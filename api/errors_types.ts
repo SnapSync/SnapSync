@@ -4,4 +4,6 @@ export enum SnapSyncErrorType {
   "SnapSyncMinLengthError" = "SnapSyncMinLengthError",
   "SnapSyncMaxLengthError" = "SnapSyncMaxLengthError",
   "SnapSyncInvalidFormatError" = "SnapSyncInvalidFormatError",
+
+  "SnapSyncUserBannedError" = "SnapSyncUserBannedError", // Utente bannato
 }

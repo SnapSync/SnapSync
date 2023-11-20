@@ -7,10 +7,48 @@ import { Skeleton } from "moti/skeleton";
 import { StyleProp, ViewStyle } from "react-native";
 
 type Props = {
+  /**
+   * Dimension of the avatar
+   * @type number
+   * @example
+   * <UserAvatar size={30} />
+   */
   size: number;
+
+  /**
+   * Url of the avatar
+   * @type string
+   * @optional
+   * @example
+   * <UserAvatar avatarUrl="https://example.com/avatar.png" />
+   */
   avatarUrl?: string;
+
+  /**
+   * BlurHash of the avatar
+   * @type string
+   * @optional
+   * @example
+   * <UserAvatar avatarBlurHash="L5EC1a~q00%2_4s9%2x]00%2t7WB" />
+   */
   avatarBlurHash?: string;
+
+  /**
+   * If the avatar is loading
+   * @type boolean
+   * @optional
+   * @example
+   * <UserAvatar isLoading />
+   */
   isLoading?: boolean;
+
+  /**
+   * Style of the container
+   * @type StyleProp<ViewStyle>
+   * @optional
+   * @example
+   * <UserAvatar containerStyle={{ marginBottom: 10 }} />
+   */
   containerStyle?: StyleProp<ViewStyle>;
 };
 

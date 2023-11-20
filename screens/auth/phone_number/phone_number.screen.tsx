@@ -34,6 +34,7 @@ import { isValidPhoneNumber } from "@/utils/helper";
 import { useMutation } from "@tanstack/react-query";
 import { ValidatePhoneNumber } from "@/api/routes/auth.routes";
 import { instanceOfErrorResponseType } from "@/api";
+import { useConnectivity } from "@/hooks/useConnectivity";
 
 const PhoneNumberScreen = ({
   navigation,
@@ -43,6 +44,8 @@ const PhoneNumberScreen = ({
   const colorMode = useColorMode();
 
   const toast = useToast();
+
+  const { isConnected } = useConnectivity();
 
   const authDto = useSelector(
     (state: RootState) => state.authentication.authDto
@@ -93,6 +96,14 @@ const PhoneNumberScreen = ({
     },
   });
 
+  React.useEffect(() => {
+    // Non faccio tornare indietro l'utente
+    navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+      return;
+    });
+  }, [navigation]);
+
   const _dismissKeyboard = () => {
     Keyboard.dismiss();
   };
@@ -111,6 +122,26 @@ const PhoneNumberScreen = ({
 
   const _handlePressContinue = () => {
     Keyboard.dismiss();
+
+    if (!isConnected) {
+      // Mostro il toast
+      toast.show({
+        placement: "top",
+        render: ({ id }) => {
+          return (
+            <Toast nativeID={"toast-" + id} action="warning" variant="accent">
+              <VStack space="xs">
+                <ToastDescription>
+                  {i18n.t("errors.noInternetConnection")}
+                </ToastDescription>
+              </VStack>
+            </Toast>
+          );
+        },
+      });
+
+      return;
+    }
 
     // La prima lettera maiuscola
     let field =
@@ -176,13 +207,7 @@ const PhoneNumberScreen = ({
     }
   };
 
-  if (
-    !authDto.fullName ||
-    !authDto.sessionId ||
-    !authDto.yearOfBirth ||
-    !authDto.monthOfBirth ||
-    !authDto.dayOfBirth
-  ) {
+  if (!authDto.sessionId || !route.params.DeviceUuid) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <ErrorText />

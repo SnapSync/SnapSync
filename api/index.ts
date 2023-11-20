@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const IP = "10.167.12.147";
+const IP = "192.168.178.141";
 export const API_URL = `http://${IP}:8000`;
 
 export interface ErrorResponseType {

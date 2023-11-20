@@ -164,7 +164,7 @@ const PhoneNumberInput = (props: Props) => {
               phoneNumberInputStyles.codeText,
               // props.codeTextStyle ? props.codeTextStyle : {},
             ]}
-            color={props.withDarkTheme ? "$textDark0" : "$textLight750"}
+            color={props.withDarkTheme ? "$textDark0" : "$textLight700"}
           >{`+${code}`}</Text>
         )}
       </TouchableOpacity>
@@ -193,7 +193,7 @@ const PhoneNumberInput = (props: Props) => {
             onChangeText={onChangeText}
             value={number}
             editable={disabled ? false : true}
-            selectionColor={props.withDarkTheme ? "white" : "dark"}
+            selectionColor={props.withDarkTheme ? "white" : "black"}
             {...props.textInputProps}
           />
         </Input>

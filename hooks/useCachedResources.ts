@@ -5,10 +5,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Font from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
+import * as SecureStore from "expo-secure-store";
+import { AuthTokenKey, DeviceUuidKey } from "@/costants/SecureStoreKeys";
 
 export default function useCachedResources() {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
   const [colorMode, setColorMode] = useState<COLORMODES>("light");
+  const [authToken, setAuthToken] = useState<string | undefined>(undefined);
+  const [deviceUuid, setDeviceUuid] = useState<string | undefined>(undefined);
 
   // Load any resources or data that we need prior to rendering the app
   useEffect(() => {
@@ -22,6 +26,18 @@ export default function useCachedResources() {
             setColorMode(value);
         } catch (e) {
           console.warn(e);
+        }
+
+        // Provo a recuperare l'authToken dallo storage
+        let authToken = await SecureStore.getItemAsync(AuthTokenKey);
+        if (authToken) setAuthToken(authToken);
+
+        // Provo a recuperare il deviceUuid dallo storage
+        let deviceUuid = await SecureStore.getItemAsync(DeviceUuidKey);
+        if (deviceUuid) {
+          setDeviceUuid(deviceUuid);
+        } else {
+          // Se non lo trovo allora lo registro nella schermata successiva
         }
 
         // Load fonts
@@ -62,5 +78,7 @@ export default function useCachedResources() {
   return {
     isLoadingComplete: isLoadingComplete,
     cachedColorMode: colorMode,
+    cachedAuthToken: authToken,
+    cachedDeviceUuid: deviceUuid,
   };
 }

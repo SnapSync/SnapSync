@@ -46,6 +46,26 @@ export const authenticationSlice = createSlice({
     updatePhoneNumberCountryCode: (state, action: PayloadAction<string>) => {
       state.authDto.phoneNumberCountryCode = action.payload;
     },
+
+    updatePhoneNumberVerificationCode: (
+      state,
+      action: PayloadAction<string>
+    ) => {
+      state.authDto.phoneNumberVerificationCode = action.payload;
+    },
+
+    updateUsername: (state, action: PayloadAction<string>) => {
+      state.authDto.username = action.payload;
+    },
+
+    resetAuthDto: (state) => {
+      state.authDto = {
+        username: "",
+        yearOfBirth: null,
+        monthOfBirth: null,
+        dayOfBirth: null,
+      };
+    },
   },
 });
 
@@ -62,6 +82,12 @@ export const {
   updatePhoneNumber,
   updatePhoneNumberFormatted,
   updatePhoneNumberCountryCode,
+
+  updatePhoneNumberVerificationCode,
+
+  updateUsername,
+
+  resetAuthDto,
 } = authenticationSlice.actions;
 
 export default authenticationSlice.reducer;

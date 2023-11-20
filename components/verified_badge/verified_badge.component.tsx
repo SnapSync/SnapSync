@@ -3,6 +3,12 @@ import React from "react";
 import verifiedBadgeStyles from "./verified_badge.styles";
 
 type Props = {
+  /**
+   * Dimension of the badge
+   * @type number
+   * @example
+   * <VerifiedBadge size={30} />
+   */
   size: number;
 };
 

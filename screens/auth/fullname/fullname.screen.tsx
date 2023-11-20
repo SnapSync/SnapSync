@@ -43,7 +43,10 @@ import {
 import ErrorText from "@/components/error_text/error_text.component";
 import { instanceOfErrorResponseType } from "@/api";
 import * as Localization from "expo-localization";
-import { useIsFirstRender } from "@/hooks/useIsFirstRender";
+import { useIsFirstRender } from "usehooks-ts";
+import { useConnectivity } from "@/hooks/useConnectivity";
+import { setDeviceUuid } from "@/redux/features/app/appSlice";
+import NetInfo from "@react-native-community/netinfo";
 
 const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
   const toast = useToast();
@@ -53,19 +56,24 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
   const insets = useSafeAreaInsets();
   const colorMode = useColorMode();
 
+  const { isConnected } = useConnectivity();
+
   const authDto = useSelector(
     (state: RootState) => state.authentication.authDto
   );
+  const deviceUuid = useSelector((state: RootState) => state.app.deviceUuid);
 
   const dispatch = useDispatch();
 
-  const [deviceUuid, setDeviceUuid] = React.useState<string | null>(null);
+  const refModeRetriveDeviceUuid = React.useRef<
+    "SucureStore" | "RegisterDevice"
+  >("SucureStore"); // 'SucureStore' | 'RegisterDevice
 
   const registerDeviceMutation = useMutation({
     mutationFn: (pOs: string) => RegisterDevice(pOs),
     onSuccess: async (data) => {
       await SecureStore.setItemAsync(DeviceUuidKey, data.device.uuid);
-      setDeviceUuid(data.device.uuid);
+      dispatch(setDeviceUuid(data.device.uuid));
     },
   });
 
@@ -77,7 +85,7 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
     }) => ValidateFullname(data.fullname, data.sessionId, data.deviceUuid),
     onSuccess: () => {
       navigation.navigate("DateOfBirth", {
-        DeviceUuid: deviceUuid,
+        DeviceUuid: deviceUuid ? deviceUuid : null,
       });
     },
     onError: (error) => {
@@ -110,18 +118,23 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
     },
   });
 
-  const { data, isLoading, refetch } = useQuery({
+  const {
+    data,
+    isLoading: isLoadingSessionId,
+    refetch,
+    isError,
+  } = useQuery({
     queryKey: ["session", deviceUuid],
     queryFn: () => GetSessionId(deviceUuid ?? ""),
     enabled: false,
   });
 
   React.useEffect(() => {
-    if (deviceUuid) {
+    if (deviceUuid && isConnected && !authDto.sessionId) {
       // Recupero il sessionId
       refetch();
     }
-  }, [deviceUuid]);
+  }, [deviceUuid, isConnected, authDto.sessionId]);
 
   React.useEffect(() => {
     if (data && data.sessionId) {
@@ -130,7 +143,7 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
   }, [data]);
 
   React.useEffect(() => {
-    if (isFirst && Localization.locale) {
+    if (!authDto.phoneNumberCountryCode && Localization.locale) {
       let locales = Localization.getLocales();
       if (locales.length > 0) {
         dispatch(
@@ -138,20 +151,24 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
         );
       }
     }
-  }, [isFirst, dispatch]);
+  }, [authDto.phoneNumberCountryCode, dispatch]);
 
   useFocusEffect(
     React.useCallback(() => {
-      // Provo a recuperare il deviceUuid da SecureStore
-      _getDeviceUuid();
-    }, [])
+      if (isConnected && !deviceUuid) {
+        // Provo a recuperare il deviceUuid da SecureStore
+        _getDeviceUuid();
+      }
+    }, [isConnected, deviceUuid])
   );
 
   const _getDeviceUuid = async () => {
     let result = await SecureStore.getItemAsync(DeviceUuidKey);
     if (result) {
-      setDeviceUuid(result);
-    } else {
+      refModeRetriveDeviceUuid.current = "SucureStore";
+      dispatch(setDeviceUuid(result));
+    } else if (isConnected) {
+      refModeRetriveDeviceUuid.current = "RegisterDevice";
       // Registro un nuovo dispositivo
       registerDeviceMutation.mutate(Platform.OS);
     }
@@ -245,6 +262,29 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
     }
   };
 
+  if (isConnected === false) {
+    // if (isLoading) {
+    //   return (
+    //     <View
+    //       style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+    //     >
+    //       <Spinner size="small" />
+    //     </View>
+    //   );
+    // }
+
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ErrorText
+          message={i18n.t("errors.noInternetConnection")}
+          style={{
+            fontSize: 12,
+          }}
+        />
+      </View>
+    );
+  }
+
   if (!deviceUuid) {
     if (registerDeviceMutation.isPending) {
       return (
@@ -256,29 +296,52 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
       );
     }
 
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ErrorText message={i18n.t("errors.deviceNotFound")} />
-      </View>
-    );
+    if (
+      !registerDeviceMutation.data &&
+      refModeRetriveDeviceUuid.current === "RegisterDevice"
+    ) {
+      return (
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <ErrorText message={i18n.t("errors.deviceNotFound")} />
+        </View>
+      );
+    }
   }
 
   if (!data) {
-    if (isLoading) {
+    if (isLoadingSessionId) {
       return (
         <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           <Spinner size="small" />
         </View>
       );
     }
 
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ErrorText message={i18n.t("errors.generic")} />
-      </View>
-    );
+    if (isError) {
+      return (
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <ErrorText message={i18n.t("errors.generic")} />
+        </View>
+      );
+    }
   }
 
   return (
@@ -329,7 +392,7 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
             autoComplete="name"
             maxLength={AuthFullNameMaxLength}
             keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-            selectionColor={colorMode === "dark" ? "white" : "dark"}
+            selectionColor={colorMode === "dark" ? "white" : "black"}
           />
         </Input>
       </View>

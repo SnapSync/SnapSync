@@ -11,11 +11,8 @@ import {
   ToastTitle,
   ToastDescription,
   ButtonSpinner,
-  Input,
-  InputField,
 } from "@gluestack-ui/themed";
 import { Keyboard, Platform } from "react-native";
-
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
@@ -25,6 +22,24 @@ import styles from "../auth.styles";
 import i18n from "@/lang";
 import { AuthStackScreenProps } from "@/types";
 import otpStyles from "./otp.styles";
+import OTPInputView from "@twotalltotems/react-native-otp-input";
+import {
+  resetAuthDto,
+  updatePhoneNumberVerificationCode,
+} from "@/redux/features/authentication/authenticationSlice";
+import { AuthOtpCodeLength } from "../auth.costants";
+import {
+  ResendPhoneNumberVerificationCode,
+  ValidatePhoneNumberVerificationCode,
+} from "@/api/routes/auth.routes";
+import { useMutation } from "@tanstack/react-query";
+import { useCountdown } from "usehooks-ts";
+import ErrorText from "@/components/error_text/error_text.component";
+import { instanceOfErrorResponseType } from "@/api";
+import { login } from "@/redux/features/auth/authSlice";
+import { AuthTokenKey } from "@/costants/SecureStoreKeys";
+import * as SecureStore from "expo-secure-store";
+import { useConnectivity } from "@/hooks/useConnectivity";
 
 const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
   const insets = useSafeAreaInsets();
@@ -32,61 +47,189 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
 
   const toast = useToast();
 
+  const [count, { startCountdown, resetCountdown }] = useCountdown({
+    countStart: 60,
+    intervalMs: 1000,
+  });
+
+  const { isConnected } = useConnectivity();
+
   const authDto = useSelector(
     (state: RootState) => state.authentication.authDto
   );
 
   const dispatch = useDispatch();
 
-  // const validatePhoneNumberMutation = useMutation({
-  //   mutationFn: (data: {
-  //     phoneNumber: string;
-  //     sessionId: string;
-  //     deviceUuid: string;
-  //   }) =>
-  //     ValidatePhoneNumber(data.sessionId, data.phoneNumber, data.deviceUuid),
-  //   onSuccess: () => {
-  //     // navigation.navigate("PhoneNumber", {
-  //     //   DeviceUuid: route.params.DeviceUuid,
-  //     // });
-  //   },
-  //   onError: (error) => {
-  //     let message = i18n.t("errors.generic");
-  //     let title: string | null = null;
+  const [forceGoBack, setForceGoBack] = React.useState(false);
 
-  //     if (
-  //       error &&
-  //       instanceOfErrorResponseType(error) &&
-  //       error.statusCode === 422
-  //     ) {
-  //       title = i18n.t("errors.unprocessableEntityTitle");
-  //       message = error.message;
-  //     }
+  const resendOtpMutation = useMutation({
+    mutationFn: (data: { sessionId: string; deviceUuid: string }) =>
+      ResendPhoneNumberVerificationCode(data.sessionId, data.deviceUuid),
+    onSuccess: () => {
+      resetCountdown(); // Resetto il countdown
+    },
+  });
 
-  //     // Mostro il toast
-  //     toast.show({
-  //       placement: "top",
-  //       render: ({ id }) => {
-  //         return (
-  //           <Toast nativeID={"toast-" + id} action="error" variant="accent">
-  //             <VStack space="xs">
-  //               {title && <ToastTitle>{title}</ToastTitle>}
-  //               <ToastDescription>{message}</ToastDescription>
-  //             </VStack>
-  //           </Toast>
-  //         );
-  //       },
-  //     });
-  //   },
-  // });
+  const validateOtpMutation = useMutation({
+    mutationFn: (data: {
+      otp: string;
+      sessionId: string;
+      deviceUuid: string;
+    }) =>
+      ValidatePhoneNumberVerificationCode(
+        data.otp,
+        data.sessionId,
+        data.deviceUuid
+      ),
+    onError: (error) => {
+      let message = i18n.t("errors.generic");
+      let title: string | null = null;
+
+      if (
+        error &&
+        instanceOfErrorResponseType(error) &&
+        (error.statusCode === 401 || error.statusCode === 403)
+      ) {
+        message = error.message;
+      }
+
+      // Mostro il toast
+      toast.show({
+        placement: "top",
+        render: ({ id }) => {
+          return (
+            <Toast nativeID={"toast-" + id} action="error" variant="accent">
+              <VStack space="xs">
+                {title && <ToastTitle>{title}</ToastTitle>}
+                <ToastDescription>{message}</ToastDescription>
+              </VStack>
+            </Toast>
+          );
+        },
+      });
+    },
+  });
+
+  React.useEffect(() => {
+    startCountdown();
+  }, []);
+
+  React.useEffect(() => {
+    // Non faccio tornare indietro l'utente, tranne se forceGoBack è true
+    navigation.addListener("beforeRemove", (e) => {
+      if (!forceGoBack) {
+        e.preventDefault();
+        return;
+      }
+
+      e.preventDefault();
+
+      navigation.dispatch(e.data.action);
+    });
+  }, [navigation, forceGoBack]);
+
+  React.useEffect(() => {
+    if (validateOtpMutation.data) {
+      // Controllo se l'utente esiste già
+      let goNext = validateOtpMutation.data.goNext;
+
+      if (goNext) {
+        // Passo alla schermata per inserire lo username
+        navigation.navigate("Username", {
+          DeviceUuid: route.params.DeviceUuid,
+        });
+      } else if (validateOtpMutation.data.data) {
+        let accessToken = validateOtpMutation.data.data.accessToken;
+        _saveAuthToken(accessToken); // Mi salvo il token per attivare il login in automatico al prossimo avvio dell'app
+
+        // Resetto il dto in redux
+        dispatch(resetAuthDto());
+
+        // Faccio il login
+        dispatch(login(validateOtpMutation.data.data));
+      }
+    }
+  }, [validateOtpMutation.data, navigation, dispatch, route.params.DeviceUuid]);
+
+  React.useEffect(() => {
+    if (forceGoBack) {
+      // Torno indietro nello stack a quando ho inserito il numero di telefono
+      navigation.navigate("PhoneNumber", {
+        DeviceUuid: route.params.DeviceUuid,
+      });
+    }
+  }, [forceGoBack]);
 
   const _dismissKeyboard = () => {
     Keyboard.dismiss();
   };
 
-  const _handlePressContinue = () => {
+  const _handlePressResend = () => {
     Keyboard.dismiss();
+
+    if (authDto.sessionId && route.params.DeviceUuid) {
+      resendOtpMutation.mutate({
+        sessionId: authDto.sessionId,
+        deviceUuid: route.params.DeviceUuid,
+      });
+    } else {
+      toast.show({
+        placement: "top",
+        render: ({ id }) => {
+          return (
+            <Toast nativeID={"toast-" + id} action="error" variant="accent">
+              <VStack space="xs">
+                <ToastDescription>{i18n.t("errors.generic")}</ToastDescription>
+              </VStack>
+            </Toast>
+          );
+        },
+      });
+    }
   };
+
+  const _onCodeChanged = (code: string) => {
+    dispatch(updatePhoneNumberVerificationCode(code));
+  };
+
+  const _onCodeFilled = (code: string) => {
+    if (authDto.sessionId && route.params.DeviceUuid && isConnected) {
+      validateOtpMutation.mutate({
+        otp: code,
+        sessionId: authDto.sessionId,
+        deviceUuid: route.params.DeviceUuid,
+      });
+    } else {
+      toast.show({
+        placement: "top",
+        render: ({ id }) => {
+          return (
+            <Toast nativeID={"toast-" + id} action="error" variant="accent">
+              <VStack space="xs">
+                <ToastDescription>{i18n.t("errors.generic")}</ToastDescription>
+              </VStack>
+            </Toast>
+          );
+        },
+      });
+    }
+  };
+
+  const _onPressChangeNumber = () => {
+    setForceGoBack(true);
+  };
+
+  const _saveAuthToken = async (token: string) => {
+    await SecureStore.setItemAsync(AuthTokenKey, token);
+  };
+
+  if (!authDto.sessionId || !route.params.DeviceUuid) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ErrorText />
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -121,98 +264,36 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
             {i18n.t("auth.otp.subtitle")}
           </Text>
         </View>
-        <View style={otpStyles.viewOptInputContainer}>
-          {/* <Input
-            size={"sm"}
-            variant={"underlined"}
-            isInvalid={false}
-            isDisabled={false}
-            isRequired={true}
-            width={36}
-          >
-            <InputField
-              keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-              selectionColor={colorMode === "dark" ? "white" : "dark"}
-              maxLength={1}
-              keyboardType="number-pad"
-            />
-          </Input>
-          <Input
-            size={"sm"}
-            variant={"underlined"}
-            isInvalid={false}
-            isDisabled={false}
-            isRequired={true}
-            width={36}
-          >
-            <InputField
-              keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-              selectionColor={colorMode === "dark" ? "white" : "dark"}
-              maxLength={1}
-              keyboardType="number-pad"
-            />
-          </Input>
-          <Input
-            size={"sm"}
-            variant={"underlined"}
-            isInvalid={false}
-            isDisabled={false}
-            isRequired={true}
-            width={36}
-          >
-            <InputField
-              keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-              selectionColor={colorMode === "dark" ? "white" : "dark"}
-              maxLength={1}
-              keyboardType="number-pad"
-            />
-          </Input>
-          <Input
-            size={"sm"}
-            variant={"underlined"}
-            isInvalid={false}
-            isDisabled={false}
-            isRequired={true}
-            width={36}
-          >
-            <InputField
-              keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-              selectionColor={colorMode === "dark" ? "white" : "dark"}
-              maxLength={1}
-              keyboardType="number-pad"
-            />
-          </Input>
-          <Input
-            size={"sm"}
-            variant={"underlined"}
-            isInvalid={false}
-            isDisabled={false}
-            isRequired={true}
-            width={36}
-          >
-            <InputField
-              keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-              selectionColor={colorMode === "dark" ? "white" : "dark"}
-              maxLength={1}
-              keyboardType="number-pad"
-            />
-          </Input>
-          <Input
-            size={"sm"}
-            variant={"underlined"}
-            isInvalid={false}
-            isDisabled={false}
-            isRequired={true}
-            width={36}
-          >
-            <InputField
-              keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-              selectionColor={colorMode === "dark" ? "white" : "dark"}
-              maxLength={1}
-              keyboardType="number-pad"
-            />
-          </Input> */}
-        </View>
+        <OTPInputView
+          style={otpStyles.viewOptInputContainer}
+          pinCount={AuthOtpCodeLength}
+          autoFocusOnLoad
+          code={authDto.phoneNumberVerificationCode}
+          onCodeChanged={_onCodeChanged}
+          onCodeFilled={_onCodeFilled}
+          keyboardAppearance={colorMode === "light" ? "light" : "dark"}
+          selectionColor={colorMode === "dark" ? "white" : "black"}
+          codeInputHighlightStyle={{
+            borderColor: colorMode === "light" ? "#004282" : "#1A91FF",
+            ...otpStyles.codeInputHighlightStyle,
+          }}
+          codeInputFieldStyle={{
+            borderColor: colorMode === "light" ? "#D4D4D4" : "#525252",
+            color: colorMode === "light" ? "#171717" : "#fcfcfc",
+            ...otpStyles.codeInputFieldStyle,
+          }}
+        />
+
+        <Button
+          variant="link"
+          size="xs"
+          isDisabled={
+            resendOtpMutation.isPending || validateOtpMutation.isPending
+          }
+          onPress={_onPressChangeNumber}
+        >
+          <ButtonText>{i18n.t("auth.otp.changeNumber")}</ButtonText>
+        </Button>
       </View>
       <View
         style={[
@@ -226,22 +307,30 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
           action={"primary"}
           variant={"solid"}
           size={"lg"}
-          isDisabled={false}
+          isDisabled={
+            resendOtpMutation.isPending ||
+            count > 0 ||
+            validateOtpMutation.isPending
+          }
           borderRadius={14}
           width={"100%"}
-          onPress={_handlePressContinue}
+          onPress={_handlePressResend}
         >
-          {/* {validateFullnameMutation.isPending ? (
+          {resendOtpMutation.isPending || validateOtpMutation.isPending ? (
             <ButtonSpinner size="small" />
           ) : (
             <ButtonText>
-              {
-                // Prima lettera maiuscola
-                i18n.t("continue").charAt(0).toUpperCase() +
-                  i18n.t("continue").slice(1)
-              }
+              {count === 0
+                ? i18n.t("resend").charAt(0).toUpperCase() +
+                  i18n.t("resend").slice(1)
+                : i18n.t("resendIn").charAt(0).toUpperCase() +
+                  i18n
+                    .t("resendIn", {
+                      seconds: count,
+                    })
+                    .slice(1)}
             </ButtonText>
-          )} */}
+          )}
         </Button>
       </View>
     </KeyboardAvoidingView>

@@ -13,11 +13,17 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { StatusBar } from "expo-status-bar";
 
 const queryClient = new QueryClient();
 
 export default function App() {
-  const { isLoadingComplete, cachedColorMode } = useCachedResources();
+  const {
+    isLoadingComplete,
+    cachedColorMode,
+    cachedAuthToken,
+    cachedDeviceUuid,
+  } = useCachedResources();
 
   // const colorMode = useSelector((state: RootState) => state.app.colorMode);
   // const dispatch = useDispatch();
@@ -57,7 +63,10 @@ export default function App() {
             <NavigationContainer>
               <GluestackUIProvider config={config} colorMode={"dark"}>
                 <BottomSheetModalProvider>
-                  <RootNavigation />
+                  <RootNavigation authToken={cachedAuthToken} />
+                  <StatusBar
+                    style={cachedColorMode === "dark" ? "light" : "dark"}
+                  />
                 </BottomSheetModalProvider>
               </GluestackUIProvider>
             </NavigationContainer>

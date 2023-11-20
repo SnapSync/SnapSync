@@ -3,7 +3,6 @@ import type {
   CompositeScreenProps,
   NavigatorScreenParams,
 } from "@react-navigation/native";
-import { AuthDto } from "./dtos/auth.dto";
 
 declare global {
   namespace ReactNavigation {
@@ -14,6 +13,7 @@ declare global {
 /* ------------------------------------------------------ Root ------------------------------------------------------ */
 export type RootStackParamList = {
   AuthStack: NavigatorScreenParams<AuthStackParamList> | undefined;
+  MainStack: NavigatorScreenParams<MainStackParamList> | undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
@@ -31,9 +31,8 @@ export type AuthStackParamList = {
   Otp: {
     DeviceUuid: string | null;
   };
-
   Username: {
-    userData: AuthDto;
+    DeviceUuid: string | null;
   };
 };
 
@@ -42,3 +41,39 @@ export type AuthStackScreenProps<Screen extends keyof AuthStackParamList> =
     NativeStackScreenProps<AuthStackParamList, Screen>,
     NativeStackScreenProps<RootStackParamList>
   >;
+
+/* ------------------------------------------------------ Main ------------------------------------------------------ */
+export type MainStackParamList = {
+  Home: undefined;
+  MyUserProfile: NavigatorScreenParams<UserProfileStackParamList> | undefined;
+};
+
+export type MainStackScreenProps<Screen extends keyof MainStackParamList> =
+  CompositeScreenProps<
+    NativeStackScreenProps<MainStackParamList, Screen>,
+    NativeStackScreenProps<RootStackParamList>
+  >;
+
+/* ------------------------------------------------------ UserProfile ------------------------------------------------------ */
+export type UserProfileStackParamList = {
+  UserProfile:
+    | {
+        id: number;
+        username?: string;
+        fullName?: string;
+        isVerified?: boolean;
+        profilePictureUrl?: string;
+      }
+    | undefined; // Se non è presente carico il profilo dell'utente loggato
+
+  MutualFriends: {
+    id: number;
+  };
+};
+
+export type UserProfileStackScreenProps<
+  Screen extends keyof UserProfileStackParamList
+> = CompositeScreenProps<
+  NativeStackScreenProps<UserProfileStackParamList, Screen>,
+  NativeStackScreenProps<RootStackParamList>
+>;

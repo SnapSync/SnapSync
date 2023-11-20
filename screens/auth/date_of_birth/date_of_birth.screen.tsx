@@ -35,6 +35,7 @@ import ErrorText from "@/components/error_text/error_text.component";
 import { instanceOfErrorResponseType } from "@/api";
 import { isValidDate } from "@/utils/helper";
 import { AuthDateOfBirthMinAge } from "../auth.costants";
+import { useConnectivity } from "@/hooks/useConnectivity";
 
 const DateOfBirthScreen = ({
   navigation,
@@ -43,6 +44,8 @@ const DateOfBirthScreen = ({
   const insets = useSafeAreaInsets();
   const colorMode = useColorMode();
   const toast = useToast();
+
+  const { isConnected } = useConnectivity();
 
   const inputRefMonthOfBirth = React.useRef<any>(null);
   const inputRefDayOfBirth = React.useRef<any>(null);
@@ -103,6 +106,14 @@ const DateOfBirthScreen = ({
       });
     },
   });
+
+  React.useEffect(() => {
+    // Non faccio tornare indietro l'utente
+    navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+      return;
+    });
+  }, [navigation]);
 
   const _dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -175,6 +186,26 @@ const DateOfBirthScreen = ({
 
   const _handlePressContinue = () => {
     Keyboard.dismiss();
+
+    if (!isConnected) {
+      // Mostro il toast e riprovo a connettermi
+      toast.show({
+        placement: "top",
+        render: ({ id }) => {
+          return (
+            <Toast nativeID={"toast-" + id} action="warning" variant="accent">
+              <VStack space="xs">
+                <ToastDescription>
+                  {i18n.t("errors.noInternetConnection")}
+                </ToastDescription>
+              </VStack>
+            </Toast>
+          );
+        },
+      });
+
+      return;
+    }
 
     // La prima lettera maiuscola
     let field =
@@ -315,7 +346,7 @@ const DateOfBirthScreen = ({
     }
   };
 
-  if (!authDto.fullName || !authDto.sessionId) {
+  if (!authDto.sessionId || !route.params.DeviceUuid) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <ErrorText />
@@ -384,7 +415,10 @@ const DateOfBirthScreen = ({
                 ref={inputRefMonthOfBirth}
                 onChangeText={_handleChangeMonthOfBirth}
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                selectionColor={colorMode === "dark" ? "white" : "dark"}
+                selectionColor={colorMode === "dark" ? "white" : "black"}
+                autoComplete={
+                  Platform.OS === "android" ? "birthdate-month" : undefined
+                }
               />
             </Input>
           </View>
@@ -420,7 +454,10 @@ const DateOfBirthScreen = ({
                   authDto.dayOfBirth ? authDto.dayOfBirth.toString() : undefined
                 }
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                selectionColor={colorMode === "dark" ? "white" : "dark"}
+                selectionColor={colorMode === "dark" ? "white" : "black"}
+                autoComplete={
+                  Platform.OS === "android" ? "birthdate-day" : undefined
+                }
               />
             </Input>
           </View>
@@ -458,7 +495,10 @@ const DateOfBirthScreen = ({
                     : undefined
                 }
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                selectionColor={colorMode === "dark" ? "white" : "dark"}
+                selectionColor={colorMode === "dark" ? "white" : "black"}
+                autoComplete={
+                  Platform.OS === "android" ? "birthdate-year" : undefined
+                }
               />
             </Input>
           </View>

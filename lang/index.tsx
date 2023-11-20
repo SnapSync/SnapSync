@@ -6,6 +6,9 @@ const translations = {
   en: {
     continue: "continue",
     resend: "resend",
+    resendIn: "resend in {{seconds}}s",
+    login: "login",
+    signup: "signup",
     auth: {
       fullname: {
         title: "Let's start, what's your name?",
@@ -26,15 +29,35 @@ const translations = {
         title: "Check your messages",
         subtitle:
           "We sent you a text message with a code to verify your phone number.",
-        notReceived: "Didn't you receive the code?",
+        changeNumber: "Change the phone number",
+      },
+
+      username: {
+        title: "Last step, choose a username",
+        subtitle:
+          "Your username is unique. It will be used to create your profile link. You can change it later.",
+      },
+    },
+
+    home: {
+      modalBannedUser: {
+        title: "Ops! Your account has been banned",
+        body: "You can't use SnapSync because your account did not follow our Community Guidelines. If you think this is a mistake, please contact us.",
+      },
+      modalAuth: {
+        title: "Ops! Something went wrong",
+        body: "We were unable to verify your account. Please try again.",
       },
     },
 
     errors: {
       unprocessableEntityTitle: "Ops! Something went wrong",
+      notAuthorizedTitle: "Ops! Something went wrong",
       generic: "Ops! Something went wrong",
-      unableToGetSession: "Ops! We were unable to retrieve the session",
-      deviceNotFound: "Ops! We were unable to find your device",
+      unableToGetSession: "We were unable to retrieve the session",
+      deviceNotFound: "We were unable to find your device",
+      noInternetConnection:
+        "There is no internet connection. Please try again later.",
 
       required: "{{field}} is required",
       minLenght: "{{field}} must be at least {{minLenght}} characters long",
@@ -45,6 +68,10 @@ const translations = {
         "You must be at least {{minAge}} years old to use the application",
 
       invalid: "{{field}} is not valid",
+
+      usernameAlreadyExists: "This username is already in use. Try another one",
+      usernameOrPhoneAlreadyExists:
+        "This username or phone number is already in use.",
     },
     fields: {
       fullname: "fullname",
@@ -55,6 +82,8 @@ const translations = {
       yearOfBirth: "year of birth",
 
       phoneNumber: "phone number",
+
+      username: "username",
     },
   },
 };
