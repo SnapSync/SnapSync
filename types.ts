@@ -22,18 +22,10 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
 /* ------------------------------------------------------ Auth ------------------------------------------------------ */
 export type AuthStackParamList = {
   FullName: undefined;
-  DateOfBirth: {
-    DeviceUuid: string | null;
-  };
-  PhoneNumber: {
-    DeviceUuid: string | null;
-  };
-  Otp: {
-    DeviceUuid: string | null;
-  };
-  Username: {
-    DeviceUuid: string | null;
-  };
+  DateOfBirth: undefined;
+  PhoneNumber: undefined;
+  Otp: undefined;
+  Username: undefined;
 };
 
 export type AuthStackScreenProps<Screen extends keyof AuthStackParamList> =

@@ -1,5 +1,5 @@
 import { useColorMode } from "@gluestack-style/react";
-import { View } from "@gluestack-ui/themed";
+import { View, Text } from "@gluestack-ui/themed";
 import React from "react";
 import { Image } from "expo-image";
 import userAvatarStyles from "./user_avatar.styles";
@@ -34,6 +34,15 @@ type Props = {
   avatarBlurHash?: string;
 
   /**
+   * Username of the user
+   * @type string
+   * @optional
+   * @example
+   * <UserAvatar username="John Doe" />
+   */
+  username?: string;
+
+  /**
    * If the avatar is loading
    * @type boolean
    * @optional
@@ -56,6 +65,7 @@ const UserAvatar = ({
   size,
   avatarUrl,
   avatarBlurHash,
+  username,
   isLoading,
   containerStyle,
 }: Props) => {
@@ -72,6 +82,8 @@ const UserAvatar = ({
           height: size,
           borderRadius: size / 2,
           overflow: "hidden",
+          alignItems: "center",
+          justifyContent: "center",
         },
         containerStyle,
       ]}
@@ -83,7 +95,7 @@ const UserAvatar = ({
           height={size}
           width={size}
         />
-      ) : (
+      ) : avatarUrl ? (
         <Image
           source={{ uri: avatarUrl }}
           placeholder={avatarBlurHash}
@@ -95,7 +107,14 @@ const UserAvatar = ({
           transition={1000}
           contentFit="cover"
         />
-      )}
+      ) : username ? (
+        <Text
+          style={userAvatarStyles.textFirstChar}
+          color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
+        >
+          {username[0].toUpperCase()}
+        </Text>
+      ) : null}
     </View>
   );
 };

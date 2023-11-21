@@ -3,20 +3,12 @@ import client from "..";
 
 const path = "/auth";
 
-export const GetSessionId = async (
-  deviceUuid: string
-): Promise<{
+export const GetSessionId = async (): Promise<{
   sessionId: string;
   message: string;
 }> => {
   try {
-    const header = {
-      DeviceUuid: deviceUuid,
-    };
-
-    const { data } = await client.get(`${path}/get_session_id`, {
-      headers: header,
-    });
+    const { data } = await client.get(`${path}/get_session_id`, {});
 
     return data;
   } catch (error) {
@@ -26,8 +18,7 @@ export const GetSessionId = async (
 
 export const ValidateFullname = async (
   fullname: string,
-  sessionId: string,
-  deviceUuid: string
+  sessionId: string
 ): Promise<{
   message: string;
 }> => {
@@ -37,13 +28,7 @@ export const ValidateFullname = async (
       fullname: fullname,
     };
 
-    const header = {
-      DeviceUuid: deviceUuid,
-    };
-
-    const { data } = await client.post(`${path}/fullname`, body, {
-      headers: header,
-    });
+    const { data } = await client.post(`${path}/fullname`, body, {});
 
     return data;
   } catch (error) {
@@ -55,8 +40,7 @@ export const ValidateDateOfBirth = async (
   sessionId: string,
   yearOfBirth: number,
   monthOfBirth: number,
-  dayOfBirth: number,
-  deviceUuid: string
+  dayOfBirth: number
 ): Promise<{
   message: string;
 }> => {
@@ -68,13 +52,7 @@ export const ValidateDateOfBirth = async (
       dayOfBirth: dayOfBirth,
     };
 
-    const header = {
-      DeviceUuid: deviceUuid,
-    };
-
-    const { data } = await client.post(`${path}/date_of_birth`, body, {
-      headers: header,
-    });
+    const { data } = await client.post(`${path}/date_of_birth`, body, {});
 
     return data;
   } catch (error) {
@@ -84,8 +62,7 @@ export const ValidateDateOfBirth = async (
 
 export const ValidatePhoneNumber = async (
   sessionId: string,
-  phoneNumber: string,
-  deviceUuid: string
+  phoneNumber: string
 ): Promise<{
   message: string;
 }> => {
@@ -95,13 +72,7 @@ export const ValidatePhoneNumber = async (
       phoneNumber: phoneNumber,
     };
 
-    const header = {
-      DeviceUuid: deviceUuid,
-    };
-
-    const { data } = await client.post(`${path}/phone_number`, body, {
-      headers: header,
-    });
+    const { data } = await client.post(`${path}/phone_number`, body, {});
 
     return data;
   } catch (error) {
@@ -110,8 +81,7 @@ export const ValidatePhoneNumber = async (
 };
 
 export const ResendPhoneNumberVerificationCode = async (
-  sessionId: string,
-  deviceUuid: string
+  sessionId: string
 ): Promise<{
   message: string;
 }> => {
@@ -120,13 +90,7 @@ export const ResendPhoneNumberVerificationCode = async (
       sessionId: sessionId,
     };
 
-    const header = {
-      DeviceUuid: deviceUuid,
-    };
-
-    const { data } = await client.post(`${path}/resend_otp`, body, {
-      headers: header,
-    });
+    const { data } = await client.post(`${path}/resend_otp`, body, {});
 
     return data;
   } catch (error) {
@@ -136,8 +100,7 @@ export const ResendPhoneNumberVerificationCode = async (
 
 export const ValidatePhoneNumberVerificationCode = async (
   code: string,
-  sessionId: string,
-  deviceUuid: string
+  sessionId: string
 ): Promise<{
   goNext: boolean;
   data?: ILoginResponse;
@@ -148,13 +111,7 @@ export const ValidatePhoneNumberVerificationCode = async (
       otp: code,
     };
 
-    const header = {
-      DeviceUuid: deviceUuid,
-    };
-
-    const { data } = await client.post(`${path}/otp`, body, {
-      headers: header,
-    });
+    const { data } = await client.post(`${path}/otp`, body, {});
 
     return data;
   } catch (error) {
@@ -164,8 +121,7 @@ export const ValidatePhoneNumberVerificationCode = async (
 
 export const ValidateUsername = async (
   username: string,
-  sessionId: string,
-  deviceUuid: string
+  sessionId: string
 ): Promise<{
   message: string;
 }> => {
@@ -175,13 +131,7 @@ export const ValidateUsername = async (
       username: username,
     };
 
-    const header = {
-      DeviceUuid: deviceUuid,
-    };
-
-    const { data } = await client.post(`${path}/username`, body, {
-      headers: header,
-    });
+    const { data } = await client.post(`${path}/username`, body, {});
 
     return data;
   } catch (error) {
@@ -190,8 +140,7 @@ export const ValidateUsername = async (
 };
 
 export const LoginWithAuthToken = async (
-  authToken: string,
-  deviceUuid?: string
+  authToken: string
 ): Promise<{
   data: ILoginResponse;
   message: string;
@@ -201,13 +150,7 @@ export const LoginWithAuthToken = async (
       authToken: authToken,
     };
 
-    const header = {
-      DeviceUuid: deviceUuid,
-    };
-
-    const { data } = await client.post(`${path}/auth_token`, body, {
-      headers: header,
-    });
+    const { data } = await client.post(`${path}/auth_token/exchange`, body, {});
 
     return data;
   } catch (error) {
@@ -216,8 +159,7 @@ export const LoginWithAuthToken = async (
 };
 
 export const SignUp = async (
-  sessionId: string,
-  deviceUuid: string
+  sessionId: string
 ): Promise<{
   data: ILoginResponse;
   message: string;
@@ -227,13 +169,7 @@ export const SignUp = async (
       sessionId: sessionId,
     };
 
-    const header = {
-      DeviceUuid: deviceUuid,
-    };
-
-    const { data } = await client.post(`${path}/signup`, body, {
-      headers: header,
-    });
+    const { data } = await client.post(`${path}/signup`, body, {});
 
     return data;
   } catch (error) {

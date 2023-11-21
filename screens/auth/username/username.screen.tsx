@@ -59,11 +59,8 @@ const UsernameScreen = ({
   const dispatch = useDispatch();
 
   const validateUsernameMutation = useMutation({
-    mutationFn: (data: {
-      username: string;
-      sessionId: string;
-      deviceUuid: string;
-    }) => ValidateUsername(data.username, data.sessionId, data.deviceUuid),
+    mutationFn: (data: { username: string; sessionId: string }) =>
+      ValidateUsername(data.username, data.sessionId),
     onError: (error) => {
       let message = i18n.t("errors.generic");
       let title: string | null = null;
@@ -73,8 +70,11 @@ const UsernameScreen = ({
         instanceOfErrorResponseType(error) &&
         error.statusCode === 422
       ) {
-        title = i18n.t("errors.unprocessableEntityTitle");
-        message = error.message;
+        message = i18n.t("errors.invalid", {
+          field:
+            i18n.t("fields.username").charAt(0).toUpperCase() +
+            i18n.t("fields.username").slice(1),
+        });
       } else if (
         error &&
         instanceOfErrorResponseType(error) &&
@@ -102,8 +102,7 @@ const UsernameScreen = ({
   });
 
   const signupMutation = useMutation({
-    mutationFn: (data: { sessionId: string; deviceUuid: string }) =>
-      SignUp(data.sessionId, data.deviceUuid),
+    mutationFn: (data: { sessionId: string }) => SignUp(data.sessionId),
     onError: (error) => {
       let message = i18n.t("errors.generic");
       let title: string | null = null;
@@ -138,20 +137,13 @@ const UsernameScreen = ({
     if (
       validateUsernameMutation.isSuccess &&
       authDto.sessionId &&
-      route.params.DeviceUuid &&
       isConnected
     ) {
       signupMutation.mutate({
         sessionId: authDto.sessionId,
-        deviceUuid: route.params.DeviceUuid,
       });
     }
-  }, [
-    validateUsernameMutation.isSuccess,
-    authDto.sessionId,
-    isConnected,
-    route.params.DeviceUuid,
-  ]);
+  }, [validateUsernameMutation.isSuccess, authDto.sessionId, isConnected]);
 
   React.useEffect(() => {
     if (signupMutation.data) {
@@ -256,11 +248,10 @@ const UsernameScreen = ({
       return;
     }
 
-    if (authDto.username && route.params.DeviceUuid && authDto.sessionId) {
+    if (authDto.username && authDto.sessionId) {
       validateUsernameMutation.mutate({
         username: authDto.username,
         sessionId: authDto.sessionId,
-        deviceUuid: route.params.DeviceUuid,
       });
     } else {
       toast.show({
@@ -278,7 +269,7 @@ const UsernameScreen = ({
     }
   };
 
-  if (!authDto.sessionId || !route.params.DeviceUuid) {
+  if (!authDto.sessionId) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <ErrorText />
@@ -333,6 +324,13 @@ const UsernameScreen = ({
             maxLength={AuthUsernameMaxLength}
             keyboardAppearance={colorMode === "light" ? "light" : "dark"}
             selectionColor={colorMode === "dark" ? "white" : "black"}
+            keyboardType={
+              Platform.OS === "ios" ? "ascii-capable" : "visible-password"
+            } // Diabilito il bottone per le emoji
+            style={{
+              fontWeight: "700",
+              fontFamily: "Inter-Bold",
+            }}
           />
         </Input>
       </View>

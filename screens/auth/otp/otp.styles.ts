@@ -19,6 +19,8 @@ const otpStyles = StyleSheet.create({
     backgroundColor: "transparent",
     borderWidth: 0,
     borderBottomWidth: 1,
+    fontWeight: "700",
+    fontFamily: "Inter-Bold",
   },
 });
 

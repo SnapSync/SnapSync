@@ -1,155 +1,123 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { UserProfileStackScreenProps } from "@/types";
-import {
-  ChevronLeftIcon,
-  Icon,
-  View,
-  useColorMode,
-  ScrollView,
-  Text,
-  ThreeDotsIcon,
-} from "@gluestack-ui/themed";
+import { View, useColorMode } from "@gluestack-ui/themed";
 import { FlashList } from "@shopify/flash-list";
 import { Animated } from "react-native";
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@/utils/helper";
-// import { Image } from "react-native";
+import { SCREEN_WIDTH } from "@/utils/helper";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
 import { useQuery } from "@tanstack/react-query";
 import { FetchMe } from "@/api/routes/users.route";
 import { useConnectivity } from "@/hooks/useConnectivity";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Layout } from "@/costants/Layout";
-import VerifiedBadge from "@/components/verified_badge/verified_badge.component";
-import { AnimatedScrollView } from "@kanelloc/react-native-animated-header-scroll-view";
-import { ImageBackground, Image } from "expo-image";
+import UserProfileAnimatedHeader from "@/components/user_profile_animated_header/user_profile_animated_header.component";
+import UserProfileNavBar from "@/components/user_profile_navbar/user_profile_navbar.component";
+import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
+import bottomSheetModalStyles from "@/styles/bottomsheet_modal.styles";
 
-let width = 375;
-let height = 508;
-
-// Calcolo il rapporto tra la larghezza dello schermo e quella dell'immagine
-const ratio = width / height;
-
-const AnimatedImageBackground =
-  Animated.createAnimatedComponent(ImageBackground);
-
-const AnimatedImage = Animated.createAnimatedComponent(Image);
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
 const UserProfileScreen = ({
   navigation,
   route,
 }: UserProfileStackScreenProps<"UserProfile">) => {
-  const colorMode = useColorMode();
-  const insets = useSafeAreaInsets();
-
   const { isConnected } = useConnectivity();
+  const { dismissAll } = useBottomSheetModal();
+  const colorMode = useColorMode();
 
   const tokenApi = useSelector((state: RootState) => state.auth.tokenApi);
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
+  const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
+
+  const snapPoints = React.useMemo(() => ["25%", "50%"], []);
 
   const { data } = useQuery({
     queryKey: ["me"],
     queryFn: () => FetchMe(tokenApi),
-    enabled: isLoggedIn,
+    enabled: isLoggedIn && isConnected ? true : false,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnReconnect: true,
   });
 
+  React.useEffect(() => {
+    return () => dismissAll();
+  }, []);
+
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
   const goBack = () => navigation.goBack();
 
   return (
     <View style={{ flex: 1 }}>
-      {/* <TouchableOpacity
-        onPress={goBack}
-        style={{
-          position: "absolute",
-          left: 24,
-          top: insets.top + 40,
-        }}
-      >
-        <Icon as={ChevronLeftIcon} size="sm" color={Layout.LightBgc} />
-      </TouchableOpacity> */}
-      {/* <AnimatedImageBackground
-        source={{
-          uri: data?.profilePictureUrl,
-        }}
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          height: SCREEN_WIDTH,
-          transform: [
-            {
-              scale: scrollY.interpolate({
-                inputRange: [-150, 0],
-                outputRange: [2, 1],
-                extrapolateLeft: "extend",
-                extrapolateRight: "clamp",
-              }),
-            },
-          ],
-        }}
-      /> */}
+      <UserProfileNavBar
+        withDarkMode={
+          data && data.profilePicture
+            ? false
+            : colorMode === "dark"
+            ? true
+            : false
+        }
+        username={data?.username}
+        isVerified={data?.isVerified}
+        onPressBack={goBack}
+        onPressOptions={handlePresentModalPress}
+      />
 
-      <Animated.ScrollView
-        showsVerticalScrollIndicator={false}
+      <AnimatedFlashList
+        data={new Array(20).fill(0).map((_, index) => index)}
+        renderItem={({ item }) => (
+          <View
+            style={{
+              height: 100,
+              backgroundColor: "blue",
+              marginVertical: 10,
+            }}
+          />
+        )}
+        keyExtractor={(item, index) => index.toString()}
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }
         )}
-        style={{
-          backgroundColor: "red",
-        }}
-      >
-        <Animated.Image
-          style={{
-            height: SCREEN_WIDTH,
-            width: SCREEN_WIDTH,
-            transform: [
-              {
-                translateY: scrollY.interpolate({
-                  inputRange: [
-                    -SCREEN_WIDTH,
-                    0,
-                    SCREEN_WIDTH,
-                    SCREEN_WIDTH + 1,
-                  ],
-                  outputRange: [
-                    SCREEN_WIDTH / 2,
-                    0,
-                    SCREEN_WIDTH * 0.75,
-                    SCREEN_WIDTH * 0.75,
-                  ],
-                }),
-              },
-              {
-                scale: scrollY.interpolate({
-                  inputRange: [
-                    -SCREEN_WIDTH,
-                    0,
-                    SCREEN_WIDTH,
-                    SCREEN_WIDTH + 1,
-                  ],
-                  outputRange: [2, 1, 0.5, 0.5],
-                }),
-              },
-            ],
-          }}
-          source={{
-            uri: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?h=360&w=360&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZhdGFyfGVufDB8fDB8fHww",
-          }}
-        />
-        {new Array(20).fill(0).map((_, index) => (
-          <View
-            key={index}
-            style={{ height: 100, backgroundColor: "blue", marginVertical: 10 }}
+        showsVerticalScrollIndicator={false}
+        estimatedItemSize={100}
+        ListHeaderComponent={
+          <UserProfileAnimatedHeader
+            imageHeight={SCREEN_WIDTH}
+            scrollY={scrollY}
           />
-        ))}
-      </Animated.ScrollView>
+        }
+      />
+
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        index={1}
+        snapPoints={snapPoints}
+        backgroundStyle={[
+          colorMode === "dark"
+            ? bottomSheetModalStyles.backgroundStyleDark
+            : bottomSheetModalStyles.backgroundStyleLight,
+        ]}
+        handleIndicatorStyle={[
+          colorMode === "dark"
+            ? bottomSheetModalStyles.handleIndicatorStyleDark
+            : bottomSheetModalStyles.handleIndicatorStyleLight,
+        ]}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "transparent",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        ></View>
+      </BottomSheetModal>
     </View>
   );
 };

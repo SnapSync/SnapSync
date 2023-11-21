@@ -1,10 +1,11 @@
 export interface IApiUser {
   id: number;
   username: string;
-  fullName: string;
+  fullname: string;
   isVerified: boolean;
-  profilePictureUrl: string;
-
-  socialContext?: string;
-  streak?: number;
+  profilePicture: {
+    url: string;
+    width: number;
+    height: number;
+  } | null;
 }

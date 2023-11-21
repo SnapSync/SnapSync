@@ -13,6 +13,11 @@ const userAvatarStyles = StyleSheet.create({
     borderWidth: 0.3,
     borderStyle: "solid",
   },
+  textFirstChar: {
+    fontWeight: "700",
+    fontFamily: "Inter-Bold",
+    fontSize: 14,
+  },
 });
 
 export default userAvatarStyles;

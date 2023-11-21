@@ -11,18 +11,19 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.snapsync.app",
+      "buildNumber": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.matteourso2002.snapsyncapp"
+      "package": "com.snapsync.app",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,8 +32,6 @@
       "tsconfigPaths": true,
       "typedRoutes": true
     },
-    "plugins": [
-      "expo-localization"
-    ]
+    "plugins": ["expo-localization"]
   }
 }

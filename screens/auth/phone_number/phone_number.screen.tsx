@@ -55,16 +55,10 @@ const PhoneNumberScreen = ({
   const dispatch = useDispatch();
 
   const validatePhoneNumberMutation = useMutation({
-    mutationFn: (data: {
-      phoneNumber: string;
-      sessionId: string;
-      deviceUuid: string;
-    }) =>
-      ValidatePhoneNumber(data.sessionId, data.phoneNumber, data.deviceUuid),
+    mutationFn: (data: { phoneNumber: string; sessionId: string }) =>
+      ValidatePhoneNumber(data.sessionId, data.phoneNumber),
     onSuccess: () => {
-      navigation.navigate("Otp", {
-        DeviceUuid: route.params.DeviceUuid,
-      });
+      navigation.navigate("Otp");
     },
     onError: (error) => {
       let message = i18n.t("errors.generic");
@@ -75,8 +69,11 @@ const PhoneNumberScreen = ({
         instanceOfErrorResponseType(error) &&
         error.statusCode === 422
       ) {
-        title = i18n.t("errors.unprocessableEntityTitle");
-        message = error.message;
+        message = i18n.t("errors.invalid", {
+          field:
+            i18n.t("fields.phoneNumber").charAt(0).toUpperCase() +
+            i18n.t("fields.phoneNumber").slice(1),
+        });
       }
 
       // Mostro il toast
@@ -181,15 +178,10 @@ const PhoneNumberScreen = ({
       return;
     }
 
-    if (
-      route.params.DeviceUuid &&
-      authDto.sessionId &&
-      authDto.phoneNumberFormatted
-    ) {
+    if (authDto.sessionId && authDto.phoneNumberFormatted) {
       validatePhoneNumberMutation.mutate({
         phoneNumber: authDto.phoneNumberFormatted,
         sessionId: authDto.sessionId,
-        deviceUuid: route.params.DeviceUuid,
       });
     } else {
       toast.show({
@@ -207,7 +199,7 @@ const PhoneNumberScreen = ({
     }
   };
 
-  if (!authDto.sessionId || !route.params.DeviceUuid) {
+  if (!authDto.sessionId) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <ErrorText />
@@ -273,6 +265,12 @@ const PhoneNumberScreen = ({
             withFilter: false,
             withCloseButton: false,
             translation: "common", // TODO: da cambiare con la lingua dell'app
+          }}
+          textInputProps={{
+            style: {
+              fontWeight: "700",
+              fontFamily: "Inter-Bold",
+            },
           }}
         />
       </View>

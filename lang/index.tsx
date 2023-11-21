@@ -72,6 +72,10 @@ const translations = {
       usernameAlreadyExists: "This username is already in use. Try another one",
       usernameOrPhoneAlreadyExists:
         "This username or phone number is already in use.",
+
+      otpInvalid: "The code you entered is not valid. Please try again.",
+
+      userBanned: "It seems that your account has been banned.",
     },
     fields: {
       fullname: "fullname",

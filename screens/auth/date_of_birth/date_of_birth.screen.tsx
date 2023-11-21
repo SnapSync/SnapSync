@@ -63,19 +63,15 @@ const DateOfBirthScreen = ({
       monthOfBirth: number;
       dayOfBirth: number;
       sessionId: string;
-      deviceUuid: string;
     }) =>
       ValidateDateOfBirth(
         data.sessionId,
         data.yearOfBirth,
         data.monthOfBirth,
-        data.dayOfBirth,
-        data.deviceUuid
+        data.dayOfBirth
       ),
     onSuccess: () => {
-      navigation.navigate("PhoneNumber", {
-        DeviceUuid: route.params.DeviceUuid,
-      });
+      navigation.navigate("PhoneNumber");
     },
     onError: (error) => {
       let message = i18n.t("errors.generic");
@@ -86,8 +82,19 @@ const DateOfBirthScreen = ({
         instanceOfErrorResponseType(error) &&
         error.statusCode === 422
       ) {
-        title = i18n.t("errors.unprocessableEntityTitle");
-        message = error.message;
+        if (error.type && error.type === "SnapSyncMinAgeError") {
+          // L'utente non ha l'età minima
+          message = i18n.t("errors.minAge", {
+            minAge: AuthDateOfBirthMinAge,
+          });
+        } else {
+          // I campi non sono validi
+          message = i18n.t("errors.invalid", {
+            field:
+              i18n.t("fields.dateOfBirth").charAt(0).toUpperCase() +
+              i18n.t("fields.dateOfBirth").slice(1),
+          });
+        }
       }
 
       // Mostro il toast
@@ -260,75 +267,16 @@ const DateOfBirthScreen = ({
     }
 
     if (
-      route.params.DeviceUuid &&
       authDto.sessionId &&
       authDto.dayOfBirth &&
       authDto.monthOfBirth &&
       authDto.yearOfBirth
     ) {
-      // Verifico se la data di nascita è valida
-      let isValid = isValidDate(
-        authDto.yearOfBirth,
-        authDto.monthOfBirth,
-        authDto.dayOfBirth
-      );
-      if (!isValid) {
-        toast.show({
-          placement: "top",
-          render: ({ id }) => {
-            return (
-              <Toast nativeID={"toast-" + id} action="error" variant="accent">
-                <VStack space="xs">
-                  <ToastTitle>
-                    {i18n.t("errors.unprocessableEntityTitle")}
-                  </ToastTitle>
-                  <ToastDescription>
-                    {i18n.t("errors.invalid", {
-                      field:
-                        i18n.t("fields.dateOfBirth").charAt(0).toUpperCase() +
-                        i18n.t("fields.dateOfBirth").slice(1),
-                    })}
-                  </ToastDescription>
-                </VStack>
-              </Toast>
-            );
-          },
-        });
-        return;
-      }
-
-      // Controllo se ha l'eta minima
-      let hasMinAge =
-        new Date().getFullYear() - authDto.yearOfBirth >= AuthDateOfBirthMinAge;
-      if (!hasMinAge) {
-        toast.show({
-          placement: "top",
-          render: ({ id }) => {
-            return (
-              <Toast nativeID={"toast-" + id} action="error" variant="accent">
-                <VStack space="xs">
-                  <ToastTitle>
-                    {i18n.t("errors.unprocessableEntityTitle")}
-                  </ToastTitle>
-                  <ToastDescription>
-                    {i18n.t("errors.minAge", {
-                      minAge: AuthDateOfBirthMinAge,
-                    })}
-                  </ToastDescription>
-                </VStack>
-              </Toast>
-            );
-          },
-        });
-        return;
-      }
-
       validateDateOfBirthMutation.mutate({
         dayOfBirth: authDto.dayOfBirth,
         monthOfBirth: authDto.monthOfBirth,
         yearOfBirth: authDto.yearOfBirth,
         sessionId: authDto.sessionId,
-        deviceUuid: route.params.DeviceUuid,
       });
     } else {
       toast.show({
@@ -346,7 +294,7 @@ const DateOfBirthScreen = ({
     }
   };
 
-  if (!authDto.sessionId || !route.params.DeviceUuid) {
+  if (!authDto.sessionId) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <ErrorText />
@@ -419,6 +367,11 @@ const DateOfBirthScreen = ({
                 autoComplete={
                   Platform.OS === "android" ? "birthdate-month" : undefined
                 }
+                style={{
+                  fontWeight: "700",
+                  fontFamily: "Inter-Bold",
+                  textAlign: "center",
+                }}
               />
             </Input>
           </View>
@@ -458,6 +411,11 @@ const DateOfBirthScreen = ({
                 autoComplete={
                   Platform.OS === "android" ? "birthdate-day" : undefined
                 }
+                style={{
+                  fontWeight: "700",
+                  fontFamily: "Inter-Bold",
+                  textAlign: "center",
+                }}
               />
             </Input>
           </View>
@@ -473,7 +431,7 @@ const DateOfBirthScreen = ({
           </Text>
           <View
             style={{
-              flex: 1,
+              flex: 2,
             }}
           >
             <Input
@@ -499,6 +457,11 @@ const DateOfBirthScreen = ({
                 autoComplete={
                   Platform.OS === "android" ? "birthdate-year" : undefined
                 }
+                style={{
+                  fontWeight: "700",
+                  fontFamily: "Inter-Bold",
+                  textAlign: "center",
+                }}
               />
             </Input>
           </View>

@@ -46,7 +46,7 @@ import * as Localization from "expo-localization";
 import { useIsFirstRender } from "usehooks-ts";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { setDeviceUuid } from "@/redux/features/app/appSlice";
-import NetInfo from "@react-native-community/netinfo";
+import * as Device from "expo-device";
 
 const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
   const toast = useToast();
@@ -61,32 +61,23 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
   const authDto = useSelector(
     (state: RootState) => state.authentication.authDto
   );
-  const deviceUuid = useSelector((state: RootState) => state.app.deviceUuid);
 
   const dispatch = useDispatch();
 
-  const refModeRetriveDeviceUuid = React.useRef<
-    "SucureStore" | "RegisterDevice"
-  >("SucureStore"); // 'SucureStore' | 'RegisterDevice
-
-  const registerDeviceMutation = useMutation({
-    mutationFn: (pOs: string) => RegisterDevice(pOs),
-    onSuccess: async (data) => {
-      await SecureStore.setItemAsync(DeviceUuidKey, data.device.uuid);
-      dispatch(setDeviceUuid(data.device.uuid));
-    },
-  });
+  // const registerDeviceMutation = useMutation({
+  //   mutationFn: (data: { os: string; type: string }) =>
+  //     RegisterDevice(data.os, data.type),
+  //   onSuccess: async (data) => {
+  //     await SecureStore.setItemAsync(DeviceUuidKey, data.device.uuid);
+  //     dispatch(setDeviceUuid(data.device.uuid));
+  //   },
+  // });
 
   const validateFullnameMutation = useMutation({
-    mutationFn: (data: {
-      fullname: string;
-      sessionId: string;
-      deviceUuid: string;
-    }) => ValidateFullname(data.fullname, data.sessionId, data.deviceUuid),
+    mutationFn: (data: { fullname: string; sessionId: string }) =>
+      ValidateFullname(data.fullname, data.sessionId),
     onSuccess: () => {
-      navigation.navigate("DateOfBirth", {
-        DeviceUuid: deviceUuid ? deviceUuid : null,
-      });
+      navigation.navigate("DateOfBirth");
     },
     onError: (error) => {
       let message = i18n.t("errors.generic");
@@ -97,8 +88,11 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
         instanceOfErrorResponseType(error) &&
         error.statusCode === 422
       ) {
-        title = i18n.t("errors.unprocessableEntityTitle");
-        message = error.message;
+        message = i18n.t("errors.invalid", {
+          field:
+            i18n.t("fields.fullname").charAt(0).toUpperCase() +
+            i18n.t("fields.fullname").slice(1),
+        });
       }
 
       // Mostro il toast
@@ -124,17 +118,10 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
     refetch,
     isError,
   } = useQuery({
-    queryKey: ["session", deviceUuid],
-    queryFn: () => GetSessionId(deviceUuid ?? ""),
+    queryKey: ["session"],
+    queryFn: () => GetSessionId(),
     enabled: false,
   });
-
-  React.useEffect(() => {
-    if (deviceUuid && isConnected && !authDto.sessionId) {
-      // Recupero il sessionId
-      refetch();
-    }
-  }, [deviceUuid, isConnected, authDto.sessionId]);
 
   React.useEffect(() => {
     if (data && data.sessionId) {
@@ -155,24 +142,30 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      if (isConnected && !deviceUuid) {
-        // Provo a recuperare il deviceUuid da SecureStore
-        _getDeviceUuid();
+      if (isConnected) {
+        refetch();
       }
-    }, [isConnected, deviceUuid])
+    }, [isConnected])
   );
 
-  const _getDeviceUuid = async () => {
-    let result = await SecureStore.getItemAsync(DeviceUuidKey);
-    if (result) {
-      refModeRetriveDeviceUuid.current = "SucureStore";
-      dispatch(setDeviceUuid(result));
-    } else if (isConnected) {
-      refModeRetriveDeviceUuid.current = "RegisterDevice";
-      // Registro un nuovo dispositivo
-      registerDeviceMutation.mutate(Platform.OS);
-    }
-  };
+  // const _getDeviceUuid = async () => {
+  //   let result = await SecureStore.getItemAsync(DeviceUuidKey);
+  //   if (result) {
+  //     refModeRetriveDeviceUuid.current = "SucureStore";
+  //     dispatch(setDeviceUuid(result));
+  //   } else if (isConnected) {
+  //     refModeRetriveDeviceUuid.current = "RegisterDevice";
+  //     // Registro un nuovo dispositivo
+
+  //     // TODO: Mappare il tipo di dispositivo
+  //     let dt = await Device.getDeviceTypeAsync();
+
+  //     registerDeviceMutation.mutate({
+  //       os: Platform.OS,
+  //       type: "UNKNOWN",
+  //     });
+  //   }
+  // };
 
   const _dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -240,11 +233,10 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
       return;
     }
 
-    if (authDto.fullName && deviceUuid && data && data.sessionId) {
+    if (authDto.fullName && data && data.sessionId) {
       validateFullnameMutation.mutate({
         fullname: authDto.fullName,
         sessionId: data.sessionId,
-        deviceUuid: deviceUuid,
       });
     } else {
       toast.show({
@@ -285,34 +277,34 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
     );
   }
 
-  if (!deviceUuid) {
-    if (registerDeviceMutation.isPending) {
-      return (
-        <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-        >
-          <Spinner size="small" />
-        </View>
-      );
-    }
+  // if (!deviceUuid) {
+  //   if (registerDeviceMutation.isPending) {
+  //     return (
+  //       <View
+  //         style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+  //       >
+  //         <Spinner size="small" />
+  //       </View>
+  //     );
+  //   }
 
-    if (
-      !registerDeviceMutation.data &&
-      refModeRetriveDeviceUuid.current === "RegisterDevice"
-    ) {
-      return (
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <ErrorText message={i18n.t("errors.deviceNotFound")} />
-        </View>
-      );
-    }
-  }
+  //   if (
+  //     !registerDeviceMutation.data &&
+  //     refModeRetriveDeviceUuid.current === "RegisterDevice"
+  //   ) {
+  //     return (
+  //       <View
+  //         style={{
+  //           flex: 1,
+  //           alignItems: "center",
+  //           justifyContent: "center",
+  //         }}
+  //       >
+  //         <ErrorText message={i18n.t("errors.deviceNotFound")} />
+  //       </View>
+  //     );
+  //   }
+  // }
 
   if (!data) {
     if (isLoadingSessionId) {
@@ -393,6 +385,13 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
             maxLength={AuthFullNameMaxLength}
             keyboardAppearance={colorMode === "light" ? "light" : "dark"}
             selectionColor={colorMode === "dark" ? "white" : "black"}
+            keyboardType={
+              Platform.OS === "ios" ? "ascii-capable" : "visible-password"
+            } // Diabilito il bottone per le emoji
+            style={{
+              fontWeight: "700",
+              fontFamily: "Inter-Bold",
+            }}
           />
         </Input>
       </View>

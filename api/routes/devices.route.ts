@@ -4,7 +4,8 @@ import client from "..";
 const path = "/devices";
 
 export const RegisterDevice = async (
-  platformOs: string
+  platformOs: string,
+  deviceType: string
 ): Promise<{
   message: string;
   device: IDevice;
@@ -12,6 +13,7 @@ export const RegisterDevice = async (
   try {
     const body = {
       platformOs: platformOs,
+      deviceType: deviceType,
     };
 
     const { data } = await client.post(`${path}/register`, body);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { config } from "./config/gluestack-ui.config";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { NavigationContainer } from "@react-navigation/native";
@@ -8,14 +8,30 @@ import { Layout } from "./costants/Layout";
 import RootNavigation from "./navigation";
 import { store } from "@/redux/app/store";
 import { Provider } from "react-redux";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  onlineManager,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { StatusBar } from "expo-status-bar";
+import NetInfo from "@react-native-community/netinfo";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const queryClient = new QueryClient();
+
+const persister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  throttleTime: 3000,
+});
+
+// @tanstack/query-async-storage-persister -> so we can create a React Query persistor using Async Storage.
+// @tanstack/react-query-persist-clien -> set of utilities to queryClient interaction with the persistor
 
 export default function App() {
   const {
@@ -24,6 +40,13 @@ export default function App() {
     cachedAuthToken,
     cachedDeviceUuid,
   } = useCachedResources();
+
+  useEffect(() => {
+    return NetInfo.addEventListener((state) => {
+      const status = !!state.isConnected;
+      onlineManager.setOnline(status);
+    });
+  }, []);
 
   // const colorMode = useSelector((state: RootState) => state.app.colorMode);
   // const dispatch = useDispatch();
@@ -51,7 +74,15 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        persistOptions={{ persister }}
+        onSuccess={() => {
+          queryClient
+            .resumePausedMutations()
+            .then(() => queryClient.invalidateQueries());
+        }}
+        client={queryClient}
+      >
         <GestureHandlerRootView style={{ flex: 1 }}>
           <SafeAreaView
             style={{
@@ -64,15 +95,13 @@ export default function App() {
               <GluestackUIProvider config={config} colorMode={"dark"}>
                 <BottomSheetModalProvider>
                   <RootNavigation authToken={cachedAuthToken} />
-                  <StatusBar
-                    style={cachedColorMode === "dark" ? "light" : "dark"}
-                  />
+                  <StatusBar style={"light"} />
                 </BottomSheetModalProvider>
               </GluestackUIProvider>
             </NavigationContainer>
           </SafeAreaView>
         </GestureHandlerRootView>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </Provider>
   );
 }

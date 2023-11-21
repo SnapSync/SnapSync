@@ -32,7 +32,7 @@ import {
   ResendPhoneNumberVerificationCode,
   ValidatePhoneNumberVerificationCode,
 } from "@/api/routes/auth.routes";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCountdown } from "usehooks-ts";
 import ErrorText from "@/components/error_text/error_text.component";
 import { instanceOfErrorResponseType } from "@/api";
@@ -54,6 +54,8 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
 
   const { isConnected } = useConnectivity();
 
+  const queryClient = useQueryClient();
+
   const authDto = useSelector(
     (state: RootState) => state.authentication.authDto
   );
@@ -63,34 +65,32 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
   const [forceGoBack, setForceGoBack] = React.useState(false);
 
   const resendOtpMutation = useMutation({
-    mutationFn: (data: { sessionId: string; deviceUuid: string }) =>
-      ResendPhoneNumberVerificationCode(data.sessionId, data.deviceUuid),
+    mutationFn: (data: { sessionId: string }) =>
+      ResendPhoneNumberVerificationCode(data.sessionId),
     onSuccess: () => {
       resetCountdown(); // Resetto il countdown
     },
   });
 
   const validateOtpMutation = useMutation({
-    mutationFn: (data: {
-      otp: string;
-      sessionId: string;
-      deviceUuid: string;
-    }) =>
-      ValidatePhoneNumberVerificationCode(
-        data.otp,
-        data.sessionId,
-        data.deviceUuid
-      ),
+    mutationFn: (data: { otp: string; sessionId: string }) =>
+      ValidatePhoneNumberVerificationCode(data.otp, data.sessionId),
     onError: (error) => {
       let message = i18n.t("errors.generic");
       let title: string | null = null;
 
-      if (
-        error &&
-        instanceOfErrorResponseType(error) &&
-        (error.statusCode === 401 || error.statusCode === 403)
-      ) {
-        message = error.message;
+      if (error && instanceOfErrorResponseType(error)) {
+        if (error.statusCode === 401) {
+          // Il codice inserito non è corretto
+          message = i18n.t("errors.otpInvalid");
+        } else if (
+          error.statusCode === 403 &&
+          error.type &&
+          error.type === "SnapSyncUserBannedError"
+        ) {
+          // L'utente è stato bannato
+          message = i18n.t("errors.userBanned");
+        }
       }
 
       // Mostro il toast
@@ -135,9 +135,7 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
 
       if (goNext) {
         // Passo alla schermata per inserire lo username
-        navigation.navigate("Username", {
-          DeviceUuid: route.params.DeviceUuid,
-        });
+        navigation.navigate("Username");
       } else if (validateOtpMutation.data.data) {
         let accessToken = validateOtpMutation.data.data.accessToken;
         _saveAuthToken(accessToken); // Mi salvo il token per attivare il login in automatico al prossimo avvio dell'app
@@ -147,16 +145,20 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
 
         // Faccio il login
         dispatch(login(validateOtpMutation.data.data));
+
+        // Rimuovo la query con key ["session"]
+        queryClient.removeQueries({
+          queryKey: ["session"],
+          exact: true,
+        });
       }
     }
-  }, [validateOtpMutation.data, navigation, dispatch, route.params.DeviceUuid]);
+  }, [validateOtpMutation.data, navigation, dispatch]);
 
   React.useEffect(() => {
     if (forceGoBack) {
       // Torno indietro nello stack a quando ho inserito il numero di telefono
-      navigation.navigate("PhoneNumber", {
-        DeviceUuid: route.params.DeviceUuid,
-      });
+      navigation.navigate("PhoneNumber");
     }
   }, [forceGoBack]);
 
@@ -167,10 +169,9 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
   const _handlePressResend = () => {
     Keyboard.dismiss();
 
-    if (authDto.sessionId && route.params.DeviceUuid) {
+    if (authDto.sessionId) {
       resendOtpMutation.mutate({
         sessionId: authDto.sessionId,
-        deviceUuid: route.params.DeviceUuid,
       });
     } else {
       toast.show({
@@ -193,11 +194,10 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
   };
 
   const _onCodeFilled = (code: string) => {
-    if (authDto.sessionId && route.params.DeviceUuid && isConnected) {
+    if (authDto.sessionId && isConnected) {
       validateOtpMutation.mutate({
         otp: code,
         sessionId: authDto.sessionId,
-        deviceUuid: route.params.DeviceUuid,
       });
     } else {
       toast.show({
@@ -223,7 +223,7 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
     await SecureStore.setItemAsync(AuthTokenKey, token);
   };
 
-  if (!authDto.sessionId || !route.params.DeviceUuid) {
+  if (!authDto.sessionId) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <ErrorText />

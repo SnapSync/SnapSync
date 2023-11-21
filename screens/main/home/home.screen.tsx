@@ -187,8 +187,9 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
           <AnimatedHeaderRightComponent
             marginRight={insets.right + 10}
             paddingTop={insets.top}
-            userAvatarUrl={data?.profilePictureUrl}
+            userAvatarUrl={data?.profilePicture?.url}
             onPress={_onPressAvatar}
+            username={data?.username}
           />
         }
         centerComponent={
@@ -309,8 +310,7 @@ const AnimatedHeaderLeftComponent = ({
       >
         <Icon
           as={Users2Icon}
-          height={30}
-          width={30}
+          size="sm"
           color={mode === "dark" ? Layout.LightBgc : Layout.DarkBgc}
         />
       </TouchableOpacity>
@@ -323,12 +323,14 @@ const AnimatedHeaderRightComponent = ({
   paddingTop,
   userAvatarUrl,
   userAvatarBlurHash,
+  username,
   onPress,
 }: {
   marginRight: number;
   paddingTop: number;
   userAvatarUrl?: string;
   userAvatarBlurHash?: string;
+  username?: string;
   onPress?: () => void;
 }) => {
   return (
@@ -356,6 +358,7 @@ const AnimatedHeaderRightComponent = ({
         <UserAvatar
           avatarUrl={userAvatarUrl}
           avatarBlurHash={userAvatarBlurHash}
+          username={username}
           size={30}
         />
       </TouchableOpacity>
