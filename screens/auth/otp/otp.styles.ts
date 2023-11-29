@@ -18,9 +18,10 @@ const otpStyles = StyleSheet.create({
   codeInputFieldStyle: {
     backgroundColor: "transparent",
     borderWidth: 0,
-    borderBottomWidth: 1,
-    fontWeight: "700",
-    fontFamily: "Inter-Bold",
+    // borderBottomWidth: 1,
+    // fontWeight: "700",
+    // fontFamily: "Inter-Bold",
+    height: 70,
   },
 });
 

@@ -1,25 +1,24 @@
 import {
-  Button,
-  ButtonText,
   useColorMode,
-  Text,
   KeyboardAvoidingView,
   Input,
   InputField,
   View,
-  ButtonSpinner,
   useToast,
   Toast,
   VStack,
   ToastDescription,
-  ToastTitle,
+  FormControl,
+  FormControlError,
+  FormControlErrorIcon,
+  AlertCircleIcon,
+  FormControlErrorText,
 } from "@gluestack-ui/themed";
 import { Keyboard, Platform } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
 import styles from "../auth.styles";
-import { dateOfBirthStyles } from "./date_of_birth.styles";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
 import { AuthStackScreenProps } from "@/types";
@@ -31,15 +30,16 @@ import {
 import i18n from "@/lang";
 import { useMutation } from "@tanstack/react-query";
 import { ValidateDateOfBirth } from "@/api/routes/auth.routes";
-import ErrorText from "@/components/error_text/error_text.component";
 import { instanceOfErrorResponseType } from "@/api";
-import { isValidDate } from "@/utils/helper";
-import { AuthDateOfBirthMinAge } from "../auth.costants";
 import { useConnectivity } from "@/hooks/useConnectivity";
+import BottomSection from "@/components/auth/bottom_section/bottom_section.component";
+import TopSection from "@/components/auth/top_section/top_section.component";
+import authStyles from "../auth.styles";
+import { MIN_AGE } from "./date_of_birth.costants";
+import dateOfBirthStyles from "./date_of_birth.styles";
 
 const DateOfBirthScreen = ({
   navigation,
-  route,
 }: AuthStackScreenProps<"DateOfBirth">) => {
   const insets = useSafeAreaInsets();
   const colorMode = useColorMode();
@@ -73,45 +73,6 @@ const DateOfBirthScreen = ({
     onSuccess: () => {
       navigation.navigate("PhoneNumber");
     },
-    onError: (error) => {
-      let message = i18n.t("errors.generic");
-      let title: string | null = null;
-
-      if (
-        error &&
-        instanceOfErrorResponseType(error) &&
-        error.statusCode === 422
-      ) {
-        if (error.type && error.type === "SnapSyncMinAgeError") {
-          // L'utente non ha l'età minima
-          message = i18n.t("errors.minAge", {
-            minAge: AuthDateOfBirthMinAge,
-          });
-        } else {
-          // I campi non sono validi
-          message = i18n.t("errors.invalid", {
-            field:
-              i18n.t("fields.dateOfBirth").charAt(0).toUpperCase() +
-              i18n.t("fields.dateOfBirth").slice(1),
-          });
-        }
-      }
-
-      // Mostro il toast
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="error" variant="accent">
-              <VStack space="xs">
-                {title && <ToastTitle>{title}</ToastTitle>}
-                <ToastDescription>{message}</ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
-    },
   });
 
   React.useEffect(() => {
@@ -122,11 +83,11 @@ const DateOfBirthScreen = ({
     });
   }, [navigation]);
 
-  const _dismissKeyboard = () => {
+  const _onTouchStart = () => {
     Keyboard.dismiss();
   };
 
-  const _handleChangeMonthOfBirth = (value: string) => {
+  const onChangeTextMonthOfBirth = (value: string) => {
     if (value.length === 0) {
       dispatch(updateMonthOfBirth(null));
     } else {
@@ -144,11 +105,11 @@ const DateOfBirthScreen = ({
       dispatch(updateMonthOfBirth(Number(value)));
 
       // Se la lunghezza è 2, passo all'anno
-      if (value.length === 2) inputRefDayOfBirth.current?.focus();
+      if (value.length === 2) inputRefYearOfBirth.current?.focus();
     }
   };
 
-  const _handleChangeDayOfBirth = (value: string) => {
+  const onChangeTextDayOfBirth = (value: string) => {
     if (value.length === 0) {
       dispatch(updateDayOfBirth(null));
     } else {
@@ -164,12 +125,12 @@ const DateOfBirthScreen = ({
 
       dispatch(updateDayOfBirth(Number(value)));
 
-      // Se la lunghezza è 2, passo all'anno
-      if (value.length === 2) inputRefYearOfBirth.current?.focus();
+      // Se la lunghezza è 2, passo al mese
+      if (value.length === 2) inputRefMonthOfBirth.current?.focus();
     }
   };
 
-  const _handleChangeYearOfBirth = (value: string) => {
+  const onChangeTextYearOfBirth = (value: string) => {
     if (value.length === 0) {
       dispatch(updateYearOfBirth(null));
     } else {
@@ -191,11 +152,29 @@ const DateOfBirthScreen = ({
     }
   };
 
-  const _handlePressContinue = () => {
+  const onKeyPressMonthOfBirth = (e: any) => {
+    const text: string | undefined = authDto.monthOfBirth?.toString();
+    const key: string | undefined = e && e.nativeEvent && e.nativeEvent.key;
+
+    if (key === "Backspace" && text && text.length === 1) {
+      inputRefDayOfBirth.current?.focus();
+    }
+  };
+
+  const onKeyPressYearOfBirth = (e: any) => {
+    const text: string | undefined = authDto.yearOfBirth?.toString();
+    const key: string | undefined = e && e.nativeEvent && e.nativeEvent.key;
+
+    if (key === "Backspace" && text && text.length === 1) {
+      inputRefMonthOfBirth.current?.focus();
+    }
+  };
+
+  const _onPress = () => {
     Keyboard.dismiss();
 
     if (!isConnected) {
-      // Mostro il toast e riprovo a connettermi
+      // Mostro il toast, perchè l'utente si è disconnesso
       toast.show({
         placement: "top",
         render: ({ id }) => {
@@ -214,71 +193,12 @@ const DateOfBirthScreen = ({
       return;
     }
 
-    // La prima lettera maiuscola
-    let field =
-      i18n.t("fields.dateOfBirth").charAt(0).toUpperCase() +
-      i18n.t("fields.dateOfBirth").slice(1);
-    let errorMessage: string | null = null;
-
-    if (authDto.dayOfBirth === null) {
-      field =
-        i18n.t("fields.dayOfBirth").charAt(0).toUpperCase() +
-        i18n.t("fields.dayOfBirth").slice(1);
-      errorMessage = i18n.t("errors.required", {
-        field: field,
-      });
-    }
-
-    if (authDto.monthOfBirth === null) {
-      field =
-        i18n.t("fields.monthOfBirth").charAt(0).toUpperCase() +
-        i18n.t("fields.monthOfBirth").slice(1);
-      errorMessage = i18n.t("errors.required", {
-        field: field,
-      });
-    }
-
-    if (authDto.yearOfBirth === null) {
-      field =
-        i18n.t("fields.yearOfBirth").charAt(0).toUpperCase() +
-        i18n.t("fields.yearOfBirth").slice(1);
-      errorMessage = i18n.t("errors.required", {
-        field: field,
-      });
-    }
-
-    if (errorMessage && errorMessage.length > 0) {
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="error" variant="accent">
-              <VStack space="xs">
-                <ToastTitle>
-                  {i18n.t("errors.unprocessableEntityTitle")}
-                </ToastTitle>
-                <ToastDescription>{errorMessage}</ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
-      return;
-    }
-
     if (
-      authDto.sessionId &&
-      authDto.dayOfBirth &&
-      authDto.monthOfBirth &&
-      authDto.yearOfBirth
+      !authDto.dayOfBirth ||
+      !authDto.monthOfBirth ||
+      !authDto.yearOfBirth ||
+      !authDto.sessionId
     ) {
-      validateDateOfBirthMutation.mutate({
-        dayOfBirth: authDto.dayOfBirth,
-        monthOfBirth: authDto.monthOfBirth,
-        yearOfBirth: authDto.yearOfBirth,
-        sessionId: authDto.sessionId,
-      });
-    } else {
       toast.show({
         placement: "top",
         render: ({ id }) => {
@@ -291,162 +211,87 @@ const DateOfBirthScreen = ({
           );
         },
       });
+      return;
     }
-  };
 
-  if (!authDto.sessionId) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ErrorText />
-      </View>
-    );
-  }
+    validateDateOfBirthMutation.mutate({
+      dayOfBirth: authDto.dayOfBirth,
+      monthOfBirth: authDto.monthOfBirth,
+      yearOfBirth: authDto.yearOfBirth,
+      sessionId: authDto.sessionId,
+    });
+  };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{
         flex: 1,
-        // alignItems: "center",
-        // justifyContent: "center",
         paddingTop: insets.top,
-        // paddingBottom: insets.bottom,
         paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
         paddingRight: insets.right + Layout.DefaultMarginHorizontal,
         flexDirection: "column",
       }}
-      onTouchStart={_dismissKeyboard}
+      onTouchStart={_onTouchStart}
       bgColor={
         colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
       }
     >
-      <View style={styles.viewHeader}>
-        <View style={styles.viewFormHeader}>
-          <Text
-            style={styles.textTitle}
-            color={colorMode === "light" ? "$textLight950" : "$textDark0"}
-          >
-            {i18n.t("auth.dateOfBirth.title", {
-              fullName: authDto.fullName,
-            })}
-          </Text>
-          <Text
-            style={styles.textSubTitle}
-            color={colorMode === "light" ? "$textLight700" : "$textDark400"}
-          >
-            {i18n.t("auth.dateOfBirth.subtitle")}
-          </Text>
-        </View>
-        <View style={dateOfBirthStyles.viewDateOfBirth}>
-          <View
-            style={{
-              flex: 1,
-            }}
-          >
-            <Input
-              size={"sm"}
-              variant={"underlined"}
-              isInvalid={false}
-              isDisabled={false}
-              isRequired={true}
-            >
+      <View style={styles.header}>
+        <TopSection
+          title={i18n.t("auth.dateOfBirth.title", {
+            fullname: authDto.fullName,
+          })}
+          withDarkMode={colorMode === "dark"}
+        />
+        <FormControl
+          width="100%"
+          isDisabled={validateDateOfBirthMutation.isPending}
+          isInvalid={validateDateOfBirthMutation.isError}
+        >
+          <View style={dateOfBirthStyles.containerInputs}>
+            <Input borderWidth={0} height={70} width="25%">
+              <InputField
+                placeholder="DD"
+                maxLength={2}
+                autoFocus={true}
+                keyboardType="number-pad"
+                ref={inputRefDayOfBirth}
+                onChangeText={onChangeTextDayOfBirth}
+                value={
+                  authDto.dayOfBirth ? authDto.dayOfBirth.toString() : undefined
+                }
+                keyboardAppearance={colorMode === "light" ? "light" : "dark"}
+                selectionColor={colorMode === "dark" ? "white" : "black"}
+                style={authStyles.input}
+              />
+            </Input>
+            <Input borderWidth={0} height={70} width="25%">
               <InputField
                 placeholder="MM"
-                autoFocus={true}
                 maxLength={2}
                 keyboardType="number-pad"
+                onKeyPress={onKeyPressMonthOfBirth}
                 value={
                   authDto.monthOfBirth
                     ? authDto.monthOfBirth.toString()
                     : undefined
                 }
                 ref={inputRefMonthOfBirth}
-                onChangeText={_handleChangeMonthOfBirth}
+                onChangeText={onChangeTextMonthOfBirth}
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                 selectionColor={colorMode === "dark" ? "white" : "black"}
-                autoComplete={
-                  Platform.OS === "android" ? "birthdate-month" : undefined
-                }
-                style={{
-                  fontWeight: "700",
-                  fontFamily: "Inter-Bold",
-                  textAlign: "center",
-                }}
+                style={authStyles.input}
               />
             </Input>
-          </View>
-          <Text
-            style={dateOfBirthStyles.textSlash}
-            color={
-              colorMode === "light"
-                ? "$backgroundLight300"
-                : "$backgroundLight700"
-            }
-          >
-            /
-          </Text>
-          <View
-            style={{
-              flex: 1,
-            }}
-          >
-            <Input
-              size={"sm"}
-              variant={"underlined"}
-              isInvalid={false}
-              isDisabled={false}
-              isRequired={true}
-            >
-              <InputField
-                placeholder="DD"
-                maxLength={2}
-                keyboardType="number-pad"
-                ref={inputRefDayOfBirth}
-                onChangeText={_handleChangeDayOfBirth}
-                value={
-                  authDto.dayOfBirth ? authDto.dayOfBirth.toString() : undefined
-                }
-                keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                selectionColor={colorMode === "dark" ? "white" : "black"}
-                autoComplete={
-                  Platform.OS === "android" ? "birthdate-day" : undefined
-                }
-                style={{
-                  fontWeight: "700",
-                  fontFamily: "Inter-Bold",
-                  textAlign: "center",
-                }}
-              />
-            </Input>
-          </View>
-          <Text
-            style={dateOfBirthStyles.textSlash}
-            color={
-              colorMode === "light"
-                ? "$backgroundLight300"
-                : "$backgroundLight700"
-            }
-          >
-            /
-          </Text>
-          <View
-            style={{
-              flex: 2,
-            }}
-          >
-            <Input
-              size={"sm"}
-              variant={"underlined"}
-              isInvalid={false}
-              isDisabled={false}
-              isRequired={true}
-            >
+            <Input borderWidth={0} height={70} width="50%">
               <InputField
                 placeholder="YYYY"
                 maxLength={4}
                 keyboardType="number-pad"
                 ref={inputRefYearOfBirth}
-                onChangeText={_handleChangeYearOfBirth}
+                onChangeText={onChangeTextYearOfBirth}
+                onKeyPress={onKeyPressYearOfBirth}
                 value={
                   authDto.yearOfBirth
                     ? authDto.yearOfBirth.toString()
@@ -454,54 +299,52 @@ const DateOfBirthScreen = ({
                 }
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                 selectionColor={colorMode === "dark" ? "white" : "black"}
-                autoComplete={
-                  Platform.OS === "android" ? "birthdate-year" : undefined
-                }
-                style={{
-                  fontWeight: "700",
-                  fontFamily: "Inter-Bold",
-                  textAlign: "center",
-                }}
+                style={authStyles.input}
               />
             </Input>
           </View>
-        </View>
-      </View>
-      <View
-        style={[
-          styles.viewFooter,
-          {
-            paddingBottom: insets.bottom,
-          },
-        ]}
-      >
-        <Button
-          action={"primary"}
-          variant={"solid"}
-          size={"lg"}
-          borderRadius={14}
-          width={"100%"}
-          isDisabled={
-            authDto.monthOfBirth === null ||
-            authDto.dayOfBirth === null ||
-            authDto.yearOfBirth === null ||
-            validateDateOfBirthMutation.isPending
-          }
-          onPress={_handlePressContinue}
-        >
-          {validateDateOfBirthMutation.isPending ? (
-            <ButtonSpinner size="small" />
-          ) : (
-            <ButtonText>
-              {
-                // Prima lettera maiuscola
-                i18n.t("continue").charAt(0).toUpperCase() +
-                  i18n.t("continue").slice(1)
-              }
-            </ButtonText>
+
+          {validateDateOfBirthMutation.isError && (
+            <FormControlError>
+              <FormControlErrorIcon as={AlertCircleIcon} size="sm" />
+              <FormControlErrorText style={[authStyles.errorText]}>
+                {validateDateOfBirthMutation.error &&
+                instanceOfErrorResponseType(
+                  validateDateOfBirthMutation.error
+                ) &&
+                validateDateOfBirthMutation.error.statusCode === 422
+                  ? validateDateOfBirthMutation.error.type &&
+                    validateDateOfBirthMutation.error.type ===
+                      "SnapSyncMinAgeError"
+                    ? i18n.t("errors.minAge", {
+                        minAge: MIN_AGE,
+                      })
+                    : i18n.t("errors.invalid", {
+                        field:
+                          i18n.t("fields.dateOfBirth").charAt(0).toUpperCase() +
+                          i18n.t("fields.dateOfBirth").slice(1),
+                      })
+                  : i18n.t("errors.generic")}
+              </FormControlErrorText>
+            </FormControlError>
           )}
-        </Button>
+        </FormControl>
       </View>
+      <BottomSection
+        buttonLabel={
+          i18n.t("continue").charAt(0).toUpperCase() +
+          i18n.t("continue").slice(1)
+        }
+        onPress={_onPress}
+        isLoading={validateDateOfBirthMutation.isPending}
+        isDisabled={
+          authDto.monthOfBirth === null ||
+          authDto.dayOfBirth === null ||
+          authDto.yearOfBirth === null ||
+          validateDateOfBirthMutation.isPending
+        }
+        pb={insets.bottom === 0 ? 20 : insets.bottom}
+      />
     </KeyboardAvoidingView>
   );
 };

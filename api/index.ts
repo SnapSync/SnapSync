@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const IP = "10.167.12.82";
+const IP = "10.167.12.153";
 export const API_URL = `http://${IP}:8000`;
 
 export interface ErrorResponseType {
@@ -11,9 +11,10 @@ export interface ErrorResponseType {
 }
 
 export interface Pagination {
-  pageSize: number;
-  pageNumber: number;
   total: number;
+  page: number;
+  size: number;
+  pages: number;
 }
 
 export function instanceOfErrorResponseType(

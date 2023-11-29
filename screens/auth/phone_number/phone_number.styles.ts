@@ -1,22 +1,23 @@
-import { Layout } from "@/costants/Layout";
-import { SCREEN_WIDTH } from "@/utils/helper";
 import { StyleSheet } from "react-native";
 
-export const PHONE_NUMBER_INPUT_GAP = 16;
-export const VIEW_COUNTRY_INFO_WIDTH = 62;
-
 const phoneNumberStyles = StyleSheet.create({
+  viewTextInputContainer: {
+    width: "100%",
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    gap: 4,
+    alignItems: "center",
+  },
   viewCountryInfo: {
-    // width: VIEW_COUNTRY_INFO_WIDTH,
-    // height: 36,
-    padding: 10,
-    borderRadius: 12,
+    minWidth: 75,
+    minHeight: 55,
+    padding: 5,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    // flexDirection: "row",
-    gap: 0,
+    flexDirection: "row",
+    gap: 5,
     borderWidth: 1,
-    // marginRight: 5,
   },
   viewCountryInfoLight: {
     backgroundColor: "rgba(252, 252, 252, 0.60)",
@@ -25,6 +26,25 @@ const phoneNumberStyles = StyleSheet.create({
   viewCountryInfoDark: {
     backgroundColor: "rgba(23, 23, 23, 0.60)",
     borderColor: "#262626", // BorderColorDark900
+  },
+
+  flagText: {
+    fontSize: 14,
+    fontStyle: "normal",
+    lineHeight: 20,
+  },
+  codeText: {
+    fontSize: 14,
+    fontStyle: "normal",
+    lineHeight: 20,
+    fontFamily: "Inter-Bold",
+  },
+  textContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+    textAlign: "left",
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
 

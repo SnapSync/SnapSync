@@ -14,6 +14,9 @@ declare global {
 export type RootStackParamList = {
   AuthStack: NavigatorScreenParams<AuthStackParamList> | undefined;
   MainStack: NavigatorScreenParams<MainStackParamList> | undefined;
+  UserProfileStack:
+    | NavigatorScreenParams<UserProfileStackParamList>
+    | undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
@@ -24,6 +27,7 @@ export type AuthStackParamList = {
   FullName: undefined;
   DateOfBirth: undefined;
   PhoneNumber: undefined;
+  CountryList: undefined;
   Otp: undefined;
   Username: undefined;
 };
@@ -38,6 +42,7 @@ export type AuthStackScreenProps<Screen extends keyof AuthStackParamList> =
 export type MainStackParamList = {
   Home: undefined;
   MyUserProfile: NavigatorScreenParams<UserProfileStackParamList> | undefined;
+  Discovery: NavigatorScreenParams<DiscoveryStackParamList> | undefined;
 };
 
 export type MainStackScreenProps<Screen extends keyof MainStackParamList> =
@@ -48,15 +53,23 @@ export type MainStackScreenProps<Screen extends keyof MainStackParamList> =
 
 /* ------------------------------------------------------ UserProfile ------------------------------------------------------ */
 export type UserProfileStackParamList = {
-  UserProfile:
-    | {
-        id: number;
-        username?: string;
-        fullName?: string;
-        isVerified?: boolean;
-        profilePictureUrl?: string;
-      }
-    | undefined; // Se non è presente carico il profilo dell'utente loggato
+  UserProfile: {
+    // isMyProfile: boolean;
+    id: number;
+
+    profilePictureUrl?: string | null;
+
+    username?: string;
+    fullname?: string;
+    isVerified?: boolean;
+
+    biography?: string | null;
+
+    streak?: number | null;
+
+    // Mi servirà per eseguire un loader all'inizio, quando non ho niente salvato in locale
+    friendshipStatusLoaderVariant?: "incoming" | "outgoing" | "add";
+  };
 
   MutualFriends: {
     id: number;
@@ -67,5 +80,18 @@ export type UserProfileStackScreenProps<
   Screen extends keyof UserProfileStackParamList
 > = CompositeScreenProps<
   NativeStackScreenProps<UserProfileStackParamList, Screen>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+/* ------------------------------------------------------ Discovery ------------------------------------------------------ */
+export type DiscoveryStackParamList = {
+  Search: undefined;
+  OutgoingFriendRequests: undefined;
+};
+
+export type DiscoveryStackScreenProps<
+  Screen extends keyof DiscoveryStackParamList
+> = CompositeScreenProps<
+  NativeStackScreenProps<DiscoveryStackParamList, Screen>,
   NativeStackScreenProps<RootStackParamList>
 >;

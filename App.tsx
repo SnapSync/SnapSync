@@ -4,15 +4,10 @@ import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useCachedResources from "@/hooks/useCachedResources";
-import { Layout } from "./costants/Layout";
 import RootNavigation from "./navigation";
 import { store } from "@/redux/app/store";
 import { Provider } from "react-redux";
-import {
-  onlineManager,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { onlineManager, QueryClient } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import "react-native-gesture-handler";
@@ -39,6 +34,7 @@ export default function App() {
     cachedColorMode,
     cachedAuthToken,
     cachedDeviceUuid,
+    cachedUserId,
   } = useCachedResources();
 
   useEffect(() => {
@@ -92,9 +88,12 @@ export default function App() {
             }}
           >
             <NavigationContainer>
-              <GluestackUIProvider config={config} colorMode={"dark"}>
+              <GluestackUIProvider config={config} colorMode={"light"}>
                 <BottomSheetModalProvider>
-                  <RootNavigation authToken={cachedAuthToken} />
+                  <RootNavigation
+                    authToken={cachedAuthToken}
+                    userId={cachedUserId}
+                  />
                   <StatusBar style={"light"} />
                 </BottomSheetModalProvider>
               </GluestackUIProvider>

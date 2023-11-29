@@ -7,7 +7,7 @@ export interface State {
   isLoggedIn: boolean;
   tokenApi: string;
   refreshTokenApi: string;
-  me?: IApiUser;
+  userId?: number;
 
   authToken?: string;
 }
@@ -16,7 +16,6 @@ const initialState: State = {
   isLoggedIn: false,
   tokenApi: "",
   refreshTokenApi: "",
-  me: undefined,
 
   authToken: undefined,
 };
@@ -29,25 +28,25 @@ export const authSlice = createSlice({
       state.isLoggedIn = true;
       state.tokenApi = action.payload.tokenData.token;
       state.refreshTokenApi = action.payload.tokenData.refreshToken;
+      state.userId = action.payload.userId;
     },
     logout: (state) => {
       state.isLoggedIn = false;
       state.tokenApi = "";
       state.refreshTokenApi = "";
-      state.me = undefined;
       state.authToken = undefined;
+      state.userId = undefined;
+    },
+    setUserId: (state, action: PayloadAction<number>) => {
+      state.userId = action.payload;
     },
     setAuthToken: (state, action: PayloadAction<string>) => {
       state.authToken = action.payload;
-    },
-    removeAuthToken: (state) => {
-      state.authToken = undefined;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { login, logout, setAuthToken, removeAuthToken } =
-  authSlice.actions;
+export const { login, logout, setAuthToken, setUserId } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -1,4 +1,4 @@
-import { IFriendshipStatus } from "./friendship_status.interface";
+import { IUserProfilePicture } from "./users.interface";
 
 export interface IUserProfile {
   id: number;
@@ -16,15 +16,11 @@ export interface IUserProfile {
     longitude: number;
   } | null;
 
-  profilePicture: {
-    url: string;
-    width: number;
-    height: number;
-  } | null;
+  profilePicture: IUserProfilePicture | null;
 
   isPrivate: boolean;
 
   isMyProfile: boolean;
 
-  friendshipStatus?: IFriendshipStatus;
+  streak?: number | null;
 }

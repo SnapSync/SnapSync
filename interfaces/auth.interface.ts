@@ -5,6 +5,7 @@ export interface TokenData {
 }
 
 export interface ILoginResponse {
+  userId: number;
   tokenData: TokenData;
   accessToken: string; // selector:validator
 }

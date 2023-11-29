@@ -1,6 +1,7 @@
 import { AuthDto } from "@/dtos/auth.dto";
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import * as CountyCodesList from "country-codes-list";
 
 export interface State {
   authDto: AuthDto;
@@ -40,11 +41,11 @@ export const authenticationSlice = createSlice({
     updatePhoneNumber: (state, action: PayloadAction<string>) => {
       state.authDto.phoneNumber = action.payload;
     },
-    updatePhoneNumberFormatted: (state, action: PayloadAction<string>) => {
-      state.authDto.phoneNumberFormatted = action.payload;
-    },
-    updatePhoneNumberCountryCode: (state, action: PayloadAction<string>) => {
-      state.authDto.phoneNumberCountryCode = action.payload;
+    updatePhoneNumberCountry: (
+      state,
+      action: PayloadAction<CountyCodesList.CountryData>
+    ) => {
+      state.authDto.phoneNumberCountry = action.payload;
     },
 
     updatePhoneNumberVerificationCode: (
@@ -80,8 +81,8 @@ export const {
   updateYearOfBirth,
 
   updatePhoneNumber,
-  updatePhoneNumberFormatted,
-  updatePhoneNumberCountryCode,
+  // updatePhoneNumberCountryCode,
+  updatePhoneNumberCountry,
 
   updatePhoneNumberVerificationCode,
 

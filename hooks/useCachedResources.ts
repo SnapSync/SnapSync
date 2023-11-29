@@ -6,13 +6,18 @@ import * as Font from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
-import { AuthTokenKey, DeviceUuidKey } from "@/costants/SecureStoreKeys";
+import {
+  AuthTokenKey,
+  DeviceUuidKey,
+  UserIdKey,
+} from "@/costants/SecureStoreKeys";
 
 export default function useCachedResources() {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
   const [colorMode, setColorMode] = useState<COLORMODES>("light");
   const [authToken, setAuthToken] = useState<string | undefined>(undefined);
   const [deviceUuid, setDeviceUuid] = useState<string | undefined>(undefined);
+  const [userId, setUserId] = useState<number | undefined>(undefined);
 
   // Load any resources or data that we need prior to rendering the app
   useEffect(() => {
@@ -39,6 +44,10 @@ export default function useCachedResources() {
         } else {
           // Se non lo trovo allora lo registro nella schermata successiva
         }
+
+        // Provo a recuperare l'userId dallo storage
+        let userId = await SecureStore.getItemAsync(UserIdKey);
+        if (userId) setUserId(parseInt(userId));
 
         // Load fonts
         await Font.loadAsync({
@@ -80,5 +89,6 @@ export default function useCachedResources() {
     cachedColorMode: colorMode,
     cachedAuthToken: authToken,
     cachedDeviceUuid: deviceUuid,
+    cachedUserId: userId,
   };
 }

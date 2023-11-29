@@ -1,18 +1,18 @@
 import {
-  Button,
   useColorMode,
-  Text,
   KeyboardAvoidingView,
   Input,
   InputField,
   View,
   useToast,
   Toast,
-  ToastTitle,
   VStack,
   ToastDescription,
-  ButtonSpinner,
-  ButtonText,
+  FormControl,
+  FormControlError,
+  FormControlErrorIcon,
+  AlertCircleIcon,
+  FormControlErrorText,
 } from "@gluestack-ui/themed";
 import { Keyboard, Platform } from "react-native";
 import React from "react";
@@ -27,28 +27,30 @@ import {
   updateUsername,
 } from "@/redux/features/authentication/authenticationSlice";
 import i18n from "@/lang";
-import {
-  AuthUsernameMaxLength,
-  AuthUsernameMinLength,
-  AuthUsernameRegex,
-} from "../auth.costants";
-import ErrorText from "@/components/error_text/error_text.component";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SignUp, ValidateUsername } from "@/api/routes/auth.routes";
 import { instanceOfErrorResponseType } from "@/api";
 import { login } from "@/redux/features/auth/authSlice";
 import * as SecureStore from "expo-secure-store";
-import { AuthTokenKey } from "@/costants/SecureStoreKeys";
+import { AuthTokenKey, UserIdKey } from "@/costants/SecureStoreKeys";
 import { useConnectivity } from "@/hooks/useConnectivity";
+import authStyles from "../auth.styles";
+import TopSection from "@/components/auth/top_section/top_section.component";
+import BottomSection from "@/components/auth/bottom_section/bottom_section.component";
+import {
+  USERNAME_MAX_LENGTH,
+  USERNAME_MIN_LENGTH,
+  USERNAME_REGEX,
+} from "./username.costants";
+import authKeys from "../queries";
 
-const UsernameScreen = ({
-  navigation,
-  route,
-}: AuthStackScreenProps<"Username">) => {
+const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
   const toast = useToast();
 
   const insets = useSafeAreaInsets();
   const colorMode = useColorMode();
+
+  const queryClient = useQueryClient();
 
   const { isConnected } = useConnectivity();
 
@@ -61,76 +63,10 @@ const UsernameScreen = ({
   const validateUsernameMutation = useMutation({
     mutationFn: (data: { username: string; sessionId: string }) =>
       ValidateUsername(data.username, data.sessionId),
-    onError: (error) => {
-      let message = i18n.t("errors.generic");
-      let title: string | null = null;
-
-      if (
-        error &&
-        instanceOfErrorResponseType(error) &&
-        error.statusCode === 422
-      ) {
-        message = i18n.t("errors.invalid", {
-          field:
-            i18n.t("fields.username").charAt(0).toUpperCase() +
-            i18n.t("fields.username").slice(1),
-        });
-      } else if (
-        error &&
-        instanceOfErrorResponseType(error) &&
-        error.statusCode === 409
-      ) {
-        // Qualcuno ha già il nome utente
-        message = i18n.t("errors.usernameAlreadyExists");
-      }
-
-      // Mostro il toast
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="error" variant="accent">
-              <VStack space="xs">
-                {title && <ToastTitle>{title}</ToastTitle>}
-                <ToastDescription>{message}</ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
-    },
   });
 
   const signupMutation = useMutation({
     mutationFn: (data: { sessionId: string }) => SignUp(data.sessionId),
-    onError: (error) => {
-      let message = i18n.t("errors.generic");
-      let title: string | null = null;
-
-      if (
-        error &&
-        instanceOfErrorResponseType(error) &&
-        error.statusCode === 409
-      ) {
-        // Qualcuno ha già il nome utente oppure il numero di telefono
-        message = i18n.t("errors.usernameOrPhoneAlreadyExists");
-      }
-
-      // Mostro il toast
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="error" variant="accent">
-              <VStack space="xs">
-                {title && <ToastTitle>{title}</ToastTitle>}
-                <ToastDescription>{message}</ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
-    },
   });
 
   React.useEffect(() => {
@@ -150,11 +86,21 @@ const UsernameScreen = ({
       let accessToken = signupMutation.data.data.accessToken;
       _saveAuthToken(accessToken); // Mi salvo il token per attivare il login in automatico al prossimo avvio dell'app
 
+      // Mi salvo lo UserId
+      let userId = signupMutation.data.data.userId;
+      _saveUserId(userId.toString());
+
       // Resetto il dto in redux
       dispatch(resetAuthDto());
 
       // Faccio il login
       dispatch(login(signupMutation.data.data));
+
+      // Rimuovo la query con key ["session"] in modo da non avere più il sessionId salvato
+      queryClient.removeQueries({
+        queryKey: authKeys.session,
+        exact: true,
+      });
     }
   }, [signupMutation.data, dispatch]);
 
@@ -166,15 +112,19 @@ const UsernameScreen = ({
     await SecureStore.setItemAsync(AuthTokenKey, token);
   };
 
-  const _handleChangeText = (text: string) => {
-    dispatch(updateUsername(text));
+  const _saveUserId = async (userId: string) => {
+    await SecureStore.setItemAsync(UserIdKey, userId);
   };
 
-  const _handlePressContinue = () => {
+  const _onChangeText = (text: string) => {
+    dispatch(updateUsername(text.toLocaleLowerCase()));
+  };
+
+  const _onPress = () => {
     Keyboard.dismiss();
 
     if (!isConnected) {
-      // Mostro il toast
+      // Mostro il toast, perchè l'utente si è disconnesso
       toast.show({
         placement: "top",
         render: ({ id }) => {
@@ -193,67 +143,7 @@ const UsernameScreen = ({
       return;
     }
 
-    // Il primo carattere deve essere maiuscolo
-    let field =
-      i18n.t("fields.username").charAt(0).toUpperCase() +
-      i18n.t("fields.username").slice(1);
-
-    let errorMessage: string | null = null;
-
-    if (!authDto.username) {
-      errorMessage = i18n.t("errors.required", {
-        field: field,
-      });
-    } else {
-      // Controllo la lunghezza
-      if (authDto.username.length < AuthUsernameMinLength) {
-        errorMessage = i18n.t("errors.minLenght", {
-          field: field,
-          minLenght: AuthUsernameMinLength,
-        });
-      }
-
-      if (authDto.username.length > AuthUsernameMaxLength) {
-        errorMessage = i18n.t("errors.maxLenght", {
-          field: field,
-          maxLenght: AuthUsernameMaxLength,
-        });
-      }
-
-      // Controllo il regex
-      if (!AuthUsernameRegex.test(authDto.username)) {
-        errorMessage = i18n.t("errors.regex", {
-          field: field,
-        });
-      }
-    }
-
-    if (errorMessage && errorMessage.length > 0) {
-      // Mostro il toast
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="error" variant="accent">
-              <VStack space="xs">
-                <ToastTitle>
-                  {i18n.t("errors.unprocessableEntityTitle")}
-                </ToastTitle>
-                <ToastDescription>{errorMessage}</ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
-      return;
-    }
-
-    if (authDto.username && authDto.sessionId) {
-      validateUsernameMutation.mutate({
-        username: authDto.username,
-        sessionId: authDto.sessionId,
-      });
-    } else {
+    if (!authDto.sessionId || !authDto.username) {
       toast.show({
         placement: "top",
         render: ({ id }) => {
@@ -266,26 +156,21 @@ const UsernameScreen = ({
           );
         },
       });
+      return;
     }
-  };
 
-  if (!authDto.sessionId) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ErrorText />
-      </View>
-    );
-  }
+    validateUsernameMutation.mutate({
+      username: authDto.username,
+      sessionId: authDto.sessionId,
+    });
+  };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{
         flex: 1,
-        // alignItems: "center",
-        // justifyContent: "center",
         paddingTop: insets.top,
-        // paddingBottom: insets.bottom,
         paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
         paddingRight: insets.right + Layout.DefaultMarginHorizontal,
         flexDirection: "column",
@@ -295,82 +180,78 @@ const UsernameScreen = ({
         colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
       }
     >
-      <View style={styles.viewHeader}>
-        <View style={styles.viewFormHeader}>
-          <Text
-            style={styles.textTitle}
-            color={colorMode === "light" ? "$textLight950" : "$textDark0"}
-          >
-            {i18n.t("auth.username.title")}
-          </Text>
-          <Text
-            style={styles.textSubTitle}
-            color={colorMode === "light" ? "$textLight700" : "$textDark400"}
-          >
-            {i18n.t("auth.username.subtitle")}
-          </Text>
-        </View>
-        <Input
-          size={"sm"}
-          variant={"underlined"}
-          isInvalid={false}
-          isDisabled={false}
-          isRequired={true}
-        >
-          <InputField
-            onChangeText={_handleChangeText}
-            value={authDto.username}
-            autoFocus={true}
-            maxLength={AuthUsernameMaxLength}
-            keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-            selectionColor={colorMode === "dark" ? "white" : "black"}
-            keyboardType={
-              Platform.OS === "ios" ? "ascii-capable" : "visible-password"
-            } // Diabilito il bottone per le emoji
-            style={{
-              fontWeight: "700",
-              fontFamily: "Inter-Bold",
-            }}
-          />
-        </Input>
-      </View>
-      <View
-        style={[
-          styles.viewFooter,
-          {
-            paddingBottom: insets.bottom,
-          },
-        ]}
-      >
-        <Button
-          action={"primary"}
-          variant={"solid"}
-          size={"lg"}
-          isDisabled={
-            !authDto.username ||
-            authDto.username.length < AuthUsernameMinLength ||
-            authDto.username.length > AuthUsernameMaxLength ||
-            !AuthUsernameRegex.test(authDto.username) ||
-            validateUsernameMutation.isPending ||
-            signupMutation.isPending
-          }
-          borderRadius={14}
+      <View style={styles.header}>
+        <TopSection
+          title={i18n.t("auth.username.title")}
+          // subtitle={i18n.t("auth.username.subtitle")}
+          withDarkMode={colorMode === "dark"}
+        />
+        <FormControl
           width={"100%"}
-          onPress={_handlePressContinue}
+          isDisabled={
+            validateUsernameMutation.isPending || signupMutation.isPending
+          }
+          isInvalid={validateUsernameMutation.isError}
         >
-          {validateUsernameMutation.isPending || signupMutation.isPending ? (
-            <ButtonSpinner size="small" />
-          ) : (
-            <ButtonText>
-              {
-                // Prima lettera maiuscola
-                i18n.t("signup").charAt(0).toUpperCase() +
-                  i18n.t("signup").slice(1)
-              }
-            </ButtonText>
+          <Input
+            isDisabled={
+              validateUsernameMutation.isPending || signupMutation.isPending
+            }
+            borderWidth={0}
+            height={70}
+          >
+            <InputField
+              onChangeText={_onChangeText}
+              value={authDto.username}
+              placeholder={i18n.t("auth.username.placeholder")}
+              autoFocus={true}
+              maxLength={USERNAME_MAX_LENGTH}
+              keyboardAppearance={colorMode === "light" ? "light" : "dark"}
+              selectionColor={colorMode === "dark" ? "white" : "black"}
+              style={authStyles.input}
+              autoCapitalize="none"
+            />
+          </Input>
+          {validateUsernameMutation.isError && (
+            <FormControlError>
+              <FormControlErrorIcon as={AlertCircleIcon} size="sm" />
+              <FormControlErrorText style={[authStyles.errorText]}>
+                {validateUsernameMutation.error &&
+                instanceOfErrorResponseType(validateUsernameMutation.error) &&
+                validateUsernameMutation.error.statusCode === 409
+                  ? i18n.t("errors.usernameAlreadyExists")
+                  : validateUsernameMutation.error &&
+                    instanceOfErrorResponseType(
+                      validateUsernameMutation.error
+                    ) &&
+                    validateUsernameMutation.error.statusCode === 422
+                  ? i18n.t("errors.invalid", {
+                      field: i18n.t("fields.username"),
+                    })
+                  : i18n.t("errors.generic")}
+              </FormControlErrorText>
+            </FormControlError>
           )}
-        </Button>
+        </FormControl>
       </View>
+      <BottomSection
+        buttonLabel={
+          i18n.t("continue").charAt(0).toUpperCase() +
+          i18n.t("continue").slice(1)
+        }
+        onPress={_onPress}
+        isLoading={signupMutation.isPending}
+        isDisabled={
+          !authDto.username ||
+          authDto.username.length < USERNAME_MIN_LENGTH ||
+          authDto.username.length > USERNAME_MAX_LENGTH ||
+          !USERNAME_REGEX.test(authDto.username) ||
+          validateUsernameMutation.isPending ||
+          signupMutation.isPending
+        }
+        pb={insets.bottom === 0 ? 20 : insets.bottom}
+        hint={i18n.t("auth.usernameHint")}
+      />
     </KeyboardAvoidingView>
   );
 };

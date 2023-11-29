@@ -1,21 +1,11 @@
 import { StyleSheet } from "react-native";
 
-export const dateOfBirthStyles = StyleSheet.create({
-  viewDateOfBirth: {
-    display: "flex",
-    justifyContent: "center",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    alignSelf: "stretch",
+const dateOfBirthStyles = StyleSheet.create({
+  containerInputs: {
     width: "100%",
-    height: 36,
-  },
-  textSlash: {
-    fontSize: 14,
-    fontStyle: "normal",
-    fontWeight: "400",
-    lineHeight: 20,
-    fontFamily: "Inter-Regular",
+    flexDirection: "row",
+    backgroundColor: "trasparent",
   },
 });
+
+export default dateOfBirthStyles;

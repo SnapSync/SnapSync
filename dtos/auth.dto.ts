@@ -1,3 +1,5 @@
+import * as CountyCodesList from "country-codes-list";
+
 export interface AuthDto {
   sessionId?: string;
 
@@ -6,8 +8,9 @@ export interface AuthDto {
 
   phoneNumberVerificationCode?: string; // Codice di verifica del numero di telefono
   phoneNumber?: string;
-  phoneNumberFormatted?: string;
-  phoneNumberCountryCode?: string;
+  // phoneNumberCountryCode?: string;
+
+  phoneNumberCountry?: CountyCodesList.CountryData;
 
   yearOfBirth: number | null;
   monthOfBirth: number | null;

@@ -1,19 +1,19 @@
 import {
-  Button,
-  ButtonText,
   useColorMode,
-  Text,
   KeyboardAvoidingView,
   View,
   useToast,
   Toast,
   VStack,
   ToastTitle,
+  Text,
   ToastDescription,
-  ButtonSpinner,
+  Input,
+  InputField,
+  FormControl,
 } from "@gluestack-ui/themed";
-import { Keyboard, Platform } from "react-native";
-import React, { useRef } from "react";
+import { Keyboard, Platform, TouchableOpacity } from "react-native";
+import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
 import { AuthStackScreenProps } from "@/types";
@@ -23,22 +23,20 @@ import { RootState } from "@/redux/app/store";
 import i18n from "@/lang";
 import ErrorText from "@/components/error_text/error_text.component";
 import phoneNumberStyles from "./phone_number.styles";
-import {
-  updatePhoneNumber,
-  updatePhoneNumberCountryCode,
-  updatePhoneNumberFormatted,
-} from "@/redux/features/authentication/authenticationSlice";
-import { Country, isCountryCode } from "react-native-country-picker-modal";
-import PhoneNumberInput from "@/components/phone_number_input/phone_number_input.component";
-import { isValidPhoneNumber } from "@/utils/helper";
+import { updatePhoneNumber } from "@/redux/features/authentication/authenticationSlice";
 import { useMutation } from "@tanstack/react-query";
 import { ValidatePhoneNumber } from "@/api/routes/auth.routes";
 import { instanceOfErrorResponseType } from "@/api";
 import { useConnectivity } from "@/hooks/useConnectivity";
+import authStyles from "../auth.styles";
+import TopSection from "@/components/auth/top_section/top_section.component";
+import BottomSection from "@/components/auth/bottom_section/bottom_section.component";
+import { PhoneNumberUtil } from "google-libphonenumber";
+
+const phoneNumberUtil = PhoneNumberUtil.getInstance();
 
 const PhoneNumberScreen = ({
   navigation,
-  route,
 }: AuthStackScreenProps<"PhoneNumber">) => {
   const insets = useSafeAreaInsets();
   const colorMode = useColorMode();
@@ -50,7 +48,6 @@ const PhoneNumberScreen = ({
   const authDto = useSelector(
     (state: RootState) => state.authentication.authDto
   );
-  const appLanguage = useSelector((state: RootState) => state.app.appLanguage);
 
   const dispatch = useDispatch();
 
@@ -101,27 +98,30 @@ const PhoneNumberScreen = ({
     });
   }, [navigation]);
 
-  const _dismissKeyboard = () => {
+  const _onTouchStart = () => {
     Keyboard.dismiss();
   };
 
   const _onChangeText = (text: string) => {
+    if (
+      text.startsWith("+") &&
+      isValidNumber(text, authDto.phoneNumberCountry?.countryCode)
+    ) {
+      const countryDialCode = getCountryCode(text);
+      if (countryDialCode) {
+        // Rimuovo il dial code dal numero di telefono
+        text = text.replace(`+${countryDialCode}`, "").trimStart();
+      }
+    }
+
     dispatch(updatePhoneNumber(text));
   };
 
-  const _onChangeFormattedText = (text: string) => {
-    dispatch(updatePhoneNumberFormatted(text));
-  };
-
-  const _onChangeCountry = (e: Country) => {
-    dispatch(updatePhoneNumberCountryCode(e.cca2));
-  };
-
-  const _handlePressContinue = () => {
+  const _onPress = () => {
     Keyboard.dismiss();
 
     if (!isConnected) {
-      // Mostro il toast
+      // Mostro il toast, perchè l'utente si è disconnesso
       toast.show({
         placement: "top",
         render: ({ id }) => {
@@ -140,50 +140,7 @@ const PhoneNumberScreen = ({
       return;
     }
 
-    // La prima lettera maiuscola
-    let field =
-      i18n.t("fields.phoneNumber").charAt(0).toUpperCase() +
-      i18n.t("fields.phoneNumber").slice(1);
-    let errorMessage: string | null = null;
-
-    if (!authDto.phoneNumberFormatted) {
-      errorMessage = i18n.t("errors.required", {
-        field: field,
-      });
-    } else {
-      // Controllo che il numero di telefono sia valido
-      if (!isValidPhoneNumber(authDto.phoneNumberFormatted)) {
-        errorMessage = i18n.t("errors.invalid", {
-          field: field,
-        });
-      }
-    }
-
-    if (errorMessage && errorMessage.length > 0) {
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="error" variant="accent">
-              <VStack space="xs">
-                <ToastTitle>
-                  {i18n.t("errors.unprocessableEntityTitle")}
-                </ToastTitle>
-                <ToastDescription>{errorMessage}</ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
-      return;
-    }
-
-    if (authDto.sessionId && authDto.phoneNumberFormatted) {
-      validatePhoneNumberMutation.mutate({
-        phoneNumber: authDto.phoneNumberFormatted,
-        sessionId: authDto.sessionId,
-      });
-    } else {
+    if (!authDto.sessionId) {
       toast.show({
         placement: "top",
         render: ({ id }) => {
@@ -196,118 +153,154 @@ const PhoneNumberScreen = ({
           );
         },
       });
+      return;
+    }
+
+    if (!authDto.phoneNumberCountry || !authDto.phoneNumber) return;
+
+    // Formatto il numero di telefono
+    const phoneNumberFormatted = formatE164(
+      authDto.phoneNumber,
+      authDto.phoneNumberCountry.countryCode
+    );
+
+    validatePhoneNumberMutation.mutate({
+      phoneNumber: phoneNumberFormatted,
+      sessionId: authDto.sessionId,
+    });
+  };
+
+  const navigateToCountryPicker = () => {
+    navigation.navigate("CountryList");
+  };
+
+  const isValidNumber = (number: string, countryCode?: string): boolean => {
+    try {
+      const phoneNumber = phoneNumberUtil.parse(number, countryCode);
+      return phoneNumberUtil.isValidNumber(phoneNumber);
+    } catch (error) {
+      return false;
     }
   };
 
-  if (!authDto.sessionId) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ErrorText />
-      </View>
-    );
-  }
+  const getCountryCode = (
+    number: string,
+    countryCode?: string
+  ): number | undefined => {
+    try {
+      const phoneNumber = phoneNumberUtil.parse(number);
+      const dialCode = phoneNumber.getCountryCode();
+
+      return dialCode;
+    } catch (e) {
+      return undefined;
+    }
+  };
+
+  const formatE164 = (number: string, countryCode?: string): string => {
+    try {
+      const phoneNumber = phoneNumberUtil.parse(number, countryCode);
+      return phoneNumberUtil.format(phoneNumber, 1);
+    } catch (error) {
+      return number;
+    }
+  };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{
         flex: 1,
-        // alignItems: "center",
-        // justifyContent: "center",
         paddingTop: insets.top,
-        // paddingBottom: insets.bottom,
         paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
         paddingRight: insets.right + Layout.DefaultMarginHorizontal,
         flexDirection: "column",
       }}
-      onTouchStart={_dismissKeyboard}
+      onTouchStart={_onTouchStart}
       bgColor={
         colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
       }
     >
-      <View style={styles.viewHeader}>
-        <View style={styles.viewFormHeader}>
-          <Text
-            style={styles.textTitle}
-            color={colorMode === "light" ? "$textLight950" : "$textDark0"}
-          >
-            {i18n.t("auth.phoneNumber.title")}
-          </Text>
-          <Text
-            style={styles.textSubTitle}
-            color={colorMode === "light" ? "$textLight700" : "$textDark400"}
-          >
-            {i18n.t("auth.phoneNumber.subtitle")}
-          </Text>
-        </View>
-        <PhoneNumberInput
-          value={authDto.phoneNumber}
-          defaultCode={
-            authDto.phoneNumberCountryCode &&
-            isCountryCode(authDto.phoneNumberCountryCode)
-              ? authDto.phoneNumberCountryCode
-              : undefined
-          }
-          onChangeText={_onChangeText}
-          onChangeFormattedText={_onChangeFormattedText}
-          onChangeCountry={_onChangeCountry}
-          withDarkTheme={colorMode === "dark" ? true : false}
-          autoFocus
-          flagSize={16}
-          countryPickerButtonStyle={[
-            phoneNumberStyles.viewCountryInfo,
-            colorMode === "dark"
-              ? phoneNumberStyles.viewCountryInfoDark
-              : phoneNumberStyles.viewCountryInfoLight,
-          ]}
-          countryPickerProps={{
-            withFlag: true,
-            withFilter: false,
-            withCloseButton: false,
-            translation: "common", // TODO: da cambiare con la lingua dell'app
-          }}
-          textInputProps={{
-            style: {
-              fontWeight: "700",
-              fontFamily: "Inter-Bold",
-            },
-          }}
+      <View style={styles.header}>
+        <TopSection
+          title={i18n.t("auth.phoneNumber.title")}
+          withDarkMode={colorMode === "dark"}
         />
+        <View style={phoneNumberStyles.viewTextInputContainer}>
+          <TouchableOpacity
+            style={[
+              phoneNumberStyles.viewCountryInfo,
+              colorMode === "dark"
+                ? phoneNumberStyles.viewCountryInfoDark
+                : phoneNumberStyles.viewCountryInfoLight,
+            ]}
+            disabled={validatePhoneNumberMutation.isPending}
+            onPress={navigateToCountryPicker}
+          >
+            {authDto.phoneNumberCountry && (
+              <Text style={[phoneNumberStyles.flagText]}>
+                {authDto.phoneNumberCountry.flag}
+              </Text>
+            )}
+            {authDto.phoneNumberCountry && (
+              <Text
+                style={[phoneNumberStyles.codeText]}
+                color={colorMode === "dark" ? "$textDark0" : "$textLight700"}
+              >{`+${authDto.phoneNumberCountry.countryCallingCode}`}</Text>
+            )}
+          </TouchableOpacity>
+          <FormControl
+            isInvalid={
+              validatePhoneNumberMutation.isError &&
+              validatePhoneNumberMutation.error &&
+              instanceOfErrorResponseType(validatePhoneNumberMutation.error) &&
+              validatePhoneNumberMutation.error.statusCode === 422
+            }
+            width={"100%"}
+            // Prima di iniziare a scrivere il numero di telefono, l'utente deve aver selezionato il prefisso
+            isDisabled={
+              validatePhoneNumberMutation.isPending ||
+              !authDto.phoneNumberCountry
+            }
+          >
+            <Input borderWidth={0} height={70}>
+              <InputField
+                keyboardType="phone-pad"
+                placeholder={i18n.t("auth.phoneNumber.placeholder")}
+                autoFocus={authDto.phoneNumberCountry ? true : false}
+                autoComplete="tel"
+                onChangeText={_onChangeText}
+                value={authDto.phoneNumber}
+                keyboardAppearance={colorMode === "light" ? "light" : "dark"}
+                selectionColor={colorMode === "dark" ? "white" : "black"}
+                style={[
+                  authStyles.input,
+                  {
+                    textAlign: "left",
+                  },
+                ]}
+              />
+            </Input>
+          </FormControl>
+        </View>
       </View>
 
-      <View
-        style={[
-          styles.viewFooter,
-          {
-            paddingBottom: insets.bottom,
-          },
-        ]}
-      >
-        <Button
-          action={"primary"}
-          variant={"solid"}
-          size={"lg"}
-          borderRadius={14}
-          width={"100%"}
-          isDisabled={
-            validatePhoneNumberMutation.isPending ||
-            !isValidPhoneNumber(authDto.phoneNumberFormatted)
-          }
-          onPress={_handlePressContinue}
-        >
-          {validatePhoneNumberMutation.isPending ? (
-            <ButtonSpinner size="small" />
-          ) : (
-            <ButtonText>
-              {
-                // Prima lettera maiuscola
-                i18n.t("continue").charAt(0).toUpperCase() +
-                  i18n.t("continue").slice(1)
-              }
-            </ButtonText>
-          )}
-        </Button>
-      </View>
+      <BottomSection
+        buttonLabel={i18n.t("continue")}
+        onPress={_onPress}
+        isLoading={validatePhoneNumberMutation.isPending}
+        isDisabled={
+          validatePhoneNumberMutation.isPending ||
+          !authDto.phoneNumber ||
+          !authDto.phoneNumberCountry ||
+          !isValidNumber(
+            authDto.phoneNumber,
+            authDto.phoneNumberCountry?.countryCode
+          )
+        }
+        pb={insets.bottom === 0 ? 20 : insets.bottom}
+        hint={i18n.t("auth.privacyPolicyHint")}
+      />
     </KeyboardAvoidingView>
   );
 };
