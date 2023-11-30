@@ -9,8 +9,6 @@ import React from "react";
 import {
   Animated,
   NativeSyntheticEvent,
-  TextInput,
-  TextInputKeyPressEventData,
   TextInputSubmitEditingEventData,
   TouchableOpacity,
 } from "react-native";
@@ -147,14 +145,15 @@ const AnimatedSearchBar = ({
           alignItems="center"
           justifyContent="flex-start"
           rounded="$xl"
-          // borderWidth={0}
-          // bgColor={withDarkMode ? "$backgroundDark800" : "$backgroundLight100"}
+          borderWidth={0}
+          bgColor={withDarkMode ? "$backgroundDark800" : "$backgroundLight100"}
+          height={50}
         >
           <Icon
             as={SearchIcon}
             size="sm"
             color="$backgroundLight400"
-            marginLeft={5}
+            marginLeft={10}
           />
           <InputField
             ref={inputRef}
@@ -167,7 +166,6 @@ const AnimatedSearchBar = ({
             keyboardAppearance={withDarkMode ? "light" : "dark"}
             selectionColor={withDarkMode ? "white" : "black"}
             returnKeyType="search"
-            // keyboardType="web-search"
           />
         </Input>
       </Animated.View>
@@ -196,3 +194,6 @@ const AnimatedSearchBar = ({
 };
 
 export default AnimatedSearchBar;
+
+// DARK -> #404040 | #A3A3A3
+// LIGHT -> #F1F1F1 | #525252

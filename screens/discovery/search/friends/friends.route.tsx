@@ -1,4 +1,12 @@
-import { Spinner, View, useColorMode } from "@gluestack-ui/themed";
+import {
+  Spinner,
+  View,
+  useColorMode,
+  Text,
+  Button,
+  ButtonIcon,
+  ButtonText,
+} from "@gluestack-ui/themed";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import React from "react";
 import friendsKeys from "./queries";
@@ -6,21 +14,21 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
 import { FetchUserFriends } from "@/api/routes/friendships.route";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { IApiUser } from "@/interfaces/users.interface";
 import { FlashList } from "@shopify/flash-list";
 import UserItem from "@/components/user_item/user_item.component";
-import { SCREEN_HEIGHT } from "@/utils/helper";
 import { Layout } from "@/costants/Layout";
+import i18n from "@/lang";
+import { Contact2Icon } from "lucide-react-native";
 
 type Props = {
   onPressUser?: (user: IApiUser) => void;
+  onPressSearchContacts?: () => void;
 };
 
 const FriendsRoute = ({ onPressUser }: Props) => {
   const colorMode = useColorMode();
   const insets = useSafeAreaInsets();
-  const headerHeight = useHeaderHeight();
 
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
   const tokenApi = useSelector((state: RootState) => state.auth.tokenApi);
@@ -74,21 +82,52 @@ const FriendsRoute = ({ onPressUser }: Props) => {
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        ListEmptyComponent={() =>
-          result.isLoading && (
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: "transparent",
-                alignItems: "center",
-                justifyContent: "center",
-                height: SCREEN_HEIGHT - headerHeight,
-              }}
-            >
-              <Spinner size="small" />
-            </View>
-          )
-        }
+        ListEmptyComponent={() => {
+          if (!result.isLoading && !result.isError) {
+            return (
+              <View
+                style={{
+                  width: "100%",
+                  // height: 20,
+                  alignSelf: "center",
+                  // borderRadius: 16,
+                  padding: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                }}
+                bgColor={
+                  colorMode === "dark"
+                    ? "$backgroundDark700"
+                    : "$backgroundLight100"
+                }
+                rounded="$lg"
+              >
+                <Text
+                  fontFamily="Inter-SemiBold"
+                  fontSize={14}
+                  color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
+                >
+                  {i18n.t("search.noResults.friendsTitle")}
+                </Text>
+                <Button
+                  action="secondary"
+                  size="sm"
+                  rounded="$lg"
+                  gap={10}
+                  width="100%"
+                >
+                  <ButtonIcon as={Contact2Icon} size="sm" />
+                  <ButtonText fontFamily="Inter-SemiBold">
+                    {i18n.t("search.noResults.friendsButton")}
+                  </ButtonText>
+                </Button>
+              </View>
+            );
+          }
+
+          return null;
+        }}
         ListFooterComponent={() =>
           isFetchingNextPage && <Spinner size="small" />
         }

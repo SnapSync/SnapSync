@@ -71,9 +71,16 @@ const enTranslactions = {
     placeholder: "Cerca amici...",
   },
 
+
   // outgoingFriendRequests
   outgoingFriendRequests: {
     screenTitle: "Requests sent",
+  },
+
+  // incomingFriendRequests
+  incomingFriendRequests: {
+    listHeaderTitle: "Requests sent",
+    listHeaderBody: "Check the friend requests you have sent.",
   },
 
   errors: {

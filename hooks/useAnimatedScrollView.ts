@@ -25,6 +25,12 @@ export const useAnimateScrollView = (
     extrapolate: "clamp",
   });
 
+  const opacity = scroll.interpolate({
+    inputRange: [-imageHeight * 0.5, 0, imageHeight],
+    outputRange: [0, 1, 1],
+    extrapolate: "clamp",
+  });
+
   const onScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scroll } } }],
     { useNativeDriver: true }
@@ -36,5 +42,6 @@ export const useAnimateScrollView = (
     disableScale ? 1 : scale,
     disableScale ? 0 : translateYDown,
     disableScale ? 0 : translateYUp,
+    disableScale ? 1 : opacity,
   ] as const;
 };

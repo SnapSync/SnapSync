@@ -99,6 +99,7 @@ const AnimatedNavbar = ({
             <AnimatedView
               style={[animatedNavbarStyles.badge, badgeStyle]}
               bgColor={withDarkMode ? "$red700" : "$red500"}
+              rounded="$full"
             />
             <Icon
               as={Users2Icon}

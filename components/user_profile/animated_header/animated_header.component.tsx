@@ -1,19 +1,17 @@
 import { View, Text } from "@gluestack-ui/themed";
 import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import React from "react";
-import {
-  Animated,
-  ImageSourcePropType,
-  StyleProp,
-  ViewStyle,
-} from "react-native";
+import { Animated, StyleProp, ViewStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import animatedHeaderStyles from "./animated_header.styles";
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 type Props = {
   scale: 1 | Animated.AnimatedInterpolation<string | number>;
   translateYUp: 0 | Animated.AnimatedInterpolation<string | number>;
   translateYDown: 0 | Animated.AnimatedInterpolation<string | number>;
+  opacity: 1 | Animated.AnimatedInterpolation<string | number>;
 
   footerContainerStyle?: StyleProp<ViewStyle>;
 
@@ -27,6 +25,7 @@ const AnimatedHeader = ({
   scale,
   translateYUp,
   translateYDown,
+  opacity,
   footerContainerStyle,
   avatarUrl,
   imageSize = SCREEN_WIDTH,
@@ -74,17 +73,21 @@ const AnimatedHeader = ({
           }}
         />
       )}
-      <LinearGradient
+      <AnimatedLinearGradient
         // Background Linear Gradient
         colors={["rgba(0,0,0,1)", "transparent"]}
         locations={[0, 1]}
         // From bottom to top
         start={[0, 1]}
         end={[0, 0]}
-        style={[animatedHeaderStyles.footerContainer, footerContainerStyle]}
+        style={[
+          animatedHeaderStyles.footerContainer,
+          footerContainerStyle,
+          { opacity },
+        ]}
       >
         <Text
-          style={animatedHeaderStyles.fullname}
+          style={[animatedHeaderStyles.fullname]}
           numberOfLines={2}
           color={"$textDark0"}
         >
@@ -100,7 +103,7 @@ const AnimatedHeader = ({
             </Text>
           </View>
         )}
-      </LinearGradient>
+      </AnimatedLinearGradient>
     </View>
   );
 };

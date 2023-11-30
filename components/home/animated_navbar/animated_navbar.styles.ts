@@ -26,7 +26,6 @@ const animatedNavbarStyles = StyleSheet.create({
     top: 6,
     right: -18,
     zIndex: 1,
-    borderRadius: 50,
     elevation: 1,
   },
   left: {

@@ -69,6 +69,7 @@ const SearchScreen = ({ navigation }: DiscoveryStackScreenProps<"Search">) => {
           90
         }
         onPressEnter={(text) => console.log(text)}
+        // onChangeQuery={(text) => setQuery(text)}
         withDarkMode={colorMode === "dark" ? true : false}
         placeholder={i18n.t("search.placeholder")}
       />

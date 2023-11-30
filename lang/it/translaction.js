@@ -69,11 +69,22 @@ const itTranslactions = {
   // Search
   search: {
     placeholder: "Cerca amici...",
+
+    noResults: {
+      friendsTitle: "Nessun amico trovato.",
+      friendsButton: "Cerca nella rubrica",
+    }
   },
 
   // outgoingFriendRequests
   outgoingFriendRequests: {
     screenTitle: "Richieste inviate",
+  },
+
+  // incomingFriendRequests
+  incomingFriendRequests: {
+    listHeaderTitle: "Richieste inviate",
+    listHeaderBody: "Controlla le richieste di amicizia che hai inviato.",
   },
 
   errors: {

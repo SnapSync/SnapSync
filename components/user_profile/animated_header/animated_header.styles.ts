@@ -15,6 +15,7 @@ const animatedHeaderStyles = StyleSheet.create({
     flexDirection: "row",
     gap: 0,
     justifyContent: "space-between",
+    paddingBottom: 5,
   },
   fullname: {
     fontFamily: "Inter-ExtraBold",

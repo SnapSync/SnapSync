@@ -50,9 +50,9 @@ const BottomSection = ({
         variant={"solid"}
         size={"lg"}
         isDisabled={isDisabled}
-        borderRadius={14}
         width={"100%"}
         onPress={onPress}
+        rounded="$full"
       >
         {isLoading ? (
           <ButtonSpinner size="small" />

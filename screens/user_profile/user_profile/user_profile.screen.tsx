@@ -52,7 +52,7 @@ const UserProfileScreen = ({
   const colorMode = useColorMode();
   const insets = useSafeAreaInsets();
 
-  const [scroll, onScroll, scale, translateYDown, translateYUp] =
+  const [scroll, onScroll, scale, translateYDown, translateYUp, opacity] =
     useAnimateScrollView(SCREEN_WIDTH, false);
 
   const queryClient = useQueryClient();
@@ -288,6 +288,7 @@ const UserProfileScreen = ({
             scale={scale}
             translateYUp={translateYUp}
             translateYDown={translateYDown}
+            opacity={opacity}
             imageSize={SCREEN_WIDTH}
             avatarUrl={
               userProfileData && userProfileData.profilePicture

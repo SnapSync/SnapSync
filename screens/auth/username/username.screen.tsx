@@ -210,6 +210,8 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
               selectionColor={colorMode === "dark" ? "white" : "black"}
               style={authStyles.input}
               autoCapitalize="none"
+              returnKeyType="done"
+              onSubmitEditing={_onPress}
             />
           </Input>
           {validateUsernameMutation.isError && (

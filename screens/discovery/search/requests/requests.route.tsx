@@ -16,6 +16,7 @@ import { FlashList } from "@shopify/flash-list";
 import UserItem from "@/components/user_item/user_item.component";
 import { IApiUser } from "@/interfaces/users.interface";
 import { SCREEN_HEIGHT } from "@/utils/helper";
+import ListHeader from "@/components/requests/list_header/list_header.component";
 
 type Props = {
   onPressUser?: (user: IApiUser) => void;
@@ -90,28 +91,15 @@ const RequestsRoute = ({ onPressUser, onPressFriendRequestsSent }: Props) => {
           if (hasNextPage) fetchNextPage();
         }}
         onEndReachedThreshold={0.5}
-        ListEmptyComponent={() =>
-          result.isLoading && (
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: "transparent",
-                alignItems: "center",
-                justifyContent: "center",
-                height: SCREEN_HEIGHT - headerHeight,
-              }}
-            >
-              <Spinner size="small" />
-            </View>
-          )
-        }
         ListFooterComponent={() =>
           isFetchingNextPage && <Spinner size="small" />
         }
         ListHeaderComponent={() => (
-          <Button onPress={onPressFriendRequestsSent}>
-            <ButtonText>Sent friend requests {data?.count}</ButtonText>
-          </Button>
+          <ListHeader
+            onPress={() => onPressFriendRequestsSent?.()}
+            count={data?.count}
+            withDarkMode={colorMode === "dark" ? true : false}
+          />
         )}
       />
     </View>

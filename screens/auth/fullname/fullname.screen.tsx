@@ -148,6 +148,7 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
               keyboardAppearance={colorMode === "light" ? "light" : "dark"}
               selectionColor={colorMode === "dark" ? "white" : "black"}
               style={authStyles.input}
+              onSubmitEditing={_onPress}
             />
           </Input>
           {validateFullnameMutation.isError && (

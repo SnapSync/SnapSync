@@ -128,7 +128,7 @@ const UserItem = ({
           </View>
         ) : null}
       </View>
-      {showUnfriendButton ? (
+      {/* {showUnfriendButton ? (
         <TouchableOpacity onPress={onPressUnfriend}>
           <Icon
             as={UserMinus2Icon}
@@ -169,7 +169,7 @@ const UserItem = ({
             {i18n.t("profile.friendship.add")}
           </ButtonText>
         </Button>
-      ) : null}
+      ) : null} */}
     </TouchableOpacity>
   );
 };
