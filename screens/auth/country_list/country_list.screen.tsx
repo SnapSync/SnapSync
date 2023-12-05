@@ -47,10 +47,10 @@ const CountryListScreen = ({
     navigation.setOptions({
       headerSearchBarOptions: {
         onChangeText: (event) => setSearchText(event.nativeEvent.text),
-        placeholder: i18n.t("search"),
+        // placeholder: i18n.t("search"),
         textColor: colorMode === "dark" ? "#FCFCFC" : "#171717",
-        hideWhenScrolling: Platform.OS === "ios" ? false : undefined,
-        cancelButtonText: Platform.OS === "ios" ? i18n.t("cancel") : undefined,
+        hideWhenScrolling: false,
+        // cancelButtonText: Platform.OS === "ios" ? i18n.t("cancel") : undefined,
       },
     });
   }, [navigation]);
@@ -95,7 +95,6 @@ const CountryListScreen = ({
             <CountryItem
               item={item}
               onPress={_onPress}
-              withDarkMode={colorMode === "dark" ? true : false}
               isSelected={
                 authDto?.phoneNumberCountry?.countryCode.toLowerCase() ===
                 item.countryCode.toLowerCase()

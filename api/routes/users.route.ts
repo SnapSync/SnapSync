@@ -4,6 +4,19 @@ import { IApiUser } from "@/interfaces/users.interface";
 
 const path = "/users";
 
+export const FetchAllUsers = async (): Promise<{
+  data: IApiUser[];
+  message: string;
+}> => {
+  try {
+    const { data } = await client.get(`${path}`);
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const FetchMe = async (tokenApi: string): Promise<IApiUser> => {
   try {
     const { data } = await client.get(`${path}/me`, {

@@ -1,9 +1,10 @@
 import { View, Text } from "@gluestack-ui/themed";
 import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import React from "react";
-import { Animated, StyleProp, ViewStyle } from "react-native";
+import { Animated } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import animatedHeaderStyles from "./animated_header.styles";
+import { Layout } from "@/costants/Layout";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
@@ -13,11 +14,10 @@ type Props = {
   translateYDown: 0 | Animated.AnimatedInterpolation<string | number>;
   opacity: 1 | Animated.AnimatedInterpolation<string | number>;
 
-  footerContainerStyle?: StyleProp<ViewStyle>;
-
   avatarUrl?: string | null;
   imageSize?: number;
   fullname?: string;
+  username?: string;
   streak?: number | null;
 };
 
@@ -26,17 +26,20 @@ const AnimatedHeader = ({
   translateYUp,
   translateYDown,
   opacity,
-  footerContainerStyle,
   avatarUrl,
   imageSize = SCREEN_WIDTH,
   fullname,
+  username,
   streak,
 }: Props) => {
+  const insets = useSafeAreaInsets();
+
   return (
     <View
       style={[
-        animatedHeaderStyles.container,
         {
+          alignItems: "center",
+          overflow: "hidden",
           marginTop: -SCREEN_WIDTH * 4,
           paddingTop: SCREEN_WIDTH * 4,
         },
@@ -75,34 +78,85 @@ const AnimatedHeader = ({
       )}
       <AnimatedLinearGradient
         // Background Linear Gradient
-        colors={["rgba(0,0,0,1)", "transparent"]}
-        locations={[0, 1]}
-        // From bottom to top
-        start={[0, 1]}
-        end={[0, 0]}
+        colors={["rgba(0,0,0,1)", "rgba(0,0,0,0.5)", "transparent"]}
+        locations={[1, 0.2, 0]}
         style={[
-          animatedHeaderStyles.footerContainer,
-          footerContainerStyle,
+          {
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1,
+            elevation: 1,
+            flexDirection: "row",
+            gap: 0,
+            justifyContent: "space-between",
+            paddingBottom: 10,
+            paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
+            paddingRight: insets.right + Layout.DefaultMarginHorizontal,
+          },
           { opacity },
         ]}
       >
-        <Text
-          style={[animatedHeaderStyles.fullname]}
-          numberOfLines={2}
-          color={"$textDark0"}
+        <View
+          flexDirection="column"
+          justifyContent="center"
+          backgroundColor="transparent"
+          flex={3}
         >
-          {fullname}
-        </Text>
-        {streak && streak > 0 && (
-          <View
-            style={animatedHeaderStyles.streakContainer}
-            bgColor={"$textDark0"}
+          <Text
+            numberOfLines={2}
+            color={"$textDark0"}
+            fontFamily="Inter-ExtraBold"
+            fontSize="$4xl"
+            lineHeight="$4xl"
           >
-            <Text style={animatedHeaderStyles.streak} color={"$textLight950"}>
-              {streak} 🔥
-            </Text>
+            {fullname}
+          </Text>
+          <Text
+            numberOfLines={1}
+            flexShrink={1}
+            flexWrap="wrap"
+            color={"$textDark0"}
+            fontFamily="Inter-Regular"
+            fontSize="$md"
+            lineHeight="$md"
+          >
+            {username}
+          </Text>
+        </View>
+        {streak && streak > 0 ? (
+          <View
+            flex={1}
+            alignItems="center"
+            justifyContent="flex-end"
+            backgroundColor="transparent"
+          >
+            <LinearGradient
+              colors={["rgba(255, 255, 255, 0.35)", "rgba(255, 255, 255, 0)"]}
+              locations={[0, 1]}
+              // Da sinistra a destra
+              start={[0, 0]}
+              end={[1, 0]}
+              style={{
+                width: 67,
+                height: 34,
+                borderRadius: 31,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                color={"$textDark0"}
+                fontSize="$sm"
+                fontFamily="Inter-SemiBold"
+                lineHeight="$sm"
+              >
+                {streak} 🔥
+              </Text>
+            </LinearGradient>
           </View>
-        )}
+        ) : null}
       </AnimatedLinearGradient>
     </View>
   );

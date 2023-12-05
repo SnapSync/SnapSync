@@ -10,13 +10,21 @@ const itTranslactions = {
   cancel: 'Annulla',
   block: 'Blocca',
   delete: 'Elimina',
+  seeAll: 'Vedi tutti',
 
   friends: 'Amici',
   requests: 'Richieste',
   suggestions: 'Suggerimenti',
+  mutualFriends: 'Amici in comune',
+
+  exit: 'Esci',
+
+  userSettings: {
+    screenTitle: 'Impostazioni',
+  },
 
   // Profile
-  profile: {
+  userProfile: {
     friendship: {
       accept: 'Accetta',
       deny: 'Rifiuta',
@@ -35,6 +43,14 @@ const itTranslactions = {
       block: 'Blocca {{username}}',
       unfriend: 'Rimuovi dagli amici',
       report: 'Segnala {{username}}',
+    }
+  },
+
+  mutualFriendsScreen: {
+    screenTitle: {
+      zero: 'Nessun amico in comune',
+      one: '{{count}} amico in comune',
+      other: '{{count}} amici in comune',
     }
   },
 
@@ -87,6 +103,16 @@ const itTranslactions = {
     listHeaderBody: "Controlla le richieste di amicizia che hai inviato.",
   },
 
+  blockUserAlert: {
+    title: "Sei sicuro?",
+    description: "Se blocchi {{username}}, non potrai più vedere i suoi post e lui non potrà più vedere i tuoi. Vuoi continuare?",
+  },
+
+  unfriendUserAlert: {
+    title: "Sei sicuro?",
+    description: "Se rimuovi {{username}} dagli amici, non potrai più vedere i suoi post e lui non potrà più vedere i tuoi. Vuoi continuare?",
+  },
+
   errors: {
     generic: "Si è verificato un errore, riprova più tardi.",
     noInternetConnection: "Nessuna connessione a Internet.",
@@ -95,6 +121,7 @@ const itTranslactions = {
     userBanned: "Ops! Sembra che il tuo account sia stato bannato.",
     usernameAlreadyExists: "Ops! Questo username è già stato preso.",
     userNotFound: "Ops! Questo utente non esiste.",
+    fieldNotValid: "Ops! Inserisci un valore valido.",
 
     authTokenModal: {
       title: "Ops! Qualcosa è andato storto.",

@@ -3,12 +3,10 @@ import {
   KeyboardAvoidingView,
   Input,
   InputField,
-  View,
   useToast,
   Toast,
   VStack,
   ToastDescription,
-  ToastTitle,
   FormControl,
   FormControlError,
   FormControlErrorIcon,
@@ -20,7 +18,6 @@ import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
 import { AuthStackScreenProps } from "@/types";
-import styles from "../auth.styles";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
@@ -28,8 +25,6 @@ import { updateFullname } from "@/redux/features/authentication/authenticationSl
 import i18n from "@/lang";
 import { ValidateFullname } from "@/api/routes/auth.routes";
 import { instanceOfErrorResponseType } from "@/api";
-import { useConnectivity } from "@/hooks/useConnectivity";
-import authStyles from "../auth.styles";
 import TopSection from "@/components/auth/top_section/top_section.component";
 import BottomSection from "@/components/auth/bottom_section/bottom_section.component";
 import {
@@ -42,8 +37,6 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
   const toast = useToast();
   const insets = useSafeAreaInsets();
   const colorMode = useColorMode();
-
-  const { isConnected } = useConnectivity();
 
   const authDto = useSelector(
     (state: RootState) => state.authentication.authDto
@@ -68,27 +61,7 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
   };
 
   const _onPress = () => {
-    Keyboard.dismiss();
-
-    if (!isConnected) {
-      // Mostro il toast, perchè l'utente si è disconnesso
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="warning" variant="accent">
-              <VStack space="xs">
-                <ToastDescription>
-                  {i18n.t("errors.noInternetConnection")}
-                </ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
-
-      return;
-    }
+    // Keyboard.dismiss();
 
     if (!authDto.sessionId || !authDto.fullName) {
       toast.show({
@@ -114,24 +87,17 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
 
   return (
     <KeyboardAvoidingView
+      paddingLeft={insets.left + Layout.DefaultMarginHorizontal}
+      paddingRight={insets.right + Layout.DefaultMarginHorizontal}
+      paddingTop={insets.top}
+      flex={1}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{
-        flex: 1,
-        paddingTop: insets.top,
-        paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
-        paddingRight: insets.right + Layout.DefaultMarginHorizontal,
-        flexDirection: "column",
-      }}
-      onTouchStart={_onTouchStart}
+      // onTouchStart={_onTouchStart}
       bgColor={
         colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
       }
     >
-      <View style={styles.header}>
-        <TopSection
-          title={i18n.t("auth.fullname.title")}
-          withDarkMode={colorMode === "dark"}
-        />
+      <TopSection title={i18n.t("auth.fullname.title")}>
         <FormControl
           isDisabled={validateFullnameMutation.isPending}
           width="100%"
@@ -146,29 +112,33 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
               autoComplete="name"
               maxLength={FULLNAME_MAX_LENGTH}
               keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-              selectionColor={colorMode === "dark" ? "white" : "black"}
-              style={authStyles.input}
+              // selectionColor={colorMode === "dark" ? "white" : "black"}
+              // style={authStyles.input}
               onSubmitEditing={_onPress}
+              fontSize="$3xl"
+              fontFamily="Inter-ExtraBold"
+              lineHeight="$3xl"
+              textAlign="center"
             />
           </Input>
           {validateFullnameMutation.isError && (
             <FormControlError>
-              <FormControlErrorIcon as={AlertCircleIcon} size="sm" />
-              <FormControlErrorText style={[authStyles.errorText]}>
+              <FormControlErrorIcon as={AlertCircleIcon} />
+              <FormControlErrorText
+                fontFamily="Inter-Regular"
+                flexShrink={1}
+                flexWrap="wrap"
+              >
                 {validateFullnameMutation.error &&
                 instanceOfErrorResponseType(validateFullnameMutation.error) &&
                 validateFullnameMutation.error.statusCode === 422
-                  ? i18n.t("errors.invalid", {
-                      field:
-                        i18n.t("fields.fullname").charAt(0).toUpperCase() +
-                        i18n.t("fields.fullname").slice(1),
-                    })
+                  ? i18n.t("errors.fieldNotValid")
                   : i18n.t("errors.generic")}
               </FormControlErrorText>
             </FormControlError>
           )}
         </FormControl>
-      </View>
+      </TopSection>
       <BottomSection
         buttonLabel={
           i18n.t("continue").charAt(0).toUpperCase() +
@@ -183,7 +153,6 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
           !FULLNAME_REGEX.test(authDto.fullName) ||
           validateFullnameMutation.isPending
         }
-        pb={insets.bottom === 0 ? 20 : insets.bottom}
       />
     </KeyboardAvoidingView>
   );

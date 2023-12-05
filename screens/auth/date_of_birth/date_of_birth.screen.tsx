@@ -18,7 +18,6 @@ import { Keyboard, Platform } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
-import styles from "../auth.styles";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
 import { AuthStackScreenProps } from "@/types";
@@ -31,12 +30,9 @@ import i18n from "@/lang";
 import { useMutation } from "@tanstack/react-query";
 import { ValidateDateOfBirth } from "@/api/routes/auth.routes";
 import { instanceOfErrorResponseType } from "@/api";
-import { useConnectivity } from "@/hooks/useConnectivity";
 import BottomSection from "@/components/auth/bottom_section/bottom_section.component";
 import TopSection from "@/components/auth/top_section/top_section.component";
-import authStyles from "../auth.styles";
 import { MIN_AGE } from "./date_of_birth.costants";
-import dateOfBirthStyles from "./date_of_birth.styles";
 
 const DateOfBirthScreen = ({
   navigation,
@@ -44,8 +40,6 @@ const DateOfBirthScreen = ({
   const insets = useSafeAreaInsets();
   const colorMode = useColorMode();
   const toast = useToast();
-
-  const { isConnected } = useConnectivity();
 
   const inputRefMonthOfBirth = React.useRef<any>(null);
   const inputRefDayOfBirth = React.useRef<any>(null);
@@ -171,27 +165,27 @@ const DateOfBirthScreen = ({
   };
 
   const _onPress = () => {
-    Keyboard.dismiss();
+    // Keyboard.dismiss();
 
-    if (!isConnected) {
-      // Mostro il toast, perchè l'utente si è disconnesso
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="warning" variant="accent">
-              <VStack space="xs">
-                <ToastDescription>
-                  {i18n.t("errors.noInternetConnection")}
-                </ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
+    // if (!isConnected) {
+    //   // Mostro il toast, perchè l'utente si è disconnesso
+    //   toast.show({
+    //     placement: "top",
+    //     render: ({ id }) => {
+    //       return (
+    //         <Toast nativeID={"toast-" + id} action="warning" variant="accent">
+    //           <VStack space="xs">
+    //             <ToastDescription>
+    //               {i18n.t("errors.noInternetConnection")}
+    //             </ToastDescription>
+    //           </VStack>
+    //         </Toast>
+    //       );
+    //     },
+    //   });
 
-      return;
-    }
+    //   return;
+    // }
 
     if (
       !authDto.dayOfBirth ||
@@ -224,37 +218,32 @@ const DateOfBirthScreen = ({
 
   return (
     <KeyboardAvoidingView
+      paddingLeft={insets.left + Layout.DefaultMarginHorizontal}
+      paddingRight={insets.right + Layout.DefaultMarginHorizontal}
+      paddingTop={insets.top}
+      flex={1}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{
-        flex: 1,
-        paddingTop: insets.top,
-        paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
-        paddingRight: insets.right + Layout.DefaultMarginHorizontal,
-        flexDirection: "column",
-      }}
-      onTouchStart={_onTouchStart}
+      // onTouchStart={_onTouchStart}
       bgColor={
         colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
       }
     >
-      <View style={styles.header}>
-        <TopSection
-          title={i18n.t("auth.dateOfBirth.title", {
-            fullname: authDto.fullName,
-          })}
-          withDarkMode={colorMode === "dark"}
-        />
+      <TopSection
+        title={i18n.t("auth.dateOfBirth.title", {
+          fullname: authDto.fullName,
+        })}
+      >
         <FormControl
           width="100%"
           isDisabled={validateDateOfBirthMutation.isPending}
           isInvalid={validateDateOfBirthMutation.isError}
         >
-          <View style={dateOfBirthStyles.containerInputs}>
+          <View flexDirection="row" width="100%" backgroundColor="transparent">
             <Input borderWidth={0} height={70} width="25%">
               <InputField
                 placeholder="DD"
                 maxLength={2}
-                autoFocus={true}
+                autoFocus={false}
                 keyboardType="number-pad"
                 ref={inputRefDayOfBirth}
                 onChangeText={onChangeTextDayOfBirth}
@@ -262,8 +251,11 @@ const DateOfBirthScreen = ({
                   authDto.dayOfBirth ? authDto.dayOfBirth.toString() : undefined
                 }
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                selectionColor={colorMode === "dark" ? "white" : "black"}
-                style={authStyles.input}
+                // selectionColor={colorMode === "dark" ? "white" : "black"}
+                fontSize="$3xl"
+                fontFamily="Inter-ExtraBold"
+                lineHeight="$3xl"
+                textAlign="center"
               />
             </Input>
             <Input borderWidth={0} height={70} width="25%">
@@ -280,8 +272,11 @@ const DateOfBirthScreen = ({
                 ref={inputRefMonthOfBirth}
                 onChangeText={onChangeTextMonthOfBirth}
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                selectionColor={colorMode === "dark" ? "white" : "black"}
-                style={authStyles.input}
+                // selectionColor={colorMode === "dark" ? "white" : "black"}
+                fontSize="$3xl"
+                fontFamily="Inter-ExtraBold"
+                lineHeight="$3xl"
+                textAlign="center"
               />
             </Input>
             <Input borderWidth={0} height={70} width="50%">
@@ -298,16 +293,23 @@ const DateOfBirthScreen = ({
                     : undefined
                 }
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                selectionColor={colorMode === "dark" ? "white" : "black"}
-                style={authStyles.input}
+                // selectionColor={colorMode === "dark" ? "white" : "black"}
+                fontSize="$3xl"
+                fontFamily="Inter-ExtraBold"
+                lineHeight="$3xl"
+                textAlign="center"
               />
             </Input>
           </View>
 
           {validateDateOfBirthMutation.isError && (
             <FormControlError>
-              <FormControlErrorIcon as={AlertCircleIcon} size="sm" />
-              <FormControlErrorText style={[authStyles.errorText]}>
+              <FormControlErrorIcon as={AlertCircleIcon} />
+              <FormControlErrorText
+                fontFamily="Inter-Regular"
+                flexShrink={1}
+                flexWrap="wrap"
+              >
                 {validateDateOfBirthMutation.error &&
                 instanceOfErrorResponseType(
                   validateDateOfBirthMutation.error
@@ -319,22 +321,14 @@ const DateOfBirthScreen = ({
                     ? i18n.t("errors.minAge", {
                         minAge: MIN_AGE,
                       })
-                    : i18n.t("errors.invalid", {
-                        field:
-                          i18n.t("fields.dateOfBirth").charAt(0).toUpperCase() +
-                          i18n.t("fields.dateOfBirth").slice(1),
-                      })
+                    : i18n.t("errors.fieldNotValid")
                   : i18n.t("errors.generic")}
               </FormControlErrorText>
             </FormControlError>
           )}
         </FormControl>
-      </View>
+      </TopSection>
       <BottomSection
-        buttonLabel={
-          i18n.t("continue").charAt(0).toUpperCase() +
-          i18n.t("continue").slice(1)
-        }
         onPress={_onPress}
         isLoading={validateDateOfBirthMutation.isPending}
         isDisabled={
@@ -343,7 +337,6 @@ const DateOfBirthScreen = ({
           authDto.yearOfBirth === null ||
           validateDateOfBirthMutation.isPending
         }
-        pb={insets.bottom === 0 ? 20 : insets.bottom}
       />
     </KeyboardAvoidingView>
   );

@@ -1,5 +1,4 @@
 import React from "react";
-import animatedNavbarStyles from "./animated_navbar.styles";
 import Animated, {
   Easing,
   SharedValue,
@@ -14,21 +13,26 @@ import {
   Icon,
   VStack,
   View,
+  useColorMode,
+  Text,
 } from "@gluestack-ui/themed";
-import { StyleProp, TouchableOpacity, ViewStyle } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { Users2Icon } from "lucide-react-native";
+import { Layout } from "@/costants/Layout";
+import { Skeleton } from "moti/skeleton";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
+
+export const ANIMATED_NAVBAR_HEIGHT = 56;
 
 type Props = {
   animatedValue: SharedValue<number>;
   avatarUrl?: string;
   username?: string;
+  fullname?: string;
+  isLoadingMe?: boolean;
 
   pendingFriendRequestsCount?: number;
-  withDarkMode?: boolean;
-
-  containerStyle?: StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>;
 
   onPressLeftIcon?: () => void;
   onPressRightIcon?: () => void;
@@ -36,19 +40,19 @@ type Props = {
 
 const AnimatedNavbar = ({
   animatedValue,
-  containerStyle,
 
   avatarUrl,
   username,
+  fullname,
+  isLoadingMe = false,
 
   pendingFriendRequestsCount,
-
-  withDarkMode = false,
 
   onPressLeftIcon,
   onPressRightIcon,
 }: Props) => {
   const insets = useSafeAreaInsets();
+  const colorMode = useColorMode();
 
   // Quando l'utente scrolla verso il basso, l'header si nasconde, mentre quando scrolla verso l'alto, l'header si mostra
   const headerStyle = useAnimatedStyle(() => {
@@ -80,48 +84,88 @@ const AnimatedNavbar = ({
     <AnimatedView
       style={[
         headerStyle,
-        animatedNavbarStyles.container,
         {
-          height: 56 + insets.top,
-          paddingLeft: insets.left,
-          paddingRight: insets.right,
+          height: ANIMATED_NAVBAR_HEIGHT + insets.top,
+          paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
+          paddingRight: insets.right + Layout.DefaultMarginHorizontal,
           paddingTop: insets.top,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 3,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
         },
-        containerStyle,
       ]}
-      bgColor={withDarkMode ? "$backgroundDark950" : "$backgroundLight0"}
       borderBottomWidth={1}
-      borderColor={withDarkMode ? "$borderDark800" : "$borderLight100"}
+      borderColor={colorMode === "dark" ? "$borderDark800" : "$borderLight100"}
     >
-      <View style={[animatedNavbarStyles.section, animatedNavbarStyles.left]}>
+      <View
+        flex={1}
+        backgroundColor="transparent"
+        alignItems="flex-start"
+        justifyContent="center"
+        height="100%"
+      >
         <TouchableOpacity onPress={onPressLeftIcon}>
           <VStack>
             <AnimatedView
-              style={[animatedNavbarStyles.badge, badgeStyle]}
-              bgColor={withDarkMode ? "$red700" : "$red500"}
+              style={[
+                {
+                  position: "relative",
+                  width: 6,
+                  height: 6,
+                  top: 6,
+                  right: -18,
+                  zIndex: 1,
+                  elevation: 1,
+                },
+                badgeStyle,
+              ]}
+              bgColor={colorMode === "dark" ? "$red700" : "$red500"}
               rounded="$full"
             />
             <Icon
               as={Users2Icon}
               size="xl"
-              color={withDarkMode ? "$textDark0" : "$textLight950"}
+              color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
             />
           </VStack>
         </TouchableOpacity>
       </View>
-      <View style={[animatedNavbarStyles.section]}></View>
-      <View style={[animatedNavbarStyles.section, animatedNavbarStyles.right]}>
+      <View
+        flex={1}
+        backgroundColor="transparent"
+        alignItems="center"
+        justifyContent="center"
+        height="100%"
+      >
+        <Text fontFamily="Lora-BoldItalic" fontSize="$lg">
+          SnapSync
+        </Text>
+      </View>
+      <View
+        flex={1}
+        backgroundColor="transparent"
+        alignItems="flex-end"
+        justifyContent="center"
+        height="100%"
+      >
         <TouchableOpacity onPress={onPressRightIcon}>
-          <Avatar borderRadius="$full" size="sm" width={30} height={30}>
-            <AvatarFallbackText fontFamily="Inter-Bold">
-              {username}
-            </AvatarFallbackText>
-            <AvatarImage
-              source={{
-                uri: avatarUrl,
-              }}
-            />
-          </Avatar>
+          <Skeleton width={32} height={32} show={isLoadingMe} radius="round">
+            <Avatar borderRadius="$full" size="sm">
+              <AvatarFallbackText fontFamily="Inter-Bold">
+                {username ? username : fullname}
+              </AvatarFallbackText>
+              <AvatarImage
+                source={{
+                  uri: avatarUrl,
+                }}
+              />
+            </Avatar>
+          </Skeleton>
         </TouchableOpacity>
       </View>
     </AnimatedView>

@@ -1,5 +1,9 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  TransitionPresets,
+  createStackNavigator,
+} from "@react-navigation/stack";
 import { RootStackParamList } from "@/types";
 import AuthStack from "./auth.stack";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,11 +15,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LoginWithAuthToken } from "@/api/routes/auth.routes";
 import * as SecureStore from "expo-secure-store";
 import { AuthTokenKey, UserIdKey } from "@/costants/SecureStoreKeys";
-import { Text } from "react-native";
 import i18n from "@/lang";
 import { instanceOfErrorResponseType } from "@/api";
 import { SnapSyncErrorType } from "@/api/errors_types";
 import {
+  Text,
   Button,
   ButtonText,
   Heading,
@@ -29,6 +33,7 @@ import {
   useColorMode,
 } from "@gluestack-ui/themed";
 import UserProfileStack from "./user_profile.stack";
+import UserSettingsStack from "./user_settings.stack";
 
 /**
  * A root stack navigator is often used for displaying modals on top of all other content.
@@ -60,7 +65,7 @@ const RootNavigation = ({ authToken, userId }: Props) => {
 
   const [modalVisible, setModalVisible] = React.useState(false);
   const [modalBody, setModalBody] = React.useState<string>(
-    i18n.t("errors.authTokenNotAvailable")
+    i18n.t("errors.authTokenModal.description")
   );
 
   const loginWithAuthTokenMutation = useMutation({
@@ -91,7 +96,7 @@ const RootNavigation = ({ authToken, userId }: Props) => {
           error.type === SnapSyncErrorType.SnapSyncUserBannedError
         ) {
           setModalBody(
-            i18n.t("errors.authTokenUserBanned", {
+            i18n.t("errors.authTokenModal.userBanned", {
               email: "todo@snapsync.net",
             })
           );
@@ -136,6 +141,7 @@ const RootNavigation = ({ authToken, userId }: Props) => {
   };
 
   if (isLoading) {
+    // TODO: fare un loading screen magari con lotie
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>CARICAMENTO...</Text>
@@ -145,11 +151,7 @@ const RootNavigation = ({ authToken, userId }: Props) => {
 
   return (
     <>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
+      <Stack.Navigator>
         {isLoggedIn || authTokenState ? (
           <Stack.Group>
             <Stack.Screen
@@ -164,18 +166,25 @@ const RootNavigation = ({ authToken, userId }: Props) => {
               component={UserProfileStack}
               options={{
                 headerShown: false,
+                gestureEnabled: false,
+                // animation: "fade",
+                // customAnimationOnGesture: true,
+                // fullScreenGestureEnabled: true,
+                // gestureDirection: "vertical",
+              }}
+            />
+            <Stack.Screen
+              name="UserSettingsStack"
+              component={UserSettingsStack}
+              options={{
+                headerShown: false,
+                gestureEnabled: true,
               }}
             />
           </Stack.Group>
         ) : (
-          <Stack.Group>
-            <Stack.Screen
-              name="AuthStack"
-              component={AuthStack}
-              options={{
-                headerShown: false,
-              }}
-            />
+          <Stack.Group screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="AuthStack" component={AuthStack} />
           </Stack.Group>
         )}
       </Stack.Navigator>
@@ -184,8 +193,12 @@ const RootNavigation = ({ authToken, userId }: Props) => {
         <ModalBackdrop />
         <ModalContent>
           <ModalHeader>
-            <Heading fontFamily="Inter-SemiBold" fontSize={16}>
-              {i18n.t("errors.authTokenFailedTitle")}
+            <Heading
+              fontFamily="Inter-SemiBold"
+              fontSize="$lg"
+              lineHeight="$lg"
+            >
+              {i18n.t("errors.authTokenModal.title")}
             </Heading>
           </ModalHeader>
           <ModalBody>
@@ -200,11 +213,10 @@ const RootNavigation = ({ authToken, userId }: Props) => {
             </Text>
           </ModalBody>
           <ModalFooter
-            style={{
-              borderTopColor: colorMode === "dark" ? "#2D3748" : "#E2E8F0",
-              borderTopWidth: 1,
-              marginTop: 16,
-            }}
+            borderTopColor={
+              colorMode === "dark" ? "$borderDark400" : "$borderLight400"
+            }
+            borderTopWidth={1}
           >
             <Button
               size="lg"
@@ -212,7 +224,7 @@ const RootNavigation = ({ authToken, userId }: Props) => {
               width="100%"
               variant="solid"
               onPress={_onPress}
-              borderRadius={14}
+              rounded="$lg"
             >
               <ButtonText fontFamily="Inter-SemiBold">
                 {i18n.t("exit")}

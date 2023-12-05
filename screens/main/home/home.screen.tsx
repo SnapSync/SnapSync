@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
-import { View, useColorMode } from "@gluestack-ui/themed";
+import { View } from "@gluestack-ui/themed";
 import { MainStackScreenProps } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { FetchMe } from "@/api/routes/users.route";
@@ -11,41 +11,37 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FetchReceivedFriendRequestsCount } from "@/api/routes/friendships.route";
-import AnimatedNavbar from "@/components/home/animated_navbar/animated_navbar.component";
-import { HOME_NAVBAR_HEIGHT } from "./home.costants";
-import homeKeys from "./queries";
-import { Layout } from "@/costants/Layout";
+import AnimatedNavbar, {
+  ANIMATED_NAVBAR_HEIGHT,
+} from "@/components/home/animated_navbar/animated_navbar.component";
+import HomeKeys from "./home.keys";
+import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
+import { useMeQuery } from "@/queries/useMeQuery";
 
 const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
-  const colorMode = useColorMode();
-
   const insets = useSafeAreaInsets();
 
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
   const tokenApi = useSelector((state: RootState) => state.auth.tokenApi);
-  const userId = useSelector((state: RootState) => state.auth.userId);
 
   const translateY = useSharedValue(0);
   const lastContentOffset = useSharedValue(0);
   const isScrolling = useSharedValue(false);
 
-  const { data } = useQuery({
-    queryKey: homeKeys.me,
-    queryFn: () => FetchMe(tokenApi),
-    enabled: isLoggedIn,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    refetchOnReconnect: true,
-  });
+  const { data, isLoading } = useMeQuery(tokenApi, isLoggedIn);
 
-  const { data: receivedFriendRequestsCount } = useQuery({
-    queryKey: homeKeys.receivedFriendRequestsCount,
+  const {
+    data: receivedFriendRequestsCount,
+    refetch: receivedFriendRequestsCountRefetch,
+  } = useQuery({
+    queryKey: HomeKeys.receivedFriendRequestsCount,
     queryFn: () => FetchReceivedFriendRequestsCount(tokenApi),
     enabled: isLoggedIn,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    refetchOnReconnect: true,
+    // staleTime: Infinity,
+    // gcTime: Infinity,
   });
+
+  useRefreshOnFocus(receivedFriendRequestsCountRefetch);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -58,7 +54,7 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
         lastContentOffset.value < event.contentOffset.y &&
         isScrolling.value
       ) {
-        translateY.value = -HOME_NAVBAR_HEIGHT - insets.top;
+        translateY.value = -ANIMATED_NAVBAR_HEIGHT - insets.top;
       }
       lastContentOffset.value = event.contentOffset.y;
     },
@@ -71,12 +67,10 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
   });
 
   const _onPressRightIcon = () => {
-    if (!userId) return;
-    navigation.navigate("MyUserProfile", {
-      screen: "UserProfile",
+    navigation.navigate("ProfileStack", {
+      screen: "Profile",
       params: {
-        id: userId,
-        ...data,
+        username: data?.username,
       },
     });
   };
@@ -88,26 +82,16 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <View flex={1} backgroundColor="transparent">
       <AnimatedNavbar
         animatedValue={translateY}
-        withDarkMode={colorMode === "dark" ? true : false}
         avatarUrl={data?.profilePicture?.url}
         username={data?.username}
+        fullname={data?.fullname}
+        isLoadingMe={isLoading}
         onPressLeftIcon={_onPressLeftIcon}
         onPressRightIcon={_onPressRightIcon}
         pendingFriendRequestsCount={receivedFriendRequestsCount?.count}
-        containerStyle={{
-          paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
-          paddingRight: insets.right + Layout.DefaultMarginHorizontal,
-          paddingTop: insets.top,
-        }}
       />
 
       <Animated.FlatList
@@ -119,10 +103,10 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
               style={{
                 width: "100%",
                 height: 100,
-                backgroundColor: "red",
+                backgroundColor: item % 2 === 0 ? "red" : "blue",
                 marginBottom: 10,
               }}
-            />
+            ></View>
           );
         }}
         // onRefresh={() => timelineRefetch()}
@@ -138,7 +122,7 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
         scrollEventThrottle={16}
         onScroll={scrollHandler}
         contentContainerStyle={{
-          paddingTop: HOME_NAVBAR_HEIGHT + insets.top + 10,
+          paddingTop: ANIMATED_NAVBAR_HEIGHT + insets.top + 10,
         }}
         scrollEnabled={true}
       />

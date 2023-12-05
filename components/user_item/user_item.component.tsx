@@ -7,16 +7,12 @@ import {
   View,
   Text,
   Icon,
-  CloseCircleIcon,
-  Button,
-  ButtonText,
+  useColorMode,
 } from "@gluestack-ui/themed";
 import React from "react";
 import { TouchableOpacity } from "react-native";
-import userItemStyles from "./user_item.styles";
 import { Skeleton } from "moti/skeleton";
-import { Contact2Icon, UserMinus2Icon, Verified } from "lucide-react-native";
-import i18n from "@/lang";
+import { Contact2Icon, Verified } from "lucide-react-native";
 
 type Props = {
   user?: IApiUser;
@@ -24,20 +20,6 @@ type Props = {
   disabled?: boolean;
 
   onPress?: () => void;
-
-  withDarkMode?: boolean;
-
-  showUnfriendButton?: boolean;
-  onPressUnfriend?: () => void;
-
-  showAcceptRequestButton?: boolean;
-  onPressAcceptRequest?: () => void;
-
-  showCancelRequestButton?: boolean;
-  onPressCancelRequest?: () => void;
-
-  showSendRequestButton?: boolean;
-  onPressSendRequest?: () => void;
 };
 
 const UserItem = ({
@@ -45,21 +27,20 @@ const UserItem = ({
   isLoading = false,
   disabled = false,
   onPress,
-  withDarkMode = false,
-  showUnfriendButton = false,
-  onPressUnfriend,
-  showAcceptRequestButton = false,
-  onPressAcceptRequest,
-  showCancelRequestButton = false,
-  onPressCancelRequest,
-  showSendRequestButton = false,
-  onPressSendRequest,
 }: Props) => {
+  const colorMode = useColorMode();
+
   return (
     <TouchableOpacity
-      style={userItemStyles.container}
       onPress={onPress}
       disabled={disabled}
+      style={{
+        marginVertical: 10,
+        flexDirection: "row",
+        gap: 5,
+        alignItems: "center",
+        minHeight: 50,
+      }}
     >
       <Skeleton width={32} height={32} radius="round" show={isLoading}>
         <Avatar borderRadius="$full" size="sm">
@@ -75,13 +56,29 @@ const UserItem = ({
       </Skeleton>
 
       <Divider orientation="vertical" />
-      <View style={userItemStyles.infoContainer}>
-        <View style={userItemStyles.usernameAndIsVerifiedAndStreakContainer}>
+      <View
+        flex={1}
+        backgroundColor="transparent"
+        justifyContent="center"
+        alignItems="flex-start"
+        alignSelf="stretch"
+        gap={3}
+      >
+        <View
+          flexDirection="row"
+          gap={3}
+          alignItems="center"
+          flex={1}
+          backgroundColor="transparent"
+        >
           <Skeleton show={isLoading}>
             <Text
               numberOfLines={1}
-              style={userItemStyles.username}
-              color={withDarkMode ? "$textDark0" : "$textLight950"}
+              fontFamily="Inter-Bold"
+              fontSize="$sm"
+              lineHeight="$sm"
+              flexWrap="wrap"
+              flexShrink={1}
             >
               {user?.username}
             </Text>
@@ -90,13 +87,15 @@ const UserItem = ({
             <Icon
               as={Verified}
               size="2xs"
-              color={withDarkMode ? "$textDark0" : "$textLight950"}
+              color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
             />
           ) : null}
           {user && user.streak && user.streak > 0 ? (
             <Text
-              color={withDarkMode ? "$textDark400" : "$textLight700"}
-              style={userItemStyles.streak}
+              color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
+              fontFamily="Inter-SemiBold"
+              fontSize="$xs"
+              lineHeight="$xs"
             >
               • {user.streak} 🔥
             </Text>
@@ -105,71 +104,43 @@ const UserItem = ({
         <Skeleton show={isLoading}>
           <Text
             numberOfLines={1}
-            style={userItemStyles.fullname}
-            color={withDarkMode ? "$textDark400" : "$textLight700"}
+            color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
+            fontFamily="Inter-Regular"
+            fontSize="$xs"
+            lineHeight="$xs"
+            flexWrap="wrap"
+            flexShrink={1}
           >
             {user?.fullname}
           </Text>
         </Skeleton>
         {user && user.contactNickname ? (
-          <View style={userItemStyles.contactNicknameContainer}>
+          <View
+            flexDirection="row"
+            gap={3}
+            alignItems="center"
+            flex={1}
+            backgroundColor="transparent"
+          >
             <Icon
               as={Contact2Icon}
               size="2xs"
-              color={withDarkMode ? "$textDark400" : "$textLight700"}
+              // color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
             />
             <Text
               numberOfLines={1}
-              style={userItemStyles.contactNickname}
-              color={withDarkMode ? "$textDark400" : "$textLight700"}
+              fontFamily="Inter-Regular"
+              fontSize="$xs"
+              lineHeight="$xs"
+              flexWrap="wrap"
+              flexShrink={1}
+              color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
             >
-              {user.contactNickname}
+              {user?.contactNickname}
             </Text>
           </View>
         ) : null}
       </View>
-      {/* {showUnfriendButton ? (
-        <TouchableOpacity onPress={onPressUnfriend}>
-          <Icon
-            as={UserMinus2Icon}
-            size="md"
-            color={withDarkMode ? "$error400" : "$error700"}
-          />
-        </TouchableOpacity>
-      ) : null}
-      {showAcceptRequestButton ? (
-        <Button
-          onPress={onPressAcceptRequest}
-          size="xs"
-          action="secondary"
-          borderRadius={14}
-        >
-          <ButtonText fontFamily="Inter-SemiBold">
-            {i18n.t("profile.friendship.accept")}
-          </ButtonText>
-        </Button>
-      ) : null}
-      {showCancelRequestButton ? (
-        <TouchableOpacity onPress={onPressCancelRequest}>
-          <Icon
-            as={CloseCircleIcon}
-            size="md"
-            color={withDarkMode ? "$textDark0" : "$textLight950"}
-          />
-        </TouchableOpacity>
-      ) : null}
-      {showSendRequestButton ? (
-        <Button
-          onPress={onPressSendRequest}
-          size="xs"
-          action="secondary"
-          borderRadius={14}
-        >
-          <ButtonText fontFamily="Inter-SemiBold">
-            {i18n.t("profile.friendship.add")}
-          </ButtonText>
-        </Button>
-      ) : null} */}
     </TouchableOpacity>
   );
 };

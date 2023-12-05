@@ -1,92 +1,72 @@
-import { Avatar, AvatarFallbackText, Text, View } from "@gluestack-ui/themed";
-import React from "react";
-import headerStyles from "./header.styles";
-import { StyleProp, ViewStyle } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Layout } from "@/costants/Layout";
+import {
+  View,
+  Text,
+  Avatar,
+  AvatarFallbackText,
+  useColorMode,
+} from "@gluestack-ui/themed";
 import { Skeleton } from "moti/skeleton";
+import React from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = {
-  containerStyle?: StyleProp<ViewStyle>;
-
+  headerHeight: number;
   username?: string;
   fullname?: string;
   streak?: number | null;
-
   isLoading?: boolean;
-
-  withDarkMode?: boolean;
 };
 
 const Header = ({
-  containerStyle,
-
+  headerHeight,
   username,
   fullname,
   streak,
-
   isLoading = false,
-
-  withDarkMode = false,
 }: Props) => {
   const insets = useSafeAreaInsets();
+  const colorMode = useColorMode();
 
   return (
     <View
-      style={[
-        headerStyles.container,
-        {
-          paddingLeft: insets.left,
-          paddingRight: insets.right,
-        },
-        containerStyle,
-      ]}
+      paddingTop={headerHeight + 24}
+      paddingLeft={insets.left + Layout.DefaultMarginHorizontal}
+      paddingRight={insets.right + Layout.DefaultMarginHorizontal}
     >
-      {username || fullname ? (
-        <Avatar rounded="$full" size="lg">
-          <AvatarFallbackText fontFamily="Inter-Bold">
-            {username ? username : fullname}
-          </AvatarFallbackText>
-        </Avatar>
-      ) : isLoading ? (
-        <Skeleton
-          colorMode={withDarkMode ? "dark" : "light"}
-          width={64}
-          height={64}
-          radius="round"
-        />
-      ) : (
-        <Avatar rounded="$full" size="lg" />
-      )}
+      <View flexDirection="column" gap={12}>
+        <Skeleton radius="round" width={64} height={64} show={isLoading}>
+          <Avatar borderRadius="$full" size="lg">
+            <AvatarFallbackText fontFamily="Inter-Bold">
+              {username ? username : fullname}
+            </AvatarFallbackText>
+          </Avatar>
+        </Skeleton>
 
-      {fullname ? (
-        <Text
-          style={[headerStyles.fullname]}
-          color={withDarkMode ? "$textDark0" : "$textLight950"}
-        >
-          {fullname}
-        </Text>
-      ) : isLoading ? (
-        <Skeleton
-          colorMode={withDarkMode ? "dark" : "light"}
-          width={"100%"}
-          height={16}
-        />
-      ) : null}
-
-      {streak && streak > 0 ? (
-        <Text
-          style={[headerStyles.streak]}
-          color={withDarkMode ? "$textDark400" : "$textLight700"}
-        >
-          {streak} 🔥
-        </Text>
-      ) : isLoading ? (
-        <Skeleton
-          colorMode={withDarkMode ? "dark" : "light"}
-          width={"30%"}
-          height={16}
-        />
-      ) : null}
+        <Skeleton show={isLoading && !fullname} height={16}>
+          <Text
+            numberOfLines={2}
+            fontFamily="Inter-ExtraBold"
+            fontSize="$4xl"
+            lineHeight="$4xl"
+            color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
+          >
+            {fullname}
+          </Text>
+        </Skeleton>
+        <Skeleton show={isLoading && !streak} height={16} width={64}>
+          {streak && streak > 0 ? (
+            <Text
+              fontSize="$sm"
+              fontFamily="Inter-SemiBold"
+              lineHeight="$sm"
+              color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
+            >
+              {streak} 🔥
+            </Text>
+          ) : null}
+        </Skeleton>
+      </View>
     </View>
   );
 };

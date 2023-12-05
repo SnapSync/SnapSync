@@ -1,18 +1,23 @@
 import { IFriendshipStatus } from "@/interfaces/friendship_status.interface";
 import {
   Button,
-  ButtonGroup,
   ButtonIcon,
+  ButtonSpinner,
   ButtonText,
   CloseCircleIcon,
   Text,
   View,
+  useColorMode,
 } from "@gluestack-ui/themed";
 import React from "react";
-import friendshipStatusStyles from "./friendship_status.styles";
 import { Skeleton } from "moti/skeleton";
 import i18n from "@/lang";
-import { UserCheck2Icon, UserPlus2Icon, UserX2Icon } from "lucide-react-native";
+import {
+  Clock1Icon,
+  UserCheck2Icon,
+  UserPlus2Icon,
+  UserX2Icon,
+} from "lucide-react-native";
 
 type Props = {
   username?: string;
@@ -21,73 +26,100 @@ type Props = {
 
   variant?: "add" | "incoming" | "outgoing";
 
-  withDarkMode?: boolean;
+  onPressAdd?: () => void;
+  isLoadingAdd?: boolean;
+
+  onPressAccept?: () => void;
+  isLoadingAccept?: boolean;
+
+  onPressDeny?: () => void;
+  isLoadingDeny?: boolean;
+
+  onPressCancel?: () => void;
+  isLoadingCancel?: boolean;
 };
 
 const FriendshipStatus = ({
   username,
   friendshipStatus,
-  isLoading,
+  isLoading = false,
   variant,
 
-  withDarkMode = false,
+  onPressAdd,
+  isLoadingAdd = false,
+
+  onPressAccept,
+  isLoadingAccept = false,
+
+  onPressDeny,
+  isLoadingDeny = false,
+
+  onPressCancel,
+  isLoadingCancel = false,
 }: Props) => {
+  const colorMode = useColorMode();
+
   if (isLoading && variant) {
     // Mostro il loader in base alla variante
     if (variant === "incoming") {
       return (
         <View
-          style={[friendshipStatusStyles.incomingContainer]}
-          bgColor={withDarkMode ? "$backgroundDark700" : "$backgroundLight100"}
+          width="100%"
+          minHeight={120}
+          paddingHorizontal={15}
+          paddingVertical={15}
+          borderColor={
+            colorMode === "dark" ? "$borderDark400" : "$borderLight700"
+          }
+          borderRadius={20}
+          borderWidth={0.5}
+          alignItems="center"
+          gap={20}
         >
           <Skeleton
-            colorMode={withDarkMode ? "dark" : "light"}
+            height={14}
             width={"100%"}
-            height={12}
+            colorMode={colorMode === "dark" ? "dark" : "light"}
           />
-          <ButtonGroup style={friendshipStatusStyles.buttonGroup}>
-            <Button
-              size="lg"
-              borderRadius={14}
-              variant="solid"
-              width="40%"
-              action="secondary"
-            />
-            <Button
-              size="lg"
-              borderRadius={14}
-              variant="outline"
-              width="40%"
-              action="secondary"
-            />
-          </ButtonGroup>
+
+          <View
+            width="100%"
+            gap={10}
+            flexDirection="row"
+            alignItems="center"
+            backgroundColor="transparent"
+          >
+            <View flex={1} backgroundColor="transparent">
+              <Skeleton
+                show
+                colorMode={colorMode === "dark" ? "dark" : "light"}
+              >
+                <Button
+                  size="lg"
+                  rounded="$lg"
+                  width="100%"
+                  action="secondary"
+                />
+              </Skeleton>
+            </View>
+            <View flex={1} backgroundColor="transparent">
+              <Skeleton
+                show
+                colorMode={colorMode === "dark" ? "dark" : "light"}
+              >
+                <Button size="lg" rounded="$lg" width="100%" action="primary" />
+              </Skeleton>
+            </View>
+          </View>
         </View>
       );
-    } else if (variant === "outgoing") {
+    } else {
       return (
-        <Skeleton show={true}>
-          <Button
-            size="lg"
-            borderRadius={14}
-            variant="solid"
-            width="100%"
-            action="secondary"
-          />
+        <Skeleton show colorMode={colorMode === "dark" ? "dark" : "light"}>
+          <Button size="lg" rounded="$lg" action="secondary" />
         </Skeleton>
       );
-    } else if (variant === "add") {
-      return (
-        <Skeleton show={true}>
-          <Button
-            size="lg"
-            borderRadius={14}
-            variant="solid"
-            width="100%"
-            action="secondary"
-          />
-        </Skeleton>
-      );
-    } else return null;
+    }
   }
 
   // Se sono amici oppure l'utente è bloccato non mostro nulla
@@ -102,76 +134,110 @@ const FriendshipStatus = ({
   if (friendshipStatus.incomingRequest) {
     return (
       <View
-        style={[friendshipStatusStyles.incomingContainer]}
-        bgColor={withDarkMode ? "$backgroundDark700" : "$backgroundLight100"}
+        width="100%"
+        minHeight={120}
+        paddingHorizontal={15}
+        paddingVertical={15}
+        borderColor={
+          colorMode === "dark" ? "$borderDark400" : "$borderLight700"
+        }
+        borderRadius={20}
+        borderWidth={0.5}
+        alignItems="center"
+        gap={20}
       >
         <Text
           fontFamily="Inter-SemiBold"
-          fontSize={14}
-          color={withDarkMode ? "$textDark0" : "$textLight950"}
+          fontSize="$md"
+          lineHeight="$md"
+          color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
         >
           {i18n.t("profile.friendship.received", {
             username: username,
           })}
         </Text>
-        <ButtonGroup style={friendshipStatusStyles.buttonGroup}>
-          <Button
-            size="lg"
-            borderRadius={14}
-            variant="solid"
-            width="40%"
-            action="secondary"
-            gap={10}
-          >
-            <ButtonIcon
-              as={UserCheck2Icon}
-              size="sm"
-              // color={withDarkMode ? "$textDark0" : "$textLight950"}
-            />
-            <ButtonText fontFamily="Inter-SemiBold">
-              {i18n.t("profile.friendship.accept")}
-            </ButtonText>
-          </Button>
-          <Button
-            size="lg"
-            borderRadius={14}
-            variant="outline"
-            width="40%"
-            action="secondary"
-            gap={10}
-          >
-            <ButtonIcon
-              as={UserX2Icon}
-              size="sm"
-              // color={withDarkMode ? "$textDark0" : "$textLight950"}
-            />
-            <ButtonText fontFamily="Inter-SemiBold">
-              {i18n.t("profile.friendship.deny")}
-            </ButtonText>
-          </Button>
-        </ButtonGroup>
+        <View
+          width="100%"
+          gap={10}
+          flexDirection="row"
+          alignItems="center"
+          backgroundColor="transparent"
+        >
+          <View flex={1} backgroundColor="transparent">
+            <Button
+              size="lg"
+              rounded="$lg"
+              width="100%"
+              action="secondary"
+              variant="solid"
+              onPress={onPressAccept}
+            >
+              {isLoadingAccept || isLoadingDeny ? (
+                <ButtonSpinner size="small" />
+              ) : (
+                <>
+                  <ButtonIcon as={UserCheck2Icon} size="sm" />
+                  <ButtonText fontFamily="Inter-SemiBold">
+                    {i18n.t("profile.friendship.accept")}
+                  </ButtonText>
+                </>
+              )}
+            </Button>
+          </View>
+          <View flex={1} backgroundColor="transparent">
+            <Button
+              size="lg"
+              rounded="$lg"
+              width="100%"
+              action="secondary"
+              variant="outline"
+              onPress={onPressDeny}
+            >
+              {isLoadingAccept || isLoadingDeny ? (
+                <ButtonSpinner size="small" />
+              ) : (
+                <>
+                  <ButtonIcon as={UserX2Icon} size="sm" />
+                  <ButtonText fontFamily="Inter-SemiBold">
+                    {i18n.t("profile.friendship.deny")}
+                  </ButtonText>
+                </>
+              )}
+            </Button>
+          </View>
+        </View>
       </View>
     );
   }
 
-  // Se ho inviato una richiesta di amicizia
-  if (friendshipStatus.outgoingRequest) {
-    return (
-      <Button action="secondary" size="lg" borderRadius={14} gap={10}>
-        <ButtonIcon as={CloseCircleIcon} size="sm" />
-        <ButtonText fontFamily="Inter-SemiBold">
-          {i18n.t("profile.friendship.cancel")}
-        </ButtonText>
-      </Button>
-    );
-  }
-
   return (
-    <Button action="secondary" size="lg" borderRadius={14} gap={10}>
-      <ButtonIcon as={UserPlus2Icon} size="sm" />
-      <ButtonText fontFamily="Inter-SemiBold">
-        {i18n.t("profile.friendship.add")}
-      </ButtonText>
+    <Button
+      size="lg"
+      rounded="$lg"
+      width="100%"
+      action="secondary"
+      variant="solid"
+      onPress={() => {
+        if (friendshipStatus.outgoingRequest) onPressCancel?.();
+        else onPressAdd?.();
+      }}
+    >
+      {isLoadingAdd || isLoadingCancel ? (
+        <ButtonSpinner size="small" />
+      ) : (
+        <>
+          {friendshipStatus.outgoingRequest ? (
+            <ButtonIcon as={Clock1Icon} size="sm" />
+          ) : (
+            <ButtonIcon as={UserPlus2Icon} size="sm" />
+          )}
+          <ButtonText fontFamily="Inter-SemiBold">
+            {friendshipStatus.outgoingRequest
+              ? i18n.t("profile.friendship.cancel")
+              : i18n.t("profile.friendship.add")}
+          </ButtonText>
+        </>
+      )}
     </Button>
   );
 };

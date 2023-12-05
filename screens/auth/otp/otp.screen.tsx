@@ -1,11 +1,9 @@
 import {
   useColorMode,
   KeyboardAvoidingView,
-  View,
   useToast,
   Toast,
   VStack,
-  ToastTitle,
   ToastDescription,
   Icon,
   ChevronLeftIcon,
@@ -23,7 +21,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
-import styles from "../auth.styles";
 import i18n from "@/lang";
 import { AuthStackScreenProps } from "@/types";
 import {
@@ -40,12 +37,11 @@ import { instanceOfErrorResponseType } from "@/api";
 import { login } from "@/redux/features/auth/authSlice";
 import { AuthTokenKey, UserIdKey } from "@/costants/SecureStoreKeys";
 import * as SecureStore from "expo-secure-store";
-import { useConnectivity } from "@/hooks/useConnectivity";
-import authStyles from "../auth.styles";
 import TopSection from "@/components/auth/top_section/top_section.component";
 import BottomSection from "@/components/auth/bottom_section/bottom_section.component";
 import { OPT_LENGTH } from "./otp.costants";
 import authKeys from "../queries";
+import { SnapSyncErrorType } from "@/api/errors_types";
 
 const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
   const insets = useSafeAreaInsets();
@@ -57,8 +53,6 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
     countStart: 60,
     intervalMs: 1000,
   });
-
-  const { isConnected } = useConnectivity();
 
   const queryClient = useQueryClient();
 
@@ -73,6 +67,7 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
       ResendPhoneNumberVerificationCode(data.sessionId),
     onSuccess: () => {
       resetCountdown(); // Resetto il countdown
+      startCountdown(); // Avvio il countdown
     },
   });
 
@@ -177,26 +172,6 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
   const _onCodeFilled = (code: string) => {
     Keyboard.dismiss();
 
-    if (!isConnected) {
-      // Mostro il toast, perchè l'utente si è disconnesso
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="warning" variant="accent">
-              <VStack space="xs">
-                <ToastDescription>
-                  {i18n.t("errors.noInternetConnection")}
-                </ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
-
-      return;
-    }
-
     if (!authDto.sessionId) {
       toast.show({
         placement: "top",
@@ -242,12 +217,7 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
         colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
       }
     >
-      <View style={styles.header}>
-        <TopSection
-          title={i18n.t("auth.otp.title")}
-          // subtitle={i18n.t("auth.otp.subtitle")}
-          withDarkMode={colorMode === "dark"}
-        />
+      <TopSection title={i18n.t("auth.otp.title")}>
         <FormControl
           width={"100%"}
           isDisabled={validateOtpMutation.isPending}
@@ -266,19 +236,22 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
               value={authDto.phoneNumberVerificationCode}
               keyboardAppearance={colorMode === "dark" ? "dark" : "default"}
               onChangeText={_onChangeText}
-              selectionColor={colorMode === "dark" ? "white" : "black"}
-              style={[
-                authStyles.input,
-                {
-                  letterSpacing: 20,
-                },
-              ]}
+              // selectionColor={colorMode === "dark" ? "white" : "black"}
+              fontSize="$3xl"
+              fontFamily="Inter-ExtraBold"
+              lineHeight="$3xl"
+              textAlign="center"
+              letterSpacing={20}
             />
           </Input>
           {validateOtpMutation.isError && (
             <FormControlError>
-              <FormControlErrorIcon as={AlertCircleIcon} size="sm" />
-              <FormControlErrorText style={[authStyles.errorText]}>
+              <FormControlErrorIcon as={AlertCircleIcon} />
+              <FormControlErrorText
+                fontFamily="Inter-Regular"
+                flexShrink={1}
+                flexWrap="wrap"
+              >
                 {validateOtpMutation.error &&
                 instanceOfErrorResponseType(validateOtpMutation.error)
                   ? validateOtpMutation.error.statusCode === 401
@@ -286,7 +259,7 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
                     : validateOtpMutation.error.statusCode === 403 &&
                       validateOtpMutation.error.type &&
                       validateOtpMutation.error.type ===
-                        "SnapSyncUserBannedError"
+                        SnapSyncErrorType.SnapSyncUserBannedError
                     ? i18n.t("errors.userBanned")
                     : i18n.t("errors.generic")
                   : i18n.t("errors.generic")}
@@ -294,19 +267,15 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
             </FormControlError>
           )}
         </FormControl>
-      </View>
+      </TopSection>
 
       <BottomSection
         buttonLabel={
           count === 0
-            ? i18n.t("resend").charAt(0).toUpperCase() +
-              i18n.t("resend").slice(1)
-            : i18n.t("resendIn").charAt(0).toUpperCase() +
-              i18n
-                .t("resendIn", {
-                  seconds: count,
-                })
-                .slice(1)
+            ? i18n.t("resend")
+            : i18n.t("resendIn", {
+                seconds: count,
+              })
         }
         onPress={_handlePressResend}
         isLoading={resendOtpMutation.isPending || validateOtpMutation.isPending}
@@ -315,7 +284,7 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
           count > 0 ||
           validateOtpMutation.isPending
         }
-        pb={insets.bottom === 0 ? 20 : insets.bottom}
+        // pb={insets.bottom === 0 ? 20 : insets.bottom}
       />
     </KeyboardAvoidingView>
   );

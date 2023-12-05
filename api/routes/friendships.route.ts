@@ -38,6 +38,35 @@ export const FetchUserFriends = async (
   }
 };
 
+export const FetchMutualFriends = async (
+  userId: number,
+  page: number,
+  tokenApi: string
+): Promise<{
+  message: string;
+  data: IApiUser[];
+  nextCursor: number | undefined;
+  prevCursor: number | undefined;
+  total: number;
+}> => {
+  try {
+    if (page < 1) page = 1;
+
+    const { data } = await client.get(`${path}/mutual_friends/${userId}`, {
+      params: {
+        page,
+      },
+      headers: {
+        Authorization: `Bearer ${tokenApi}`,
+      },
+    });
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const FetchUserReceivedFriendRequests = async (
   page: number,
   tokenApi: string,

@@ -1,31 +1,25 @@
 import React from "react";
-import topSectionStyles from "./top_section.styles";
 import { View, Text } from "@gluestack-ui/themed";
 
 type Props = {
   title: string;
-  subtitle?: string;
-
-  withDarkMode?: boolean;
+  children?: React.ReactNode;
 };
 
-const TopSection = ({ title, subtitle, withDarkMode = false }: Props) => {
+const TopSection = ({ title, children }: Props) => {
   return (
-    <View style={[topSectionStyles.container]}>
-      <Text
-        style={topSectionStyles.title}
-        color={withDarkMode ? "$textDark0" : "$textLight950"}
-      >
-        {title}
-      </Text>
-      {subtitle && (
-        <Text
-          style={topSectionStyles.subTitle}
-          color={withDarkMode ? "$textDark400" : "$textLight700"}
-        >
-          {subtitle}
+    <View
+      paddingTop="$16"
+      backgroundColor="transparent"
+      maxWidth={500}
+      flex={1}
+    >
+      <View alignItems="center" gap={8} backgroundColor="transparent">
+        <Text fontSize="$lg" fontFamily="Inter-ExtraBold" lineHeight="$md">
+          {title}
         </Text>
-      )}
+      </View>
+      {children}
     </View>
   );
 };

@@ -1,7 +1,8 @@
-import { Divider, Icon, View, Text } from "@gluestack-ui/themed";
+import { Divider, Icon, View, Text, useColorMode } from "@gluestack-ui/themed";
 import React from "react";
 import { StyleProp, TouchableOpacity, ViewStyle } from "react-native";
-import bottomSheetItemStyles from "./bottom_sheet_item.styles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Layout } from "@/costants/Layout";
 
 type Props = {
   variant?: "default" | "danger";
@@ -16,8 +17,6 @@ type Props = {
   onPress?: () => void;
 
   withDivider?: boolean;
-
-  withDarkMode?: boolean;
 };
 
 const BottomSheetItem = ({
@@ -32,25 +31,32 @@ const BottomSheetItem = ({
   onPress,
 
   withDivider = false,
-
-  withDarkMode = false,
 }: Props) => {
+  const insets = useSafeAreaInsets();
+  const colorMode = useColorMode();
+
   return (
-    <View
-      style={{
-        backgroundColor: "transparent",
-        width: "100%",
-      }}
-    >
+    <View backgroundColor="transparent" width="100%">
       <TouchableOpacity
         onPress={onPress}
-        style={[bottomSheetItemStyles.container, containerStyle]}
+        style={[
+          {
+            flexDirection: "row",
+            justifyContent: "flex-start",
+            alignItems: "center",
+            paddingVertical: 24,
+            gap: 16,
+            // paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
+            // paddingRight: insets.right + Layout.DefaultMarginHorizontal,
+          },
+          containerStyle,
+        ]}
       >
         <Icon
           as={iconAs}
           size={iconSize}
           color={
-            withDarkMode
+            colorMode === "dark"
               ? variant === "default"
                 ? "$textDark0"
                 : "$error400"
@@ -60,9 +66,11 @@ const BottomSheetItem = ({
           }
         />
         <Text
-          style={[bottomSheetItemStyles.label]}
+          fontFamily="Inter-SemiBold"
+          fontSize="$md"
+          lineHeight="$md"
           color={
-            withDarkMode
+            colorMode === "dark"
               ? variant === "default"
                 ? "$textDark0"
                 : "$error400"

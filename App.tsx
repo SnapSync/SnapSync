@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { config } from "./config/gluestack-ui.config";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
-import { NavigationContainer } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import useCachedResources from "@/hooks/useCachedResources";
 import RootNavigation from "./navigation";
 import { store } from "@/redux/app/store";
@@ -17,6 +17,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useColorScheme } from "react-native";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,28 @@ const persister = createAsyncStoragePersister({
 // @tanstack/query-async-storage-persister -> so we can create a React Query persistor using Async Storage.
 // @tanstack/react-query-persist-clien -> set of utilities to queryClient interaction with the persistor
 
+const MyThemeDark = {
+  dark: true,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: "#1A91FF", // The primary color of the app used to tint various elements. Usually you'll want to use your brand color for this.
+    background: "#171717", // The color of various backgrounds, such as background color for the screens.
+    text: "#FCFCFC", // The text color of various elements.
+    card: "#171717", // The background color of card-like elements, such as headers, tab bars etc.
+  },
+};
+
+const MyThemeLight = {
+  dark: false,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: "#0077E6",
+    background: "#FCFCFC",
+    text: "#171717",
+    card: "#FCFCFC",
+  },
+};
+
 export default function App() {
   const {
     isLoadingComplete,
@@ -36,6 +59,9 @@ export default function App() {
     cachedDeviceUuid,
     cachedUserId,
   } = useCachedResources();
+
+  const colorScheme = useColorScheme();
+  // const colorMode = useColorMode();
 
   useEffect(() => {
     return NetInfo.addEventListener((state) => {
@@ -80,15 +106,18 @@ export default function App() {
         client={queryClient}
       >
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <SafeAreaView
+          <SafeAreaProvider
             style={{
               flex: 1,
               // paddingHorizontal: Layout.DefaultMarginHorizontal,
               // backgroundColor: colorMode === "dark" ? Layout.DarkBgc : Layout.LightBgc,
             }}
           >
-            <NavigationContainer>
-              <GluestackUIProvider config={config} colorMode={"light"}>
+            <NavigationContainer
+              // @see -> https://reactnavigation.org/docs/themes/
+              theme={MyThemeDark}
+            >
+              <GluestackUIProvider config={config} colorMode={"dark"}>
                 <BottomSheetModalProvider>
                   <RootNavigation
                     authToken={cachedAuthToken}
@@ -98,7 +127,7 @@ export default function App() {
                 </BottomSheetModalProvider>
               </GluestackUIProvider>
             </NavigationContainer>
-          </SafeAreaView>
+          </SafeAreaProvider>
         </GestureHandlerRootView>
       </PersistQueryClientProvider>
     </Provider>

@@ -7,15 +7,13 @@ import {
 } from "@gluestack-ui/themed";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import bottomSectionStyles from "./bottom_section.styles";
+import i18n from "@/lang";
 
 type Props = {
-  buttonLabel: string;
+  buttonLabel?: string;
 
   isLoading?: boolean;
   isDisabled?: boolean;
-
-  pb?: number;
 
   hint?: string;
 
@@ -28,8 +26,6 @@ const BottomSection = ({
   isLoading = false,
   isDisabled = false,
 
-  pb,
-
   hint,
 
   onPress,
@@ -37,14 +33,19 @@ const BottomSection = ({
   const insets = useSafeAreaInsets();
   return (
     <View
-      style={[
-        bottomSectionStyles.container,
-        {
-          paddingBottom: pb ?? insets.bottom,
-        },
-      ]}
+      backgroundColor="transparent"
+      maxWidth={500}
+      paddingBottom={insets.bottom === 0 ? "$16" : insets.bottom}
+      justifyContent="flex-end"
+      alignItems="center"
+      gap={16}
+      flex={1}
     >
-      {hint && <Text style={bottomSectionStyles.hint}>{hint}</Text>}
+      {hint && (
+        <Text fontFamily="Inter-Regular" fontSize="$sm" lineHeight="$sm">
+          {hint}
+        </Text>
+      )}
       <Button
         action={"primary"}
         variant={"solid"}
@@ -52,12 +53,14 @@ const BottomSection = ({
         isDisabled={isDisabled}
         width={"100%"}
         onPress={onPress}
-        rounded="$full"
+        rounded="$lg"
       >
         {isLoading ? (
           <ButtonSpinner size="small" />
         ) : (
-          <ButtonText fontFamily="Inter-SemiBold">{buttonLabel}</ButtonText>
+          <ButtonText fontFamily="Inter-SemiBold">
+            {buttonLabel ? buttonLabel : i18n.t("continue")}
+          </ButtonText>
         )}
       </Button>
     </View>

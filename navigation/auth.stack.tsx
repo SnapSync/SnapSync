@@ -1,5 +1,4 @@
 import { GetSessionId } from "@/api/routes/auth.routes";
-import { Layout } from "@/costants/Layout";
 import i18n from "@/lang";
 import { RootState } from "@/redux/app/store";
 import {
@@ -14,21 +13,23 @@ import PhoneNumberScreen from "@/screens/auth/phone_number/phone_number.screen";
 import UsernameScreen from "@/screens/auth/username/username.screen";
 import { AuthStackParamList } from "@/types";
 import { useColorMode } from "@gluestack-style/react";
-import { CloseIcon, Icon } from "@gluestack-ui/themed";
+import { CloseIcon, Icon, Text } from "@gluestack-ui/themed";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useQuery } from "@tanstack/react-query";
-import { Image } from "expo-image";
 import React from "react";
-import { Platform, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import * as CountyCodesList from "country-codes-list";
 import * as Localization from "expo-localization";
 import authKeys from "@/screens/auth/queries";
+import { useNavigation } from "@react-navigation/native";
 
+// Utilizzo un NativeStackNavigator per avere la possibilità di utilizzare: https://reactnavigation.org/docs/native-stack-navigator/#headersearchbaroptions
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 const AuthStack = () => {
   const colorMode = useColorMode();
+  const navigation = useNavigation();
 
   const authDto = useSelector(
     (state: RootState) => state.authentication.authDto
@@ -63,25 +64,20 @@ const AuthStack = () => {
     }
   }, [authDto, Localization, dispatch]);
 
+  const goBack = () => navigation.goBack();
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
         headerTransparent: true,
-        headerBackTitleVisible: false,
-        headerLeft: () => null,
         headerBackVisible: false,
+        headerLeft: () => null,
         headerTitleAlign: "center",
         headerTitle: () => (
-          <Image
-            source={{
-              uri: "https://www.verysocialnetwork.com/.a/6a00e54f9b07dc883402a308e0cd67200c-800wi",
-            }}
-            style={{
-              height: 40,
-              width: 80,
-            }}
-          />
+          <Text fontFamily="Lora-BoldItalic" fontSize="$lg">
+            SnapSync
+          </Text>
         ),
         gestureEnabled: false,
       }}
@@ -92,9 +88,9 @@ const AuthStack = () => {
       <Stack.Screen
         name="CountryList"
         component={CountryListScreen}
-        options={({ navigation }) => ({
+        options={{
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity onPress={goBack}>
               <Icon
                 as={CloseIcon}
                 size="xl"
@@ -104,23 +100,15 @@ const AuthStack = () => {
           ),
           animation: "slide_from_bottom",
           headerBlurEffect: colorMode === "dark" ? "dark" : "light",
-          headerShown: true,
           headerLargeTitle: true,
-          headerTransparent: true,
-          headerTitle:
-            Platform.OS === "ios" ? i18n.t("auth.countryList.title") : "",
-          headerLargeStyle: {
-            backgroundColor:
-              colorMode === "dark" ? Layout.DarkBgc : Layout.LightBgc,
-          },
+          headerTitle: i18n.t("auth.countryList.title"),
           headerLargeTitleStyle: {
             fontFamily: "Inter-SemiBold",
           },
           headerTitleStyle: {
-            color: colorMode === "dark" ? "#FCFCFC" : "#171717",
             fontFamily: "Inter-SemiBold",
           },
-        })}
+        }}
       />
       <Stack.Screen name="Otp" component={OtpScreen} />
       <Stack.Screen name="Username" component={UsernameScreen} />

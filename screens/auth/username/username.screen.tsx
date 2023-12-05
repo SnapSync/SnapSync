@@ -19,7 +19,6 @@ import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
 import { AuthStackScreenProps } from "@/types";
-import styles from "../auth.styles";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
 import {
@@ -33,8 +32,6 @@ import { instanceOfErrorResponseType } from "@/api";
 import { login } from "@/redux/features/auth/authSlice";
 import * as SecureStore from "expo-secure-store";
 import { AuthTokenKey, UserIdKey } from "@/costants/SecureStoreKeys";
-import { useConnectivity } from "@/hooks/useConnectivity";
-import authStyles from "../auth.styles";
 import TopSection from "@/components/auth/top_section/top_section.component";
 import BottomSection from "@/components/auth/bottom_section/bottom_section.component";
 import {
@@ -52,8 +49,6 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
 
   const queryClient = useQueryClient();
 
-  const { isConnected } = useConnectivity();
-
   const authDto = useSelector(
     (state: RootState) => state.authentication.authDto
   );
@@ -70,16 +65,12 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
   });
 
   React.useEffect(() => {
-    if (
-      validateUsernameMutation.isSuccess &&
-      authDto.sessionId &&
-      isConnected
-    ) {
+    if (validateUsernameMutation.isSuccess && authDto.sessionId) {
       signupMutation.mutate({
         sessionId: authDto.sessionId,
       });
     }
-  }, [validateUsernameMutation.isSuccess, authDto.sessionId, isConnected]);
+  }, [validateUsernameMutation.isSuccess, authDto.sessionId]);
 
   React.useEffect(() => {
     if (signupMutation.data) {
@@ -123,26 +114,6 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
   const _onPress = () => {
     Keyboard.dismiss();
 
-    if (!isConnected) {
-      // Mostro il toast, perchè l'utente si è disconnesso
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="warning" variant="accent">
-              <VStack space="xs">
-                <ToastDescription>
-                  {i18n.t("errors.noInternetConnection")}
-                </ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
-
-      return;
-    }
-
     if (!authDto.sessionId || !authDto.username) {
       toast.show({
         placement: "top",
@@ -168,24 +139,16 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{
-        flex: 1,
-        paddingTop: insets.top,
-        paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
-        paddingRight: insets.right + Layout.DefaultMarginHorizontal,
-        flexDirection: "column",
-      }}
+      paddingLeft={insets.left + Layout.DefaultMarginHorizontal}
+      paddingRight={insets.right + Layout.DefaultMarginHorizontal}
+      paddingTop={insets.top}
+      flex={1}
       onTouchStart={_dismissKeyboard}
       bgColor={
         colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
       }
     >
-      <View style={styles.header}>
-        <TopSection
-          title={i18n.t("auth.username.title")}
-          // subtitle={i18n.t("auth.username.subtitle")}
-          withDarkMode={colorMode === "dark"}
-        />
+      <TopSection title={i18n.t("auth.username.title")}>
         <FormControl
           width={"100%"}
           isDisabled={
@@ -207,17 +170,24 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
               autoFocus={true}
               maxLength={USERNAME_MAX_LENGTH}
               keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-              selectionColor={colorMode === "dark" ? "white" : "black"}
-              style={authStyles.input}
+              // selectionColor={colorMode === "dark" ? "white" : "black"}
               autoCapitalize="none"
               returnKeyType="done"
               onSubmitEditing={_onPress}
+              fontSize="$3xl"
+              fontFamily="Inter-ExtraBold"
+              lineHeight="$3xl"
+              textAlign="center"
             />
           </Input>
           {validateUsernameMutation.isError && (
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} size="sm" />
-              <FormControlErrorText style={[authStyles.errorText]}>
+              <FormControlErrorText
+                fontFamily="Inter-Regular"
+                flexShrink={1}
+                flexWrap="wrap"
+              >
                 {validateUsernameMutation.error &&
                 instanceOfErrorResponseType(validateUsernameMutation.error) &&
                 validateUsernameMutation.error.statusCode === 409
@@ -235,12 +205,8 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
             </FormControlError>
           )}
         </FormControl>
-      </View>
+      </TopSection>
       <BottomSection
-        buttonLabel={
-          i18n.t("continue").charAt(0).toUpperCase() +
-          i18n.t("continue").slice(1)
-        }
         onPress={_onPress}
         isLoading={signupMutation.isPending}
         isDisabled={
@@ -251,7 +217,6 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
           validateUsernameMutation.isPending ||
           signupMutation.isPending
         }
-        pb={insets.bottom === 0 ? 20 : insets.bottom}
         hint={i18n.t("auth.usernameHint")}
       />
     </KeyboardAvoidingView>

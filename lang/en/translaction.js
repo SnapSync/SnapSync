@@ -10,13 +10,21 @@ const enTranslactions = {
   cancel: 'Cancel',
   block: 'Block',
   delete: 'Delete',
+  seeAll: 'See all',
 
   friends: 'Friends',
   requests: 'Requests',
   suggestions: 'Suggestions',
+  mutualFriends: 'Mutual friends',
+
+  exit: 'Exit',
+
+  userSettings: {
+    screenTitle: 'Settings',
+  },
 
   // Profile
-  profile: {
+  userProfile: {
     friendship: {
       accept: 'Accept',
       deny: 'Reject',
@@ -35,6 +43,14 @@ const enTranslactions = {
       block: 'Block {{username}}',
       unfriend: 'Remove from friends',
       report: 'Report {{username}}',
+    }
+  },
+
+  mutualFriendsScreen: {
+    screenTitle: {
+      zero: 'No mutual friends',
+      one: '{{count}} mutual friend',
+      other: '{{count}} mutual friends',
     }
   },
 
@@ -83,6 +99,17 @@ const enTranslactions = {
     listHeaderBody: "Check the friend requests you have sent.",
   },
 
+  blockUserAlert: {
+    title: "Are you sure?",
+    description: "If you block {{username}}, you will no longer be able to see his posts and he will no longer be able to see yours. Do you want to continue?"
+  },
+
+  unfriendUserAlert: {
+    title: "Are you sure?",
+    description: "If you remove {{username}} from your friends, you will no longer be able to see his posts and he will no longer be able to see yours. Do you want to continue?"
+
+  },
+
   errors: {
     generic: "An error occurred, try again later.",
     noInternetConnection: "No internet connection.",
@@ -91,7 +118,7 @@ const enTranslactions = {
     userBanned: "Ops! It seems that your account has been banned.",
     usernameAlreadyExists: "Ops! This username has already been taken.",
     userNotFound: "Ops! This user does not exist.",
-
+    fieldNotValid: "Ops! Insert a valid value.",
     authTokenModal: {
       title: "Ops! Something went wrong.",
       description: "We are unable to access your account. Try again later.",

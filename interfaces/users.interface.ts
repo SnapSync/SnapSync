@@ -2,6 +2,7 @@ export interface IUserProfilePicture {
   url: string;
   width: number;
   height: number;
+  blurHash: string | null;
 }
 
 export interface IApiUser {
@@ -11,9 +12,11 @@ export interface IApiUser {
   isVerified: boolean;
   profilePicture: IUserProfilePicture | null;
 
-  contactNickname?: string | null;
-  mutualFriends?: number | null;
-  streak?: number | null;
+  biography?: string | null;
+
+  contactNickname?: string;
+  mutualFriends?: number;
+  streak?: number;
 
   isNotSynced?: boolean; // is a local used property only, it tells us if the current state of the exercise is synced with the backend.
 }
