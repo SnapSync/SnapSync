@@ -6,7 +6,7 @@ import enTranslactions from "./en/translaction.js";
 // Set the key-value pairs for the different languages you want to support.
 const translations = {
   it: itTranslactions,
-  en: enTranslactions,
+  // en: enTranslactions,
 };
 
 const i18n = new I18n(translations);

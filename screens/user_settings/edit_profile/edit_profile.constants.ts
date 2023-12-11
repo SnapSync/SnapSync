@@ -1,0 +1,1 @@
+export const BIOGRAPHY_MAX_LENGTH = 150;

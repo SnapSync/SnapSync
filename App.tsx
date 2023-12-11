@@ -18,6 +18,7 @@ import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persi
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColorScheme } from "react-native";
+import { ThemeProvider, createTheme } from "@rneui/themed";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,8 @@ export default function App() {
 
   const colorScheme = useColorScheme();
   // const colorMode = useColorMode();
+
+  const [colorMode, setColorMode] = React.useState<"light" | "dark">("light");
 
   useEffect(() => {
     return NetInfo.addEventListener((state) => {
@@ -115,16 +118,32 @@ export default function App() {
           >
             <NavigationContainer
               // @see -> https://reactnavigation.org/docs/themes/
-              theme={MyThemeDark}
+              theme={colorMode === "dark" ? MyThemeDark : MyThemeLight}
             >
-              <GluestackUIProvider config={config} colorMode={"dark"}>
-                <BottomSheetModalProvider>
-                  <RootNavigation
-                    authToken={cachedAuthToken}
-                    userId={cachedUserId}
-                  />
-                  <StatusBar style={"light"} />
-                </BottomSheetModalProvider>
+              <GluestackUIProvider config={config} colorMode={colorMode}>
+                <ThemeProvider
+                  theme={{
+                    mode: colorMode,
+                    lightColors: {
+                      primary: "#0077E6",
+                      background: "#FCFCFC",
+                    },
+                    darkColors: {
+                      primary: "#1A91FF",
+                      background: "#171717",
+                    },
+                  }}
+                >
+                  <BottomSheetModalProvider>
+                    <RootNavigation
+                      authToken={cachedAuthToken}
+                      userId={cachedUserId}
+                    />
+                    <StatusBar
+                      style={colorMode === "dark" ? "light" : "dark"}
+                    />
+                  </BottomSheetModalProvider>
+                </ThemeProvider>
               </GluestackUIProvider>
             </NavigationContainer>
           </SafeAreaProvider>

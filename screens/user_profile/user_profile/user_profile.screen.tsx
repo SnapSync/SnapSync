@@ -18,12 +18,7 @@ import { Alert, Animated, TouchableOpacity } from "react-native";
 import { SCREEN_WIDTH } from "@/utils/helper";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FetchUserProfileById } from "@/api/routes/users.route";
 import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
 import { useAnimateScrollView } from "@/hooks/useAnimatedScrollView";
@@ -40,14 +35,12 @@ import {
   BlockUser,
   DenyFriendRequest,
   DestroyFriendship,
-  FetchMutualFriends,
-  FetchUserFriends,
   SendFriendRequest,
   ShowFriendship,
 } from "@/api/routes/friendships.route";
 import i18n from "@/lang";
 import { IFriendshipStatus } from "@/interfaces/friendship_status.interface";
-import userProfileKeys from "./queries";
+import UserProfileKeys from "./user_profile.keys";
 import BottomSheetItem from "@/components/bottom_sheet_item/bottom_sheet_item.component";
 import Header from "@/components/user_profile/header/header.component";
 import AnimatedHeader from "@/components/user_profile/animated_header/animated_header.component";
@@ -56,8 +49,6 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { LinearGradient } from "expo-linear-gradient";
 import Biography from "@/components/user_profile/biography/biography.component";
 import FriendshipStatus from "@/components/user_profile/friendship_status/friendship_status.component";
-import mutualFriendsKeys from "../mutual_friends/queries";
-import friendsKeys from "@/screens/discovery/friends/queries";
 import FriendCard, {
   FRIEND_CARD_HEIGHT,
   FRIEND_CARD_MARGIN,
@@ -65,6 +56,10 @@ import FriendCard, {
 } from "@/components/user_profile/friend_card/friend_card.component";
 import Carousel from "react-native-reanimated-carousel";
 import { IApiUser } from "@/interfaces/users.interface";
+import { useInfiniteMutualFriendsQuery } from "@/queries/useInfiniteMutualFriendsQuery";
+import { useInfiniteFriendsQuery } from "@/queries/useInfiniteFriendsQuery";
+import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
+import { StatusBar } from "expo-status-bar";
 
 const UserProfileScreen = ({
   navigation,
@@ -105,22 +100,23 @@ const UserProfileScreen = ({
     isLoading: isLoadingUserProfile,
     isError: isErrorUserProfile,
     error: errorUserProfile,
-    isRefetching: isRefetchingUserProfile,
+    refetch: refetchUserProfile,
   } = useQuery({
-    queryKey: userProfileKeys.userProfile(route.params.id),
+    queryKey: UserProfileKeys.userProfile(route.params.id),
     queryFn: () => FetchUserProfileById(route.params.id, tokenApi),
     enabled: isLoggedIn && route.params && route.params.id ? true : false,
-    staleTime: Infinity,
+    staleTime: route.params.id === userId ? undefined : 1000 * 60 * 60, // Se è il mio profilo allora ogni volta che vado nella schermata faccio il refetch, altrimenti metto 1 ora
     gcTime: Infinity,
-    // refetchOnReconnect: true,
   });
+
+  useRefreshOnFocus(refetchUserProfile);
 
   const {
     data: friendshipStatusData,
     isLoading: isLoadingFriendshipStatus,
-    isRefetching: isRefetchingFriendshipStatus,
+    refetch: refetchFriendshipStatus,
   } = useQuery({
-    queryKey: userProfileKeys.friendshipStatus(route.params.id),
+    queryKey: UserProfileKeys.friendshipStatus(route.params.id),
     queryFn: () => ShowFriendship(route.params.id, tokenApi),
     enabled:
       isLoggedIn &&
@@ -129,54 +125,28 @@ const UserProfileScreen = ({
       route.params.id !== userId
         ? true
         : false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60, // 1000 * 60 * 60,
     gcTime: Infinity,
     // refetchOnWindowFocus: true,
     // refetchOnReconnect: true,
   });
 
+  useRefreshOnFocus(refetchFriendshipStatus);
+
   // Nel caso fosse il profilo di un'altro utente allora carico gli amici in comune con l'utente
   const { data: mutualFriendsData, isLoading: isLoadingMutualFriends } =
-    useInfiniteQuery({
-      queryKey: mutualFriendsKeys.infiniteMutualFriends(route.params.id),
-      initialPageParam: 1,
-      queryFn: ({ pageParam = 1 }) =>
-        FetchMutualFriends(route.params.id, pageParam, tokenApi),
-      enabled:
-        isLoggedIn &&
-        route.params &&
-        route.params.id &&
-        route.params.id !== userId
-          ? true
-          : false,
-      staleTime: Infinity,
-      gcTime: Infinity,
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      getPreviousPageParam: (firstPage) => firstPage.prevCursor,
-      // refetchOnWindowFocus: true,
-      // refetchOnReconnect: true,
-    });
+    useInfiniteMutualFriendsQuery(
+      route.params.id,
+      tokenApi,
+      isLoggedIn && route.params.id !== userId
+    );
 
   // Nel caso fosse il mio profilo allora carico i miei amici
-  const { data: friends, isLoading: isLoadingFriends } = useInfiniteQuery({
-    queryKey: friendsKeys.infiniteFriends,
-    initialPageParam: 1,
-    queryFn: ({ pageParam = 1 }) => FetchUserFriends(pageParam, tokenApi),
-    enabled:
-      isLoggedIn &&
-      route.params &&
-      route.params.id &&
-      route.params.id === userId
-        ? true
-        : false,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    getPreviousPageParam: (firstPage) => firstPage.prevCursor,
-  });
+  const { data: friendsData, isLoading: isLoadingFriends } =
+    useInfiniteFriendsQuery(tokenApi, isLoggedIn && route.params.id === userId);
 
   const sendFriendshipRequestMutation = useMutation({
-    mutationKey: userProfileKeys.sendFriendhipRequests(route.params?.id),
+    mutationKey: UserProfileKeys.sendFriendhipRequests(route.params?.id),
     mutationFn: (data: { userId: number }) =>
       SendFriendRequest(data.userId, tokenApi),
     onMutate: async (data: { userId: number }) => {
@@ -198,9 +168,11 @@ const UserProfileScreen = ({
     },
     onError(error, variables, context) {},
     onSuccess(data, variables, context) {
+      // TODO: Rifare il refetch della query con sentFriendshipRequest
+
       // In case di successo aggiorno isNotSynced
       queryClient.setQueryData<IFriendshipStatus>(
-        userProfileKeys.friendshipStatus(variables.userId),
+        UserProfileKeys.friendshipStatus(variables.userId),
         {
           ...data,
           isNotSynced: false,
@@ -210,13 +182,13 @@ const UserProfileScreen = ({
   });
 
   const destroyFriendshipRequestMutation = useMutation({
-    mutationKey: userProfileKeys.destroyFriendhipRequests(route.params?.id),
+    mutationKey: UserProfileKeys.destroyFriendhipRequests(route.params?.id),
     mutationFn: (data: { userId: number }) =>
       DestroyFriendship(data.userId, tokenApi),
     onSuccess(data, variables, context) {
       // In case di successo aggiorno isNotSynced
       queryClient.setQueryData<IFriendshipStatus>(
-        userProfileKeys.friendshipStatus(variables.userId),
+        UserProfileKeys.friendshipStatus(variables.userId),
         {
           ...data,
           isNotSynced: false,
@@ -226,13 +198,13 @@ const UserProfileScreen = ({
   });
 
   const acceptFriendshipRequestMutation = useMutation({
-    mutationKey: userProfileKeys.acceptFriendhipRequests(route.params?.id),
+    mutationKey: UserProfileKeys.acceptFriendhipRequests(route.params?.id),
     mutationFn: (data: { userId: number }) =>
       AcceptFriendRequest(data.userId, tokenApi),
     onSuccess(data, variables, context) {
       // In case di successo aggiorno isNotSynced
       queryClient.setQueryData<IFriendshipStatus>(
-        userProfileKeys.friendshipStatus(variables.userId),
+        UserProfileKeys.friendshipStatus(variables.userId),
         {
           ...data,
           isNotSynced: false,
@@ -242,13 +214,13 @@ const UserProfileScreen = ({
   });
 
   const rejectFriendshipRequestMutation = useMutation({
-    mutationKey: userProfileKeys.rejectFriendhipRequests(route.params?.id),
+    mutationKey: UserProfileKeys.rejectFriendhipRequests(route.params?.id),
     mutationFn: (data: { userId: number }) =>
       DenyFriendRequest(data.userId, tokenApi),
     onSuccess(data, variables, context) {
       // In case di successo aggiorno isNotSynced
       queryClient.setQueryData<IFriendshipStatus>(
-        userProfileKeys.friendshipStatus(variables.userId),
+        UserProfileKeys.friendshipStatus(variables.userId),
         {
           ...data,
           isNotSynced: false,
@@ -258,12 +230,12 @@ const UserProfileScreen = ({
   });
 
   const blockUserMutation = useMutation({
-    mutationKey: userProfileKeys.blockUser(route.params?.id),
+    mutationKey: UserProfileKeys.blockUser(route.params?.id),
     mutationFn: (data: { userId: number }) => BlockUser(data.userId, tokenApi),
     onSuccess(data, variables, context) {
       // In case di successo aggiorno isNotSynced
       queryClient.setQueryData<IFriendshipStatus>(
-        userProfileKeys.friendshipStatus(variables.userId),
+        UserProfileKeys.friendshipStatus(variables.userId),
         {
           ...data,
           isNotSynced: false,
@@ -282,7 +254,7 @@ const UserProfileScreen = ({
   React.useEffect(() => {
     let userHasImage = false;
 
-    if (route.params && route.params.profilePictureUrl) userHasImage = true;
+    if (route.params && route.params.profilePicture) userHasImage = true;
     if (userProfileData && userProfileData.profilePicture) userHasImage = true;
 
     navigation.setOptions({
@@ -361,9 +333,9 @@ const UserProfileScreen = ({
 
   React.useEffect(() => {
     if (isMyProfile) {
-      if (friends && friends.pages && friends.pages.length > 0) {
+      if (friendsData && friendsData.pages && friendsData.pages.length > 0) {
         // Recupero la prima pagina e la inserisco nel carousel
-        setCarouselUsers(friends.pages[0].data);
+        setCarouselUsers(friendsData.pages[0].data);
       } else {
         setCarouselUsers([]);
       }
@@ -375,7 +347,7 @@ const UserProfileScreen = ({
         setCarouselUsers([]);
       }
     }
-  }, [friends, mutualFriendsData, isMyProfile]);
+  }, [friendsData, mutualFriendsData, isMyProfile]);
 
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
@@ -497,12 +469,23 @@ const UserProfileScreen = ({
 
   return (
     <View flex={1} backgroundColor="transparent" paddingBottom={insets.bottom}>
+      <StatusBar
+        style={
+          colorMode === "light"
+            ? (route.params && route.params.profilePicture) ||
+              (userProfileData && userProfileData.profilePicture)
+              ? "light"
+              : "dark"
+            : "light"
+        }
+      />
+
       <Animated.ScrollView
         scrollEventThrottle={16}
         onScroll={onScroll}
         showsVerticalScrollIndicator={true}
       >
-        {(route.params && route.params.profilePictureUrl) ||
+        {(route.params && route.params.profilePicture) ||
         (userProfileData && userProfileData.profilePicture) ? (
           <AnimatedHeader
             scale={scale}
@@ -513,7 +496,9 @@ const UserProfileScreen = ({
             avatarUrl={
               userProfileData && userProfileData.profilePicture
                 ? userProfileData.profilePicture.url
-                : route.params.profilePictureUrl
+                : route.params.profilePicture
+                ? route.params.profilePicture.url
+                : undefined
             }
             fullname={
               userProfileData
@@ -549,8 +534,8 @@ const UserProfileScreen = ({
           />
         )}
         <View
-          paddingLeft={insets.left + Layout.DefaultMarginHorizontal}
-          paddingRight={insets.right + Layout.DefaultMarginHorizontal}
+          paddingLeft={insets.left + Layout.ScreenPaddingHorizontal}
+          paddingRight={insets.right + Layout.ScreenPaddingHorizontal}
           paddingTop={24}
           gap={16}
           backgroundColor="transparent"
@@ -575,18 +560,24 @@ const UserProfileScreen = ({
               isLoadingDeny={rejectFriendshipRequestMutation.isPending}
             />
           ) : null}
-          <Biography
-            biography={
-              userProfileData
-                ? userProfileData.biography
-                : route.params?.biography
-            }
-            isLoading={isLoadingUserProfile}
-          />
+
+          {
+            // Se route.params.biography è undefined oppure null, e sto caricando il profile non mostro niente, altrimenti mostro il loader
+            !route.params.biography && isLoadingUserProfile ? null : (
+              <Biography
+                biography={
+                  userProfileData
+                    ? userProfileData.biography
+                    : route.params?.biography
+                }
+                isLoading={isLoadingUserProfile}
+              />
+            )
+          }
         </View>
         <Divider marginVertical={26} />
         <View
-          paddingLeft={insets.left + Layout.DefaultMarginHorizontal}
+          paddingLeft={insets.left + Layout.ScreenPaddingHorizontal}
           // paddingRight={insets.right + Layout.DefaultMarginHorizontal} // Non li metto perchè ci saranno due carousel e sta bene se escono fuori dallo schermo
           gap={16}
           backgroundColor="transparent"
@@ -597,7 +588,7 @@ const UserProfileScreen = ({
                 flexDirection="row"
                 alignItems="center"
                 justifyContent="space-between"
-                paddingRight={insets.right + Layout.DefaultMarginHorizontal}
+                paddingRight={insets.right + Layout.ScreenPaddingHorizontal}
                 backgroundColor="transparent"
               >
                 <Text
@@ -649,7 +640,7 @@ const UserProfileScreen = ({
               backgroundColor="transparent"
               flexDirection="row"
               gap={FRIEND_CARD_MARGIN}
-              paddingRight={insets.right + Layout.DefaultMarginHorizontal}
+              paddingRight={insets.right + Layout.ScreenPaddingHorizontal}
             >
               {Array.from(
                 Array(
@@ -688,8 +679,8 @@ const UserProfileScreen = ({
         <View
           flex={1}
           backgroundColor="transparent"
-          paddingLeft={insets.left + Layout.DefaultMarginHorizontal}
-          paddingRight={insets.right + Layout.DefaultMarginHorizontal}
+          paddingLeft={insets.left + Layout.ScreenPaddingHorizontal}
+          paddingRight={insets.right + Layout.ScreenPaddingHorizontal}
         >
           {!isMyProfile && userProfileData && friendshipStatusData ? (
             <>

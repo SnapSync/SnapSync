@@ -42,21 +42,6 @@ const ProfileStack = () => {
         component={ProfileScreen}
         options={({ navigation, route }) => ({
           headerTitle: route.params?.username || "",
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("UserSettingsStack", {
-                  screen: "Settings",
-                })
-              }
-            >
-              <Icon
-                as={UserCog2Icon}
-                size="xl"
-                color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
-              />
-            </TouchableOpacity>
-          ),
         })}
       />
     </Stack.Navigator>

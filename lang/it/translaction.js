@@ -2,6 +2,7 @@ import Countries from './countries';
 
 const itTranslactions = {
   continue: 'Continua',
+  save: 'Salva',
 
   resend: 'Reinvia',
   resendIn: 'Reinvia in {{seconds}}s',
@@ -9,18 +10,73 @@ const itTranslactions = {
   search: 'Cerca',
   cancel: 'Annulla',
   block: 'Blocca',
+  unblock: 'Sblocca',
   delete: 'Elimina',
+  clear: 'Svuota',
   seeAll: 'Vedi tutti',
 
   friends: 'Amici',
   requests: 'Richieste',
-  suggestions: 'Suggerimenti',
+  suggestions: 'Per te',
   mutualFriends: 'Amici in comune',
 
   exit: 'Esci',
 
+  lotOfMutualFriends: 'Molti amici in comune',
+
   userSettings: {
     screenTitle: 'Impostazioni',
+
+    settings: {
+      title: 'Impostazioni',
+
+      items: {
+        notificationTitle: 'Notifiche',
+        otherTitle: 'Altro',
+      }
+    },
+
+    privacy: {
+      title: 'Privacy',
+
+      items: {
+        findMeFromPhoneNumber: 'Trovami tramite il numero di telefono',
+        syncContactsTitle: 'Sincronizza contatti',
+        blockedUsersTitle: 'Utenti bloccati',
+      }
+    },
+
+    more: {
+      title: 'Di più',
+
+      items: {
+        aboutTitle: 'Informazioni su',
+        rateThisAppTitle: 'Valuta questa app',
+        logoutTitle: 'Esci',
+      }
+    }
+  },
+
+  blockedUsers: {
+    screenTitle: 'Utenti bloccati',
+    noBlockedUsers: 'Non hai bloccato nessun utente.',
+  },
+
+  editProfile: {
+    screenTitle: 'Modifica profilo',
+
+    bottomSheetModal: {
+      takePhoto: 'Scatta foto',
+      chooseFromLibrary: 'Scegli dalla libreria',
+      removeProfilePicture: 'Rimuovi foto profilo',
+    }
+  },
+
+  other: {
+    screenTitle: 'Altro',
+
+    clearCache: 'Svuota cache',
+    deleteAccount: 'Elimina account',
   },
 
   // Profile
@@ -82,14 +138,23 @@ const itTranslactions = {
     }
   },
 
-  // Search
-  search: {
-    placeholder: "Cerca amici...",
+  // Discover
+  discovery: {
+    screenTitle: "Scopri",
+    placeholder: "Cerca nuovi amici...",
+  },
 
-    noResults: {
-      friendsTitle: "Nessun amico trovato.",
-      friendsButton: "Cerca nella rubrica",
+  friendsRoute: {
+    friends: {
+      zero: 'Nessun amico',
+      one: '{{count}} amico',
+      other: '{{count}} amici',
     }
+  },
+
+  requestsRoute: {
+    requestSentTitle: "Richieste inviate",
+    requestSentDescription: "Controlla le richieste di amicizia che hai inviato.",
   },
 
   // outgoingFriendRequests
@@ -113,6 +178,19 @@ const itTranslactions = {
     description: "Se rimuovi {{username}} dagli amici, non potrai più vedere i suoi post e lui non potrà più vedere i tuoi. Vuoi continuare?",
   },
 
+  unblockUserAlert: {
+    title: "Sei sicuro?",
+    description: "Se sblocchi {{username}}, potrai vedere i suoi post e lui potrà vedere i tuoi. Vuoi continuare?",
+
+  },
+
+  clearCacheAlert: {
+    title: "Svuota cache",
+    description: "Sei sicuro di voler svuotare la cache?",
+    successTitle: "Cache svuotata",
+    successDescription: "La cache è stata svuotata con successo.",
+  },
+
   errors: {
     generic: "Si è verificato un errore, riprova più tardi.",
     noInternetConnection: "Nessuna connessione a Internet.",
@@ -122,6 +200,7 @@ const itTranslactions = {
     usernameAlreadyExists: "Ops! Questo username è già stato preso.",
     userNotFound: "Ops! Questo utente non esiste.",
     fieldNotValid: "Ops! Inserisci un valore valido.",
+    invalidData: "Ops! I dati inseriti non sono validi.",
 
     authTokenModal: {
       title: "Ops! Qualcosa è andato storto.",
@@ -146,6 +225,8 @@ const itTranslactions = {
     monthOfBirth: "Mese",
     yearOfBirth: "Anno",
     phoneNumber: "Numero di telefono",
+    username: "Username",
+    biography: "Biografia",
   },
 
   countries: Countries

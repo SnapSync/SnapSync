@@ -34,7 +34,7 @@ const MainStack = () => {
       initialRouteName="Home"
       backBehavior="history"
     >
-      <Tab.Screen name="Discovery" component={DiscoveryStack} />
+      <Tab.Screen name="DiscoveryStack" component={DiscoveryStack} />
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="ProfileStack" component={ProfileStack} />
     </Tab.Navigator>

@@ -34,6 +34,8 @@ const AnimatedHeader = ({
 }: Props) => {
   const insets = useSafeAreaInsets();
 
+  console.log("AnimatedHeader");
+
   return (
     <View
       style={[
@@ -72,7 +74,7 @@ const AnimatedHeader = ({
           style={{
             height: imageSize,
             width: imageSize,
-            backgroundColor: "transparent",
+            backgroundColor: "red",
           }}
         />
       )}

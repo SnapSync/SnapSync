@@ -1,5 +1,5 @@
-const userProfileKeys = {
-  userProfile: (id?: number) => ["user-profile", id] as const,
+const UserProfileKeys = {
+  userProfile: (id: number) => ["user-profile", id] as const,
   friendshipStatus: (id?: number) => ["friendship-status", id] as const,
 
   sendFriendhipRequests: (id?: number) =>
@@ -13,4 +13,4 @@ const userProfileKeys = {
   blockUser: (id?: number) => ["block-user", id] as const,
 };
 
-export default userProfileKeys;
+export default UserProfileKeys;

@@ -2,6 +2,7 @@ import Countries from './countries';
 
 const enTranslactions = {
   continue: 'Continue',
+  save: 'Save',
 
   resend: 'Resend',
   resendIn: 'Resend in {{seconds}}s',
@@ -14,13 +15,48 @@ const enTranslactions = {
 
   friends: 'Friends',
   requests: 'Requests',
-  suggestions: 'Suggestions',
+  suggestions: 'For you',
   mutualFriends: 'Mutual friends',
 
   exit: 'Exit',
 
+  lotOfMutualFriends: 'Lot of mutual friends',
+
   userSettings: {
     screenTitle: 'Settings',
+
+    settings: {
+      title: 'Settings',
+
+      items: {
+        notificationTitle: 'Notifications',
+        otherTitle: 'Other',
+      }
+    },
+
+    privacy: {
+      title: 'Privacy',
+
+      items: {
+        findMeFromPhoneNumber: 'Find me from phone number',
+        syncContactsTitle: 'Sync contacts',
+        blockedUsersTitle: 'Blocked users',
+      }
+    },
+
+    more: {
+      title: 'More',
+
+      items: {
+        aboutTitle: 'About',
+        rateThisAppTitle: 'Rate this app',
+        logoutTitle: 'Logout',
+      }
+    }
+  },
+
+  editProfile: {
+    screenTitle: 'Edit profile',
   },
 
   // Profile
@@ -82,11 +118,22 @@ const enTranslactions = {
     }
   },
 
-  // Search
-  search: {
-    placeholder: "Cerca amici...",
+  discovery: {
+    screenTitle: "Discover",
   },
 
+  friendsRoute: {
+    friends: {
+      zero: 'No friends',
+      one: '{{count}} friend',
+      other: '{{count}} friends',
+    }
+  },
+
+  requestsRoute: {
+    requestSentTitle: "Requests sent",
+    requestSentDescription: "Check the friend requests you have sent.",
+  },
 
   // outgoingFriendRequests
   outgoingFriendRequests: {
@@ -119,6 +166,8 @@ const enTranslactions = {
     usernameAlreadyExists: "Ops! This username has already been taken.",
     userNotFound: "Ops! This user does not exist.",
     fieldNotValid: "Ops! Insert a valid value.",
+    invalidData: "Ops! The data you entered is not valid.",
+
     authTokenModal: {
       title: "Ops! Something went wrong.",
       description: "We are unable to access your account. Try again later.",
@@ -142,6 +191,8 @@ const enTranslactions = {
     monthOfBirth: "Month",
     yearOfBirth: "Year",
     phoneNumber: "Phone number",
+    username: "Username",
+    biography: "Biography",
   },
 
   countries: Countries

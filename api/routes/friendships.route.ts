@@ -4,19 +4,20 @@ import { IApiUser } from "@/interfaces/users.interface";
 
 const path = "/friendships";
 
+export interface IResponseInfinite {
+  data: IApiUser[];
+  nextCursor: number | undefined;
+  prevCursor: number | undefined;
+  total: number;
+}
+
 export const FetchUserFriends = async (
   page: number,
   tokenApi: string,
 
   size: number = 30,
   query: string | null = null
-): Promise<{
-  message: string;
-  data: IApiUser[];
-  nextCursor: number | undefined;
-  prevCursor: number | undefined;
-  // pagination: Pagination;
-}> => {
+): Promise<IResponseInfinite> => {
   try {
     if (page < 1) page = 1;
     if (size < 1) size = 1;
@@ -42,13 +43,7 @@ export const FetchMutualFriends = async (
   userId: number,
   page: number,
   tokenApi: string
-): Promise<{
-  message: string;
-  data: IApiUser[];
-  nextCursor: number | undefined;
-  prevCursor: number | undefined;
-  total: number;
-}> => {
+): Promise<IResponseInfinite> => {
   try {
     if (page < 1) page = 1;
 
@@ -67,19 +62,36 @@ export const FetchMutualFriends = async (
   }
 };
 
+export const FetchSuggestions = async (
+  tokenApi: string
+): Promise<{
+  message: string;
+  data: IApiUser[];
+}> => {
+  try {
+    const { data } = await client.get(`${path}/suggestions`, {
+      params: {
+        page: 1,
+        size: 30,
+      },
+      headers: {
+        Authorization: `Bearer ${tokenApi}`,
+      },
+    });
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const FetchUserReceivedFriendRequests = async (
   page: number,
   tokenApi: string,
 
   size: number = 30,
   query: string | null = null
-): Promise<{
-  message: string;
-  data: IApiUser[];
-  nextCursor: number | undefined;
-  prevCursor: number | undefined;
-  // pagination: Pagination;
-}> => {
+): Promise<IResponseInfinite> => {
   try {
     if (page < 1) page = 1;
     if (size < 1) size = 1;
@@ -107,13 +119,7 @@ export const FetchUserSentFriendRequests = async (
 
   size: number = 30,
   query: string | null = null
-): Promise<{
-  message: string;
-  data: IApiUser[];
-  nextCursor: number | undefined;
-  prevCursor: number | undefined;
-  // pagination: Pagination;
-}> => {
+): Promise<IResponseInfinite> => {
   try {
     if (page < 1) page = 1;
     if (size < 1) size = 1;
@@ -303,11 +309,15 @@ export const UnblockUser = async (
   tokenApi: string
 ): Promise<IFriendshipStatus> => {
   try {
-    const { data } = await client.delete(`${path}/unblock/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${tokenApi}`,
-      },
-    });
+    const { data } = await client.post(
+      `${path}/unblock/${userId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${tokenApi}`,
+        },
+      }
+    );
 
     return data;
   } catch (error) {

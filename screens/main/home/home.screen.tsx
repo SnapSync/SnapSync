@@ -4,7 +4,6 @@ import { RootState } from "@/redux/app/store";
 import { View } from "@gluestack-ui/themed";
 import { MainStackScreenProps } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { FetchMe } from "@/api/routes/users.route";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -14,9 +13,8 @@ import { FetchReceivedFriendRequestsCount } from "@/api/routes/friendships.route
 import AnimatedNavbar, {
   ANIMATED_NAVBAR_HEIGHT,
 } from "@/components/home/animated_navbar/animated_navbar.component";
-import HomeKeys from "./home.keys";
-import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 import { useMeQuery } from "@/queries/useMeQuery";
+import RequestsKeys from "@/screens/discovery/requests/requests.keys";
 
 const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
   const insets = useSafeAreaInsets();
@@ -30,18 +28,15 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
 
   const { data, isLoading } = useMeQuery(tokenApi, isLoggedIn);
 
-  const {
-    data: receivedFriendRequestsCount,
-    refetch: receivedFriendRequestsCountRefetch,
-  } = useQuery({
-    queryKey: HomeKeys.receivedFriendRequestsCount,
+  const { data: receivedFriendRequestsCount } = useQuery({
+    queryKey: RequestsKeys.countReceivedFriendRequests,
     queryFn: () => FetchReceivedFriendRequestsCount(tokenApi),
     enabled: isLoggedIn,
     // staleTime: Infinity,
     // gcTime: Infinity,
   });
 
-  useRefreshOnFocus(receivedFriendRequestsCountRefetch);
+  // useRefreshOnFocus(receivedFriendRequestsCountRefetch);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -76,8 +71,8 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
   };
 
   const _onPressLeftIcon = () => {
-    navigation.navigate("Discovery", {
-      screen: "Search",
+    navigation.navigate("DiscoveryStack", {
+      screen: "Discovery",
     });
   };
 

@@ -93,9 +93,7 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
       flex={1}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       // onTouchStart={_onTouchStart}
-      bgColor={
-        colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
-      }
+      bgColor={"transparent"}
     >
       <TopSection title={i18n.t("auth.fullname.title")}>
         <FormControl

@@ -3,6 +3,7 @@ import type {
   CompositeScreenProps,
   NavigatorScreenParams,
 } from "@react-navigation/native";
+import { IUserProfilePicture } from "./interfaces/users.interface";
 
 declare global {
   namespace ReactNavigation {
@@ -50,7 +51,7 @@ export type AuthStackScreenProps<Screen extends keyof AuthStackParamList> =
 export type MainStackParamList = {
   Home: undefined;
   // MyUserProfile: NavigatorScreenParams<UserProfileStackParamList> | undefined;
-  Discovery: NavigatorScreenParams<DiscoveryStackParamList> | undefined;
+  DiscoveryStack: NavigatorScreenParams<DiscoveryStackParamList> | undefined;
   ProfileStack: NavigatorScreenParams<ProfileStackParamList> | undefined;
 };
 
@@ -80,8 +81,7 @@ export type UserProfileStackParamList = {
     // isMyProfile: boolean;
     id: number;
 
-    profilePictureUrl?: string | null;
-    profilePictureBlurHash?: string | null;
+    profilePicture?: IUserProfilePicture | null;
 
     username?: string;
     fullname?: string;
@@ -100,7 +100,7 @@ export type UserProfileStackParamList = {
 
   MutualFriends: {
     id: number;
-    total?: number;
+    total?: number; // Gli passo total al fine di aver un caricamento più veritiero
   };
 };
 
@@ -113,8 +113,11 @@ export type UserProfileStackScreenProps<
 
 /* ------------------------------------------------------ Discovery ------------------------------------------------------ */
 export type DiscoveryStackParamList = {
+  Discovery: undefined;
   Search: undefined;
-  OutgoingFriendRequests: undefined;
+  OutgoingFriendRequests: {
+    total?: number; // Gli passo total al fine di aver un caricamento più veritiero
+  };
 };
 
 export type DiscoveryStackScreenProps<
@@ -126,7 +129,17 @@ export type DiscoveryStackScreenProps<
 
 /* ------------------------------------------------------ UserSettings ------------------------------------------------------ */
 export type UserSettingsStackParamList = {
-  Settings: undefined;
+  Settings: {
+    username?: string;
+    fullname?: string;
+    profilePicture?: IUserProfilePicture | null;
+  };
+
+  EditProfile: undefined;
+
+  Other: undefined;
+
+  BlockedUsers: undefined;
 };
 
 export type UserSettingsStackScreenProps<

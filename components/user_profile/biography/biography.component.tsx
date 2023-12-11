@@ -26,7 +26,12 @@ const Biography = ({ biography, isLoading = false }: Props) => {
     return (
       <View gap={16} backgroundColor="transparent">
         {new Array(3).fill(0).map((_, index) => (
-          <Skeleton height={14} width="100%" key={index} />
+          <Skeleton
+            height={14}
+            width="100%"
+            key={index}
+            colorMode={colorMode === "dark" ? "dark" : "light"}
+          />
         ))}
       </View>
     );

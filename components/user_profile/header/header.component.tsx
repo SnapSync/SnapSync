@@ -35,7 +35,13 @@ const Header = ({
       paddingRight={insets.right + Layout.DefaultMarginHorizontal}
     >
       <View flexDirection="column" gap={12}>
-        <Skeleton radius="round" width={64} height={64} show={isLoading}>
+        <Skeleton
+          radius="round"
+          width={64}
+          height={64}
+          show={isLoading}
+          colorMode={colorMode === "dark" ? "dark" : "light"}
+        >
           <Avatar borderRadius="$full" size="lg">
             <AvatarFallbackText fontFamily="Inter-Bold">
               {username ? username : fullname}
@@ -43,7 +49,11 @@ const Header = ({
           </Avatar>
         </Skeleton>
 
-        <Skeleton show={isLoading && !fullname} height={16}>
+        <Skeleton
+          show={isLoading && !fullname}
+          height={16}
+          colorMode={colorMode === "dark" ? "dark" : "light"}
+        >
           <Text
             numberOfLines={2}
             fontFamily="Inter-ExtraBold"
@@ -54,18 +64,17 @@ const Header = ({
             {fullname}
           </Text>
         </Skeleton>
-        <Skeleton show={isLoading && !streak} height={16} width={64}>
-          {streak && streak > 0 ? (
-            <Text
-              fontSize="$sm"
-              fontFamily="Inter-SemiBold"
-              lineHeight="$sm"
-              color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
-            >
-              {streak} 🔥
-            </Text>
-          ) : null}
-        </Skeleton>
+
+        {streak && streak > 0 ? (
+          <Text
+            fontSize="$sm"
+            fontFamily="Inter-SemiBold"
+            lineHeight="$sm"
+            color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
+          >
+            {streak} 🔥
+          </Text>
+        ) : null}
       </View>
     </View>
   );

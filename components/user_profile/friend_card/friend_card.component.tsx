@@ -1,4 +1,10 @@
-import { View, useColorMode, Text } from "@gluestack-ui/themed";
+import {
+  View,
+  useColorMode,
+  Text,
+  Avatar,
+  AvatarFallbackText,
+} from "@gluestack-ui/themed";
 import { ImageBackground } from "expo-image";
 import { Skeleton } from "moti/skeleton";
 import React from "react";
@@ -38,7 +44,9 @@ const FriendCard = ({
       <View
         width={FRIEND_CARD_WIDTH}
         height={FRIEND_CARD_HEIGHT}
-        backgroundColor="transparent"
+        bgColor={
+          colorMode === "dark" ? "$backgroundDark900" : "$backgroundLight50"
+        }
         borderColor={
           colorMode === "dark" ? "$borderDark400" : "$borderLight700"
         }
@@ -46,50 +54,74 @@ const FriendCard = ({
         borderRadius="$xl"
         overflow="hidden"
         alignItems="center"
-        justifyContent="flex-end"
+        // justifyContent="flex-end"
       >
-        <ImageBackground
-          source={{
-            uri: profilePictureUrl,
-          }}
-          placeholder={profilePictureBlurHash}
-          blurRadius={5}
-          style={{ ...StyleSheet.absoluteFillObject }}
-          contentFit="cover"
-        />
-        <LinearGradient
-          colors={["rgba(0, 0, 0, 1)", "rgba(0, 0, 0, 0.5)", "transparent"]}
-          locations={[1, 0.2, 0]}
-          style={{
-            width: "100%",
-            // height: 50,
-            paddingHorizontal: 10,
-            paddingVertical: 10,
-          }}
+        {profilePictureUrl ? (
+          <ImageBackground
+            source={{
+              uri: profilePictureUrl,
+            }}
+            placeholder={profilePictureBlurHash}
+            blurRadius={10}
+            style={{ ...StyleSheet.absoluteFillObject }}
+            contentFit="cover"
+          />
+        ) : (
+          <View
+            backgroundColor="transparent"
+            flex={1}
+            width="100%"
+            paddingLeft={FRIEND_CARD_MARGIN}
+            paddingTop={FRIEND_CARD_MARGIN}
+          >
+            <Avatar size="md">
+              <AvatarFallbackText fontFamily="Inter-SemiBold">
+                {username ? username : fullname}
+              </AvatarFallbackText>
+            </Avatar>
+          </View>
+        )}
+
+        <View
+          flex={1}
+          backgroundColor="transparent"
+          justifyContent="flex-end"
+          width="100%"
         >
-          <Text
-            color="$textDark0"
-            numberOfLines={2}
-            flexShrink={1}
-            flexWrap="wrap"
-            fontFamily="Inter-SemiBold"
-            fontSize="$lg"
-            lineHeight="$lg"
+          <LinearGradient
+            colors={["rgba(0, 0, 0, 1)", "rgba(0, 0, 0, 0.5)", "transparent"]}
+            locations={[1, 0.2, 0]}
+            style={{
+              width: "100%",
+              // height: 50,
+              paddingHorizontal: 10,
+              paddingVertical: 10,
+            }}
           >
-            {fullname}
-          </Text>
-          <Text
-            color="$textDark0"
-            numberOfLines={1}
-            flexShrink={1}
-            flexWrap="wrap"
-            fontFamily="Inter-Regular"
-            fontSize="$md"
-            lineHeight="$md"
-          >
-            @{username}
-          </Text>
-        </LinearGradient>
+            <Text
+              color="$textDark0"
+              numberOfLines={2}
+              flexShrink={1}
+              flexWrap="wrap"
+              fontFamily="Inter-SemiBold"
+              fontSize="$lg"
+              lineHeight="$lg"
+            >
+              {fullname}
+            </Text>
+            <Text
+              color="$textDark0"
+              numberOfLines={1}
+              flexShrink={1}
+              flexWrap="wrap"
+              fontFamily="Inter-Regular"
+              fontSize="$md"
+              lineHeight="$md"
+            >
+              @{username}
+            </Text>
+          </LinearGradient>
+        </View>
       </View>
     </Skeleton>
   );

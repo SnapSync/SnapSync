@@ -1,5 +1,5 @@
-const friendsKeys = {
+const FriendsKeys = {
   infiniteFriends: ["infiniteFriends"] as const,
 };
 
-export default friendsKeys;
+export default FriendsKeys;

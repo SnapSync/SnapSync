@@ -1,6 +1,4 @@
-import { FetchMe } from "@/api/routes/users.route";
 import { RootState } from "@/redux/app/store";
-import HomeKeys from "@/screens/main/home/home.keys";
 import {
   View,
   Avatar,
@@ -8,18 +6,18 @@ import {
   AvatarImage,
   Text,
   useColorMode,
+  Icon,
 } from "@gluestack-ui/themed";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import * as SecureStore from "expo-secure-store";
-import { AuthTokenKey, UserIdKey } from "@/costants/SecureStoreKeys";
-import { logout } from "@/redux/features/auth/authSlice";
+import { useSelector } from "react-redux";
 import { Skeleton } from "moti/skeleton";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
-import { MainStackScreenProps, ProfileStackScreenProps } from "@/types";
+import { ProfileStackScreenProps } from "@/types";
 import { useMeQuery } from "@/queries/useMeQuery";
+import Biography from "@/components/user_profile/biography/biography.component";
+import { TouchableOpacity } from "react-native";
+import { UserCog2Icon } from "lucide-react-native";
 
 const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
   const insets = useSafeAreaInsets();
@@ -27,10 +25,6 @@ const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
 
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
   const tokenApi = useSelector((state: RootState) => state.auth.tokenApi);
-
-  const dispatch = useDispatch();
-
-  const queryClient = useQueryClient();
 
   const { data, isLoading } = useMeQuery(tokenApi, isLoggedIn);
 
@@ -40,28 +34,35 @@ const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
         username: data.username,
       });
     }
+
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("UserSettingsStack", {
+              screen: "Settings",
+              params: {
+                ...data,
+              },
+            })
+          }
+        >
+          <Icon
+            as={UserCog2Icon}
+            size="xl"
+            color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
+          />
+        </TouchableOpacity>
+      ),
+    });
   }, [data, navigation]);
-
-  const _onPress = async () => {
-    // Elimito il token dallo storage
-    await SecureStore.deleteItemAsync(AuthTokenKey);
-
-    // Elimino lo UserId dallo storage
-    await SecureStore.deleteItemAsync(UserIdKey);
-
-    // Pulisco tutti le query
-    await queryClient.clear();
-
-    // Navigo verso la schermata di login
-    dispatch(logout());
-  };
 
   return (
     <View
       flex={1}
       backgroundColor="transparent"
-      paddingLeft={insets.left + Layout.DefaultMarginHorizontal}
-      paddingRight={insets.right + Layout.DefaultMarginHorizontal}
+      paddingLeft={insets.left + Layout.ScreenPaddingHorizontal}
+      paddingRight={insets.right + Layout.ScreenPaddingHorizontal}
       paddingBottom={insets.bottom}
       paddingTop={insets.top}
     >
@@ -86,29 +87,18 @@ const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
         </Skeleton>
 
         {isLoading ? (
-          <Skeleton width="100%" height={20} />
+          <Skeleton
+            width="100%"
+            height={20}
+            colorMode={colorMode === "dark" ? "dark" : "light"}
+          />
         ) : (
           <Text fontFamily="Inter-ExtraBold" fontSize="$3xl" lineHeight="$3xl">
             {data?.fullname}
           </Text>
         )}
 
-        {isLoading ? (
-          <View width="100%" gap={4}>
-            {new Array(3).fill(0).map((_, index) => (
-              <Skeleton key={index} width="100%" height={14} />
-            ))}
-          </View>
-        ) : (
-          <Text
-            fontFamily="Inter-Regular"
-            fontSize="$md"
-            lineHeight="$md"
-            color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
-          >
-            {data?.biography}
-          </Text>
-        )}
+        <Biography biography={data?.biography} isLoading={isLoading} />
       </View>
     </View>
   );

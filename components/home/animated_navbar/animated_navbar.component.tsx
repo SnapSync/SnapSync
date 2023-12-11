@@ -154,7 +154,13 @@ const AnimatedNavbar = ({
         height="100%"
       >
         <TouchableOpacity onPress={onPressRightIcon}>
-          <Skeleton width={32} height={32} show={isLoadingMe} radius="round">
+          <Skeleton
+            width={32}
+            height={32}
+            show={isLoadingMe}
+            radius="round"
+            colorMode={colorMode === "dark" ? "dark" : "light"}
+          >
             <Avatar borderRadius="$full" size="sm">
               <AvatarFallbackText fontFamily="Inter-Bold">
                 {username ? username : fullname}

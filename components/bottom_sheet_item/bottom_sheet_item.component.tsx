@@ -2,7 +2,6 @@ import { Divider, Icon, View, Text, useColorMode } from "@gluestack-ui/themed";
 import React from "react";
 import { StyleProp, TouchableOpacity, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Layout } from "@/costants/Layout";
 
 type Props = {
   variant?: "default" | "danger";
@@ -15,6 +14,7 @@ type Props = {
   label?: string;
 
   onPress?: () => void;
+  disabled?: boolean;
 
   withDivider?: boolean;
 };
@@ -29,6 +29,7 @@ const BottomSheetItem = ({
   label,
 
   onPress,
+  disabled = false,
 
   withDivider = false,
 }: Props) => {
@@ -51,6 +52,7 @@ const BottomSheetItem = ({
           },
           containerStyle,
         ]}
+        disabled={disabled}
       >
         <Icon
           as={iconAs}

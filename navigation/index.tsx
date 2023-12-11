@@ -100,6 +100,8 @@ const RootNavigation = ({ authToken, userId }: Props) => {
               email: "todo@snapsync.net",
             })
           );
+        } else if (error.statusCode === 500) {
+          // TODO: fare un modal con un messaggio generico, ma non mostrare il pulsante per fare il logout
         }
       }
 
@@ -178,7 +180,7 @@ const RootNavigation = ({ authToken, userId }: Props) => {
               component={UserSettingsStack}
               options={{
                 headerShown: false,
-                gestureEnabled: true,
+                gestureEnabled: false,
               }}
             />
           </Stack.Group>

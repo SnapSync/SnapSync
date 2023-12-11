@@ -152,7 +152,7 @@ const FriendshipStatus = ({
           lineHeight="$md"
           color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
         >
-          {i18n.t("profile.friendship.received", {
+          {i18n.t("userProfile.friendship.received", {
             username: username,
           })}
         </Text>
@@ -178,7 +178,7 @@ const FriendshipStatus = ({
                 <>
                   <ButtonIcon as={UserCheck2Icon} size="sm" />
                   <ButtonText fontFamily="Inter-SemiBold">
-                    {i18n.t("profile.friendship.accept")}
+                    {i18n.t("userProfile.friendship.accept")}
                   </ButtonText>
                 </>
               )}
@@ -199,7 +199,7 @@ const FriendshipStatus = ({
                 <>
                   <ButtonIcon as={UserX2Icon} size="sm" />
                   <ButtonText fontFamily="Inter-SemiBold">
-                    {i18n.t("profile.friendship.deny")}
+                    {i18n.t("userProfile.friendship.deny")}
                   </ButtonText>
                 </>
               )}
@@ -233,8 +233,8 @@ const FriendshipStatus = ({
           )}
           <ButtonText fontFamily="Inter-SemiBold">
             {friendshipStatus.outgoingRequest
-              ? i18n.t("profile.friendship.cancel")
-              : i18n.t("profile.friendship.add")}
+              ? i18n.t("userProfile.friendship.cancel")
+              : i18n.t("userProfile.friendship.add")}
           </ButtonText>
         </>
       )}
