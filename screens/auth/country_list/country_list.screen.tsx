@@ -3,7 +3,6 @@ import { AuthStackScreenProps } from "@/types";
 import * as CountryList from "country-codes-list";
 import { View, useColorMode, Divider } from "@gluestack-ui/themed";
 import { FlashList } from "@shopify/flash-list";
-import { Platform } from "react-native";
 import i18n from "@/lang";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
@@ -47,10 +46,10 @@ const CountryListScreen = ({
     navigation.setOptions({
       headerSearchBarOptions: {
         onChangeText: (event) => setSearchText(event.nativeEvent.text),
-        // placeholder: i18n.t("search"),
-        textColor: colorMode === "dark" ? "#FCFCFC" : "#171717",
+        placeholder: i18n.t("search"),
+        // textColor: colorMode === "dark" ? "#FCFCFC" : "#171717",
         hideWhenScrolling: false,
-        // cancelButtonText: Platform.OS === "ios" ? i18n.t("cancel") : undefined,
+        cancelButtonText: i18n.t("cancel"),
       },
     });
   }, [navigation]);
@@ -81,11 +80,7 @@ const CountryListScreen = ({
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-      }}
-    >
+    <View flex={1} backgroundColor="transparent">
       <FlashList
         data={countries}
         contentInsetAdjustmentBehavior="automatic"

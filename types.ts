@@ -65,6 +65,7 @@ export type MainStackScreenProps<Screen extends keyof MainStackParamList> =
 export type ProfileStackParamList = {
   Profile: {
     username?: string;
+    isVerified?: boolean;
   };
 };
 

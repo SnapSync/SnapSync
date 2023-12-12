@@ -5,7 +5,6 @@ import {
   useToast,
   Toast,
   VStack,
-  ToastTitle,
   Text,
   ToastDescription,
   Input,
@@ -15,8 +14,9 @@ import {
   FormControlErrorIcon,
   AlertCircleIcon,
   FormControlErrorText,
+  Pressable,
 } from "@gluestack-ui/themed";
-import { Keyboard, Platform, TouchableOpacity, StyleSheet } from "react-native";
+import { Keyboard, Platform } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
@@ -86,29 +86,13 @@ const PhoneNumberScreen = ({
   };
 
   const _onPress = () => {
-    Keyboard.dismiss();
+    // Keyboard.dismiss();
 
-    if (!isConnected) {
-      // Mostro il toast, perchè l'utente si è disconnesso
-      toast.show({
-        placement: "top",
-        render: ({ id }) => {
-          return (
-            <Toast nativeID={"toast-" + id} action="warning" variant="accent">
-              <VStack space="xs">
-                <ToastDescription>
-                  {i18n.t("errors.noInternetConnection")}
-                </ToastDescription>
-              </VStack>
-            </Toast>
-          );
-        },
-      });
-
-      return;
-    }
-
-    if (!authDto.sessionId) {
+    if (
+      !authDto.phoneNumberCountry ||
+      !authDto.phoneNumber ||
+      !authDto.sessionId
+    ) {
       toast.show({
         placement: "top",
         render: ({ id }) => {
@@ -123,8 +107,6 @@ const PhoneNumberScreen = ({
       });
       return;
     }
-
-    if (!authDto.phoneNumberCountry || !authDto.phoneNumber) return;
 
     // Formatto il numero di telefono
     const phoneNumberFormatted = formatE164(
@@ -167,10 +149,6 @@ const PhoneNumberScreen = ({
       paddingRight={insets.right + Layout.DefaultMarginHorizontal}
       paddingTop={insets.top}
       flex={1}
-      onTouchStart={_onTouchStart}
-      bgColor={
-        colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
-      }
     >
       <TopSection title={i18n.t("auth.phoneNumber.title")}>
         <FormControl
@@ -188,23 +166,20 @@ const PhoneNumberScreen = ({
             flexDirection="row"
             alignItems="center"
           >
-            <TouchableOpacity
-              style={{
-                minWidth: 75,
-                minHeight: 55,
-                padding: 5,
-                borderRadius: 24,
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "row",
-                gap: 5,
-                borderWidth: 1,
-                borderColor: colorMode === "dark" ? "#262626" : "#F5F5F5",
-                backgroundColor:
-                  colorMode === "dark"
-                    ? "rgba(23, 23, 23, 0.60)"
-                    : "rgba(252, 252, 252, 0.60)",
-              }}
+            <Pressable
+              alignItems="center"
+              justifyContent="center"
+              // padding="$1"
+              borderRadius="$2xl"
+              borderWidth={1}
+              flexDirection="row"
+              gap="$1"
+              backgroundColor="transparent"
+              height={55}
+              width={75}
+              borderColor={
+                colorMode === "dark" ? "$borderDark700" : "$borderLight200"
+              }
               disabled={validatePhoneNumberMutation.isPending}
               onPress={navigateToCountryPicker}
             >
@@ -215,13 +190,11 @@ const PhoneNumberScreen = ({
               )}
               {authDto.phoneNumberCountry && (
                 <Text
-                  fontFamily="Inter-Bold"
-                  fontSize="$sm"
-                  lineHeight="$sm"
-                  // color={colorMode === "dark" ? "$textDark0" : "$textLight700"}
+                  size="sm"
+                  fontFamily="Inter_900Black"
                 >{`+${authDto.phoneNumberCountry.countryCallingCode}`}</Text>
               )}
-            </TouchableOpacity>
+            </Pressable>
             <Input borderWidth={0} height={70} flex={1}>
               <InputField
                 keyboardType="phone-pad"
@@ -232,21 +205,15 @@ const PhoneNumberScreen = ({
                 value={authDto.phoneNumber}
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                 // selectionColor={colorMode === "dark" ? "white" : "black"}
-                fontSize="$3xl"
-                fontFamily="Inter-ExtraBold"
-                lineHeight="$3xl"
-                textAlign="left"
+                fontFamily="Inter_900Black"
+                size="3xl"
               />
             </Input>
           </View>
           {validatePhoneNumberMutation.isError && (
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText
-                fontFamily="Inter-Regular"
-                flexShrink={1}
-                flexWrap="wrap"
-              >
+              <FormControlErrorText flexShrink={1}>
                 {validatePhoneNumberMutation.error &&
                 instanceOfErrorResponseType(
                   validatePhoneNumberMutation.error
@@ -278,5 +245,3 @@ const PhoneNumberScreen = ({
   );
 };
 export default PhoneNumberScreen;
-
-const styles = StyleSheet.create({});

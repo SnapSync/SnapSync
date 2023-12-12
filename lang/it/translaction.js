@@ -33,6 +33,7 @@ const itTranslactions = {
       items: {
         notificationTitle: 'Notifiche',
         otherTitle: 'Altro',
+        clearCacheTitle: 'Svuota cache',
       }
     },
 

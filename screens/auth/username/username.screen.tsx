@@ -39,7 +39,7 @@ import {
   USERNAME_MIN_LENGTH,
   USERNAME_REGEX,
 } from "./username.costants";
-import authKeys from "../queries";
+import AuthKeys from "../auth.keys";
 
 const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
   const toast = useToast();
@@ -89,7 +89,7 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
 
       // Rimuovo la query con key ["session"] in modo da non avere più il sessionId salvato
       queryClient.removeQueries({
-        queryKey: authKeys.session,
+        queryKey: AuthKeys.session,
         exact: true,
       });
     }
@@ -112,7 +112,7 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
   };
 
   const _onPress = () => {
-    Keyboard.dismiss();
+    // Keyboard.dismiss();
 
     if (!authDto.sessionId || !authDto.username) {
       toast.show({
@@ -174,20 +174,15 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
               autoCapitalize="none"
               returnKeyType="done"
               onSubmitEditing={_onPress}
-              fontSize="$3xl"
-              fontFamily="Inter-ExtraBold"
-              lineHeight="$3xl"
+              fontFamily="Inter_900Black"
+              size="3xl"
               textAlign="center"
             />
           </Input>
           {validateUsernameMutation.isError && (
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} size="sm" />
-              <FormControlErrorText
-                fontFamily="Inter-Regular"
-                flexShrink={1}
-                flexWrap="wrap"
-              >
+              <FormControlErrorText flexShrink={1}>
                 {validateUsernameMutation.error &&
                 instanceOfErrorResponseType(validateUsernameMutation.error) &&
                 validateUsernameMutation.error.statusCode === 409

@@ -3,11 +3,11 @@ import { ICountryList } from "@/interfaces/countries_list.interface";
 import {
   CheckIcon,
   Icon,
+  Pressable,
   Text,
   View,
   useColorMode,
 } from "@gluestack-ui/themed";
-import { TouchableOpacity } from "react-native";
 import { Layout } from "@/costants/Layout";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -28,54 +28,48 @@ const CountryItem = ({
   const colorMode = useColorMode();
 
   return (
-    <TouchableOpacity
-      style={{
-        paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
-        paddingRight: insets.right + Layout.DefaultMarginHorizontal,
-        flexDirection: "row",
-        backgroundColor: "transparent",
-        height: 50,
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
+    <Pressable
+      paddingLeft={insets.left + Layout.ScreenPaddingHorizontal}
+      paddingRight={insets.right + Layout.ScreenPaddingHorizontal}
+      flexDirection="row"
+      backgroundColor="transparent"
+      justifyContent="space-between"
+      alignContent="center"
+      height={50}
       onPress={() => onPress?.(item)}
       disabled={isSelected}
+      flex={1}
     >
       <View
         backgroundColor="transparent"
         flexDirection="row"
         alignItems="center"
-        gap={16}
+        gap="$3"
+        flex={1}
       >
         <Text>{item.flag}</Text>
-        <Text
-          fontFamily="Inter-SemiBold"
-          fontSize="$md"
-          lineHeight="$md"
-          flexShrink={1}
-          flexWrap="wrap"
-          numberOfLines={1}
-        >
+        <Text isTruncated flexShrink={1} size="md" fontFamily="Inter_700Bold">
           {item.name}
         </Text>
         <Text
-          fontFamily="Inter-Regular"
-          fontSize="$sm"
-          lineHeight="$sm"
+          size="sm"
           color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
         >
           (+{item.dialCode})
         </Text>
       </View>
-
-      {isSelected && (
-        <Icon
-          as={CheckIcon}
-          size="sm"
-          // color={withDarkMode ? "$textDark0" : "$textLight950"}
-        />
-      )}
-    </TouchableOpacity>
+      {isSelected ? (
+        <View
+          backgroundColor="transparent"
+          height="$full"
+          width={50}
+          alignItems="flex-end"
+          justifyContent="center"
+        >
+          <Icon as={CheckIcon} size="sm" />
+        </View>
+      ) : null}
+    </Pressable>
   );
 };
 

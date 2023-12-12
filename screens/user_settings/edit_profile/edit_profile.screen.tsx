@@ -11,6 +11,7 @@ import {
 } from "@/api/routes/accounts.route";
 import {
   Avatar,
+  AvatarBadge,
   AvatarFallbackText,
   AvatarImage,
   FormControl,
@@ -28,6 +29,7 @@ import {
   View,
   useColorMode,
   useToast,
+  ScrollView,
 } from "@gluestack-ui/themed";
 import { useFormik } from "formik";
 import * as yup from "yup";
@@ -44,7 +46,7 @@ import {
 import { BIOGRAPHY_MAX_LENGTH } from "./edit_profile.constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
-import { Platform, ScrollView, TouchableOpacity } from "react-native";
+import { Platform, TouchableOpacity } from "react-native";
 import i18n from "@/lang";
 import { UserSettingsStackScreenProps } from "@/types";
 import {
@@ -317,64 +319,61 @@ const EditProfileScreen = ({
           paddingLeft: insets.left + Layout.ScreenPaddingHorizontal,
           paddingRight: insets.right + Layout.ScreenPaddingHorizontal,
           paddingBottom: insets.bottom,
-          paddingTop: 10,
+          paddingTop: 20,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "transparent",
         }}
         automaticallyAdjustKeyboardInsets={true}
       >
-        <View
-          alignItems="center"
-          justifyContent="center"
-          backgroundColor="transparent"
+        <Skeleton
+          colorMode={colorMode === "dark" ? "dark" : "light"}
+          radius="round"
+          show={isLoading}
+          width={96}
+          height={96}
         >
-          <View borderRadius="$full" backgroundColor="transparent">
-            <Skeleton
-              colorMode={colorMode === "dark" ? "dark" : "light"}
-              radius="round"
-              show={isLoading}
-            >
-              <Pressable
-                onPress={handlePresentModalPress}
-                disabled={
-                  isLoading ||
-                  changeProfilePictureMutation.isPending ||
-                  removeProfilePictureMutation.isPending
-                }
-              >
-                <Avatar size="xl">
-                  <AvatarFallbackText fontFamily="Inter-Bold">
-                    {data?.username || data?.fullname}
-                  </AvatarFallbackText>
-                  <AvatarImage
-                    source={{
-                      uri: data?.profilePicture?.url,
-                    }}
+          <Pressable
+            onPress={handlePresentModalPress}
+            disabled={
+              isLoading ||
+              changeProfilePictureMutation.isPending ||
+              removeProfilePictureMutation.isPending
+            }
+          >
+            <Avatar size="xl">
+              <AvatarFallbackText>
+                {data?.username || data?.fullname}
+              </AvatarFallbackText>
+              <AvatarImage
+                source={{
+                  uri: data?.profilePicture?.url,
+                }}
+              />
+              {!isLoading ? (
+                <AvatarBadge
+                  bg={
+                    colorMode === "dark"
+                      ? "$backgroundDark900"
+                      : "$backgroundLight50"
+                  }
+                  alignItems="center"
+                  justifyContent="center"
+                  borderWidth={0}
+                >
+                  <Icon
+                    as={CameraIcon}
+                    size="2xs"
+                    color={
+                      colorMode === "dark" ? "$textDark0" : "$textLight950"
+                    }
                   />
-                </Avatar>
-                {!isLoading ? (
-                  <View
-                    width={20}
-                    height={20}
-                    borderRadius="$full"
-                    position="absolute"
-                    bottom={0}
-                    right={10}
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Icon
-                      as={CameraIcon}
-                      size="2xs"
-                      color={
-                        colorMode === "dark" ? "$textDark0" : "$textLight950"
-                      }
-                    />
-                  </View>
-                ) : null}
-              </Pressable>
-            </Skeleton>
-          </View>
-        </View>
-        <View gap={20} marginTop={20}>
+                </AvatarBadge>
+              ) : null}
+            </Avatar>
+          </Pressable>
+        </Skeleton>
+        <View gap="$5" marginTop={20} width="$full">
           {isLoading ? (
             <View width={"100%"} gap={4}>
               <Skeleton
@@ -391,7 +390,7 @@ const EditProfileScreen = ({
           ) : (
             <FormControl>
               <FormControlLabel>
-                <FormControlLabelText fontFamily="Inter-Bold">
+                <FormControlLabelText>
                   {i18n.t("fields.username")}
                 </FormControlLabelText>
               </FormControlLabel>
@@ -401,7 +400,7 @@ const EditProfileScreen = ({
                   onChangeText={(text) =>
                     formik.setFieldValue("username", text)
                   }
-                  fontFamily="Inter-Regular"
+                  fontFamily="Inter_400Regular"
                   keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                 />
               </Input>
@@ -424,7 +423,7 @@ const EditProfileScreen = ({
           ) : (
             <FormControl>
               <FormControlLabel>
-                <FormControlLabelText fontFamily="Inter-Bold">
+                <FormControlLabelText>
                   {i18n.t("fields.fullname")}
                 </FormControlLabelText>
               </FormControlLabel>
@@ -434,7 +433,7 @@ const EditProfileScreen = ({
                   onChangeText={(text) =>
                     formik.setFieldValue("fullname", text)
                   }
-                  fontFamily="Inter-Regular"
+                  fontFamily="Inter_400Regular"
                   keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                   autoComplete="name"
                 />
@@ -457,7 +456,7 @@ const EditProfileScreen = ({
           ) : (
             <FormControl>
               <FormControlLabel>
-                <FormControlLabelText fontFamily="Inter-Bold">
+                <FormControlLabelText>
                   {i18n.t("fields.biography")}
                 </FormControlLabelText>
               </FormControlLabel>
@@ -467,7 +466,7 @@ const EditProfileScreen = ({
                   onChangeText={(text) =>
                     formik.setFieldValue("biography", text)
                   }
-                  fontFamily="Inter-Regular"
+                  fontFamily="Inter_400Regular"
                   keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                   autoComplete="off"
                   multiline

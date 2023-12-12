@@ -112,14 +112,14 @@ const RequestsRoute = ({ goToProfile, onPressSentRequests }: Props) => {
             >
               <View backgroundColor="transparent" flex={1} gap={5}>
                 <Text
-                  fontFamily="Inter-SemiBold"
+                  // fontFamily="Inter-SemiBold"
                   fontSize="$md"
                   lineHeight="$md"
                 >
                   {i18n.t("requestsRoute.requestSentTitle")}
                 </Text>
                 <Text
-                  fontFamily="Inter-Regular"
+                  // fontFamily="Inter-Regular"
                   fontSize="$sm"
                   lineHeight="$sm"
                 >
@@ -154,7 +154,7 @@ const RequestsRoute = ({ goToProfile, onPressSentRequests }: Props) => {
                 size="sm"
                 borderRadius="$3xl"
               >
-                <ButtonText fontFamily="Inter-SemiBold" fontSize="$xs">
+                <ButtonText>
                   {i18n.t("userProfile.friendship.accept")}
                 </ButtonText>
               </Button>

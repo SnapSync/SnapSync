@@ -33,6 +33,7 @@ import { instanceOfErrorResponseType } from "@/api";
 import BottomSection from "@/components/auth/bottom_section/bottom_section.component";
 import TopSection from "@/components/auth/top_section/top_section.component";
 import { MIN_AGE } from "./date_of_birth.costants";
+import moment from "moment";
 
 const DateOfBirthScreen = ({
   navigation,
@@ -223,10 +224,6 @@ const DateOfBirthScreen = ({
       paddingTop={insets.top}
       flex={1}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      // onTouchStart={_onTouchStart}
-      bgColor={
-        colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
-      }
     >
       <TopSection
         title={i18n.t("auth.dateOfBirth.title", {
@@ -243,7 +240,7 @@ const DateOfBirthScreen = ({
               <InputField
                 placeholder="DD"
                 maxLength={2}
-                autoFocus={false}
+                autoFocus={true}
                 keyboardType="number-pad"
                 ref={inputRefDayOfBirth}
                 onChangeText={onChangeTextDayOfBirth}
@@ -252,9 +249,8 @@ const DateOfBirthScreen = ({
                 }
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                 // selectionColor={colorMode === "dark" ? "white" : "black"}
-                fontSize="$3xl"
-                fontFamily="Inter-ExtraBold"
-                lineHeight="$3xl"
+                fontFamily="Inter_900Black"
+                size="3xl"
                 textAlign="center"
               />
             </Input>
@@ -273,9 +269,8 @@ const DateOfBirthScreen = ({
                 onChangeText={onChangeTextMonthOfBirth}
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                 // selectionColor={colorMode === "dark" ? "white" : "black"}
-                fontSize="$3xl"
-                fontFamily="Inter-ExtraBold"
-                lineHeight="$3xl"
+                fontFamily="Inter_900Black"
+                size="3xl"
                 textAlign="center"
               />
             </Input>
@@ -294,9 +289,8 @@ const DateOfBirthScreen = ({
                 }
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                 // selectionColor={colorMode === "dark" ? "white" : "black"}
-                fontSize="$3xl"
-                fontFamily="Inter-ExtraBold"
-                lineHeight="$3xl"
+                fontFamily="Inter_900Black"
+                size="3xl"
                 textAlign="center"
               />
             </Input>
@@ -305,11 +299,7 @@ const DateOfBirthScreen = ({
           {validateDateOfBirthMutation.isError && (
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText
-                fontFamily="Inter-Regular"
-                flexShrink={1}
-                flexWrap="wrap"
-              >
+              <FormControlErrorText flexShrink={1}>
                 {validateDateOfBirthMutation.error &&
                 instanceOfErrorResponseType(
                   validateDateOfBirthMutation.error
@@ -335,6 +325,14 @@ const DateOfBirthScreen = ({
           authDto.monthOfBirth === null ||
           authDto.dayOfBirth === null ||
           authDto.yearOfBirth === null ||
+          !moment(
+            `${authDto.yearOfBirth}-${authDto.monthOfBirth}-${authDto.dayOfBirth}`,
+            "YYYY-MM-DD"
+          ).isValid() ||
+          moment(
+            `${authDto.yearOfBirth}-${authDto.monthOfBirth}-${authDto.dayOfBirth}`,
+            "YYYY-MM-DD"
+          ).isAfter(moment().subtract(MIN_AGE, "years")) ||
           validateDateOfBirthMutation.isPending
         }
       />

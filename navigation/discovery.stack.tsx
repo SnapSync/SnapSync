@@ -9,8 +9,6 @@ import {
   Icon,
   useColorMode,
 } from "@gluestack-ui/themed";
-import { Layout } from "@/costants/Layout";
-import { Image } from "expo-image";
 import SearchScreen from "@/screens/discovery/search/search.screen";
 import { useNavigation } from "@react-navigation/native";
 import i18n from "@/lang";
@@ -42,9 +40,9 @@ const DiscoveryStack = () => {
         ),
         headerLeft: () => null,
         headerBackVisible: false,
-        headerTitleAlign: "left",
+        headerTitleAlign: "center",
         headerTitleStyle: {
-          fontFamily: "Inter-SemiBold",
+          // fontFamily: "Inter_500Medium",
         },
         headerTitle: i18n.t("discovery.screenTitle"),
       })}
@@ -63,7 +61,8 @@ const DiscoveryStack = () => {
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Icon
-                  as={Platform.OS === "ios" ? ChevronDownIcon : ChevronLeftIcon}
+                  // as={Platform.OS === "ios" ? ChevronDownIcon : ChevronLeftIcon}
+                  as={ChevronLeftIcon}
                   size="xl"
                   color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
                 />

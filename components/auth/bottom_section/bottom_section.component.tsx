@@ -42,7 +42,7 @@ const BottomSection = ({
       flex={1}
     >
       {hint && (
-        <Text fontFamily="Inter-Regular" fontSize="$sm" lineHeight="$sm">
+        <Text fontSize="$sm" lineHeight="$sm" fontWeight="$normal">
           {hint}
         </Text>
       )}
@@ -56,9 +56,9 @@ const BottomSection = ({
         rounded="$lg"
       >
         {isLoading ? (
-          <ButtonSpinner size="small" />
+          <ButtonSpinner />
         ) : (
-          <ButtonText fontFamily="Inter-SemiBold">
+          <ButtonText>
             {buttonLabel ? buttonLabel : i18n.t("continue")}
           </ButtonText>
         )}

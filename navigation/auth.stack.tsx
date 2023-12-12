@@ -13,7 +13,7 @@ import PhoneNumberScreen from "@/screens/auth/phone_number/phone_number.screen";
 import UsernameScreen from "@/screens/auth/username/username.screen";
 import { AuthStackParamList } from "@/types";
 import { useColorMode } from "@gluestack-style/react";
-import { CloseIcon, Icon, Text } from "@gluestack-ui/themed";
+import { CloseIcon, Icon } from "@gluestack-ui/themed";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
@@ -21,8 +21,8 @@ import { TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import * as CountyCodesList from "country-codes-list";
 import * as Localization from "expo-localization";
-import authKeys from "@/screens/auth/queries";
 import { useNavigation } from "@react-navigation/native";
+import AuthKeys from "@/screens/auth/auth.keys";
 
 // Utilizzo un NativeStackNavigator per avere la possibilità di utilizzare: https://reactnavigation.org/docs/native-stack-navigator/#headersearchbaroptions
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -39,7 +39,7 @@ const AuthStack = () => {
   const dispatch = useDispatch();
 
   const { data } = useQuery({
-    queryKey: authKeys.session,
+    queryKey: AuthKeys.session,
     queryFn: () => GetSessionId(),
     enabled: !authDto.sessionId && !isLoggedIn,
   });
@@ -74,11 +74,7 @@ const AuthStack = () => {
         headerBackVisible: false,
         headerLeft: () => null,
         headerTitleAlign: "center",
-        headerTitle: () => (
-          <Text fontFamily="Lora-BoldItalic" fontSize="$lg">
-            SnapSync
-          </Text>
-        ),
+        headerTitle: "",
         gestureEnabled: false,
       }}
     >
@@ -103,10 +99,10 @@ const AuthStack = () => {
           headerLargeTitle: true,
           headerTitle: i18n.t("auth.countryList.title"),
           headerLargeTitleStyle: {
-            fontFamily: "Inter-SemiBold",
+            fontFamily: "Inter_500Medium",
           },
           headerTitleStyle: {
-            fontFamily: "Inter-SemiBold",
+            fontFamily: "Inter_500Medium",
           },
         }}
       />

@@ -1,4 +1,4 @@
-import { View, useColorMode, Text, Icon, BellIcon } from "@gluestack-ui/themed";
+import { View, useColorMode, Text, Icon } from "@gluestack-ui/themed";
 import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -36,9 +36,8 @@ const SettingSectionHeader = ({ iconAs, sectionName }: Props) => {
         <Icon as={iconAs} size="md" color={"$textDark0"} />
       </LinearGradient>
       <Text
-        fontFamily="Inter-Bold"
-        fontSize="$lg"
-        lineHeight="$lg"
+        fontFamily="Inter_600SemiBold"
+        size="lg"
         color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
       >
         {sectionName}

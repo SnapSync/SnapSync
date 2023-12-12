@@ -52,7 +52,7 @@ const RootNavigation = ({ authToken, userId }: Props) => {
   const colorMode = useColorMode();
 
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-  const userIdRedux = useSelector((state: RootState) => state.auth.userId);
+  // const userIdRedux = useSelector((state: RootState) => state.auth.userId);
 
   const dispatch = useDispatch();
 
@@ -117,12 +117,12 @@ const RootNavigation = ({ authToken, userId }: Props) => {
     }
   }, [isConnected, authTokenState, isLoggedIn]);
 
-  React.useEffect(() => {
-    if (userId && !userIdRedux) {
-      // Salvo lo UserId in redux
-      dispatch(setUserId(userId));
-    }
-  }, [userIdRedux, userId]);
+  // React.useEffect(() => {
+  //   if (userId && !userIdRedux) {
+  //     // Salvo lo UserId in redux
+  //     dispatch(setUserId(userId));
+  //   }
+  // }, [userIdRedux, userId]);
 
   React.useEffect(() => {
     if (isLoggedIn) {
@@ -196,7 +196,7 @@ const RootNavigation = ({ authToken, userId }: Props) => {
         <ModalContent>
           <ModalHeader>
             <Heading
-              fontFamily="Inter-SemiBold"
+              // fontFamily="Inter-SemiBold"
               fontSize="$lg"
               lineHeight="$lg"
             >
@@ -206,7 +206,7 @@ const RootNavigation = ({ authToken, userId }: Props) => {
           <ModalBody>
             <Text
               style={{
-                fontFamily: "Inter-Regular",
+                // fontFamily: "Inter-Regular",
                 fontSize: 12,
                 lineHeight: 20,
               }}
@@ -228,9 +228,7 @@ const RootNavigation = ({ authToken, userId }: Props) => {
               onPress={_onPress}
               rounded="$lg"
             >
-              <ButtonText fontFamily="Inter-SemiBold">
-                {i18n.t("exit")}
-              </ButtonText>
+              <ButtonText>{i18n.t("exit")}</ButtonText>
             </Button>
           </ModalFooter>
         </ModalContent>

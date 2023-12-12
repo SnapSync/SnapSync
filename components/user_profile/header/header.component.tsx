@@ -42,8 +42,8 @@ const Header = ({
           show={isLoading}
           colorMode={colorMode === "dark" ? "dark" : "light"}
         >
-          <Avatar borderRadius="$full" size="lg">
-            <AvatarFallbackText fontFamily="Inter-Bold">
+          <Avatar size="lg">
+            <AvatarFallbackText>
               {username ? username : fullname}
             </AvatarFallbackText>
           </Avatar>
@@ -56,7 +56,7 @@ const Header = ({
         >
           <Text
             numberOfLines={2}
-            fontFamily="Inter-ExtraBold"
+            // fontFamily="Inter-ExtraBold"
             fontSize="$4xl"
             lineHeight="$4xl"
             color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
@@ -68,7 +68,7 @@ const Header = ({
         {streak && streak > 0 ? (
           <Text
             fontSize="$sm"
-            fontFamily="Inter-SemiBold"
+            // fontFamily="Inter-SemiBold"
             lineHeight="$sm"
             color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
           >

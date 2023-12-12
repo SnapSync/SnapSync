@@ -8,6 +8,8 @@ import {
   Text,
   Icon,
   useColorMode,
+  AvatarBadge,
+  Pressable,
 } from "@gluestack-ui/themed";
 import React from "react";
 import { TouchableOpacity } from "react-native";
@@ -34,28 +36,26 @@ const UserItem = ({
   const colorMode = useColorMode();
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={{
-        marginVertical: 10,
-        flexDirection: "row",
-        gap: 5,
-        alignItems: "center",
-        minHeight: USER_ITEM_MIN_HEIGHT,
-        backgroundColor: "transparent",
-        flex: 1,
-      }}
+      gap="$2"
+      marginVertical="$3"
+      flexDirection="row"
+      minHeight={USER_ITEM_MIN_HEIGHT}
+      alignItems="center"
+      flex={1}
+      backgroundColor="transparent"
     >
       <Skeleton
-        width={32}
-        height={32}
+        width={48}
+        height={48}
         radius="round"
         show={isLoading}
         colorMode={colorMode === "dark" ? "dark" : "light"}
       >
-        <Avatar borderRadius="$full" size="sm">
-          <AvatarFallbackText fontFamily="Inter-Bold">
+        <Avatar size="md">
+          <AvatarFallbackText>
             {user?.username || user?.fullname}
           </AvatarFallbackText>
           <AvatarImage
@@ -63,83 +63,68 @@ const UserItem = ({
               uri: user?.profilePicture?.url,
             }}
           />
+          {!isLoading && user && user.isVerified ? (
+            <AvatarBadge
+              alignItems="center"
+              justifyContent="center"
+              borderWidth={0}
+              bgColor={
+                colorMode === "dark"
+                  ? "$backgroundDark950"
+                  : "$backgroundLight0"
+              }
+            >
+              <Icon
+                as={Verified}
+                size="xs"
+                color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
+              />
+            </AvatarBadge>
+          ) : null}
         </Avatar>
       </Skeleton>
 
       <Divider orientation="vertical" />
+
       <View
         flex={1}
+        gap="$2"
+        flexDirection="column"
         backgroundColor="transparent"
-        justifyContent="center"
-        alignItems="flex-start"
-        alignSelf="stretch"
-        gap={3}
       >
-        <View
-          flexDirection="row"
-          gap={3}
-          alignItems="center"
-          flex={1}
-          backgroundColor="transparent"
+        <Skeleton
+          width={"100%"}
+          height={22}
+          colorMode={colorMode === "dark" ? "dark" : "light"}
+          show={isLoading}
         >
-          {isLoading ? (
-            <Skeleton
-              width={"100%"}
-              height={21}
-              colorMode={colorMode === "dark" ? "dark" : "light"}
-            />
-          ) : (
-            <>
-              <Text
-                numberOfLines={1}
-                fontFamily="Inter-Bold"
-                fontSize="$sm"
-                lineHeight="$sm"
-                flexWrap="wrap"
-                flexShrink={1}
-                backgroundColor="transparent"
-              >
-                {user?.username}
-              </Text>
-              {user?.isVerified ? (
-                <Icon
-                  as={Verified}
-                  size="2xs"
-                  color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
-                />
-              ) : null}
-            </>
-          )}
-          {/* {user && user.streak && user.streak > 0 ? (
-            <Text
-              color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
-              fontFamily="Inter-SemiBold"
-              fontSize="$xs"
-              lineHeight="$xs"
-            >
-              • {user.streak} 🔥
-            </Text>
-          ) : null} */}
-        </View>
+          <Text
+            isTruncated
+            flexShrink={1}
+            fontFamily="Inter_600SemiBold"
+            size="md"
+            color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
+          >
+            {user?.username}
+          </Text>
+        </Skeleton>
+
         <Skeleton
           show={isLoading}
           width={"100%"}
-          height={19}
+          height={20}
           colorMode={colorMode === "dark" ? "dark" : "light"}
         >
           <Text
-            numberOfLines={1}
-            color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
-            fontFamily="Inter-Regular"
-            fontSize="$xs"
-            lineHeight="$xs"
-            flexWrap="wrap"
+            isTruncated
             flexShrink={1}
+            size="sm"
+            fontFamily="Inter_400Regular"
           >
             {user?.fullname}
           </Text>
         </Skeleton>
-        {user &&
+        {/* TODO: {user &&
         ((user.mutualFriends && user.mutualFriends >= 20) ||
           user.contactNickname ||
           (user.streak && user.streak > 0)) ? (
@@ -159,7 +144,7 @@ const UserItem = ({
               >
                 <Text
                   numberOfLines={1}
-                  fontFamily="Inter-Regular"
+                  // fontFamily="Inter-Regular"
                   fontSize="$xs"
                   lineHeight="$xs"
                   flexWrap="wrap"
@@ -186,7 +171,7 @@ const UserItem = ({
                 />
                 <Text
                   numberOfLines={1}
-                  fontFamily="Inter-Regular"
+                  // fontFamily="Inter-Regular"
                   fontSize="$xs"
                   lineHeight="$xs"
                   flexWrap="wrap"
@@ -215,7 +200,7 @@ const UserItem = ({
                   color={
                     colorMode === "dark" ? "$textDark400" : "$textLight700"
                   }
-                  fontFamily="Inter-SemiBold"
+                  // fontFamily="Inter-SemiBold"
                   fontSize="$xs"
                   lineHeight="$xs"
                 >
@@ -224,9 +209,9 @@ const UserItem = ({
               </View>
             ) : null}
           </View>
-        ) : null}
+        ) : null} */}
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

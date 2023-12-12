@@ -12,6 +12,7 @@ import {
   FormControlErrorIcon,
   AlertCircleIcon,
   FormControlErrorText,
+  Text,
 } from "@gluestack-ui/themed";
 import { Keyboard, Platform } from "react-native";
 import React from "react";
@@ -92,8 +93,6 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
       paddingTop={insets.top}
       flex={1}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      // onTouchStart={_onTouchStart}
-      bgColor={"transparent"}
     >
       <TopSection title={i18n.t("auth.fullname.title")}>
         <FormControl
@@ -113,20 +112,15 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
               // selectionColor={colorMode === "dark" ? "white" : "black"}
               // style={authStyles.input}
               onSubmitEditing={_onPress}
-              fontSize="$3xl"
-              fontFamily="Inter-ExtraBold"
-              lineHeight="$3xl"
+              fontFamily="Inter_900Black"
+              size="3xl"
               textAlign="center"
             />
           </Input>
           {validateFullnameMutation.isError && (
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText
-                fontFamily="Inter-Regular"
-                flexShrink={1}
-                flexWrap="wrap"
-              >
+              <FormControlErrorText flexShrink={1}>
                 {validateFullnameMutation.error &&
                 instanceOfErrorResponseType(validateFullnameMutation.error) &&
                 validateFullnameMutation.error.statusCode === 422
@@ -138,10 +132,6 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
         </FormControl>
       </TopSection>
       <BottomSection
-        buttonLabel={
-          i18n.t("continue").charAt(0).toUpperCase() +
-          i18n.t("continue").slice(1)
-        }
         onPress={_onPress}
         isLoading={validateFullnameMutation.isPending}
         isDisabled={

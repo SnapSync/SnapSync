@@ -6,6 +6,9 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "extra": {
+      "oneSignalAppId": "5802ef55-dbf6-490b-af96-74ae4852882e"
+    },
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -44,6 +47,12 @@
         "expo-image-picker",
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos."
+        }
+      ],
+      [
+        "onesignal-expo-plugin", // @see -> https://documentation.onesignal.com/docs/react-native-expo-sdk-setup
+        {
+          "mode": "development" // development | production
         }
       ]
     ]

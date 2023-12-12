@@ -1,102 +1,96 @@
 import {
-  ChevronRightIcon,
   Icon,
+  Pressable,
   Switch,
   Text,
   View,
   useColorMode,
 } from "@gluestack-ui/themed";
-import React from "react";
-import { TouchableOpacity, StyleSheet } from "react-native";
+import { ChevronRightCircle } from "lucide-react-native";
+import React, { useState } from "react";
 
 type Props = {
   label: string;
   onPress?: () => void;
-  showSwitch?: boolean;
-  onToggle?: (value: boolean) => void;
-  value?: boolean;
-  isDisabled?: boolean;
-
+  iconAs?: React.ElementType;
   variant?: "default" | "danger";
+  showSwitch?: boolean;
+  onToggleSwitch?: (value: boolean) => void;
+  valueSwitch?: boolean;
+  isDisabledSwitch?: boolean;
 };
 
 const SettingItem = ({
   label,
   onPress,
-  showSwitch = false,
-  onToggle,
-  value = false,
-  isDisabled = false,
   variant = "default",
+  iconAs = ChevronRightCircle,
+  showSwitch = false,
+  onToggleSwitch,
+  valueSwitch,
+  isDisabledSwitch,
 }: Props) => {
   const colorMode = useColorMode();
 
+  const [color] = useState<string>(
+    colorMode === "dark"
+      ? variant === "default"
+        ? "$textDark0"
+        : "$error700"
+      : variant === "default"
+      ? "$textLight950"
+      : "$error400"
+  );
+
   if (showSwitch) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.text} numberOfLines={1}>
+      <View
+        flex={1}
+        bgColor="transparent"
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Text
+          color={color}
+          size="sm"
+          fontFamily="Inter_600SemiBold"
+          isTruncated
+          flexShrink={1}
+        >
           {label}
         </Text>
         <Switch
           size="sm"
-          onValueChange={onToggle}
-          value={value}
-          isDisabled={isDisabled}
+          onToggle={onToggleSwitch}
+          value={valueSwitch}
+          isDisabled={isDisabledSwitch}
         />
       </View>
     );
   }
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <Pressable
+      flex={1}
+      bgColor="transparent"
+      flexDirection="row"
+      justifyContent="space-between"
+      alignItems="center"
+      onPress={onPress}
+    >
       <Text
-        style={styles.text}
-        numberOfLines={1}
-        color={
-          colorMode === "dark"
-            ? variant === "default"
-              ? "$textDark0"
-              : "$error400"
-            : variant === "default"
-            ? "$textLight950"
-            : "$error700"
-        }
+        color={color}
+        size="sm"
+        fontFamily="Inter_600SemiBold"
+        isTruncated
+        flexShrink={1}
       >
         {label}
       </Text>
-      <Icon
-        as={ChevronRightIcon}
-        size="md"
-        color={
-          colorMode === "dark"
-            ? variant === "default"
-              ? "$textDark0"
-              : "$error400"
-            : variant === "default"
-            ? "$textLight950"
-            : "$error700"
-        }
-      />
-    </TouchableOpacity>
+      <Icon as={iconAs} size="sm" color={color} />
+    </Pressable>
   );
 };
 
 export default SettingItem;
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "transparent",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    minHeight: 22,
-    width: "100%",
-  },
-  text: {
-    fontFamily: "Inter-SemiBold",
-    fontSize: 14,
-    lineHeight: 22,
-    flexShrink: 1,
-    flexWrap: "wrap",
-  },
-});

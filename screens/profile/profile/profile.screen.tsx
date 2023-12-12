@@ -1,12 +1,14 @@
 import { RootState } from "@/redux/app/store";
 import {
   View,
-  Avatar,
-  AvatarFallbackText,
-  AvatarImage,
   Text,
   useColorMode,
   Icon,
+  ScrollView,
+  Avatar,
+  AvatarImage,
+  AvatarBadge,
+  AvatarFallbackText,
 } from "@gluestack-ui/themed";
 import React from "react";
 import { useSelector } from "react-redux";
@@ -17,7 +19,7 @@ import { ProfileStackScreenProps } from "@/types";
 import { useMeQuery } from "@/queries/useMeQuery";
 import Biography from "@/components/user_profile/biography/biography.component";
 import { TouchableOpacity } from "react-native";
-import { UserCog2Icon } from "lucide-react-native";
+import { UserCog2Icon, Verified } from "lucide-react-native";
 
 const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
   const insets = useSafeAreaInsets();
@@ -32,6 +34,7 @@ const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
     if (data) {
       navigation.setParams({
         username: data.username,
+        isVerified: data.isVerified,
       });
     }
 
@@ -58,15 +61,21 @@ const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
   }, [data, navigation]);
 
   return (
-    <View
-      flex={1}
-      backgroundColor="transparent"
-      paddingLeft={insets.left + Layout.ScreenPaddingHorizontal}
-      paddingRight={insets.right + Layout.ScreenPaddingHorizontal}
-      paddingBottom={insets.bottom}
-      paddingTop={insets.top}
-    >
-      <View backgroundColor="transparent" gap={16} alignItems="center">
+    <View flex={1} backgroundColor="transparent">
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: 20,
+          paddingLeft: insets.left + Layout.ScreenPaddingHorizontal,
+          paddingRight: insets.right + Layout.ScreenPaddingHorizontal,
+          paddingBottom: insets.bottom,
+          alignItems: "center",
+        }}
+        gap="$4"
+        backgroundColor="transparent"
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+      >
         <Skeleton
           width={96}
           height={96}
@@ -74,32 +83,48 @@ const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
           show={isLoading}
           colorMode={colorMode === "dark" ? "dark" : "light"}
         >
-          <Avatar borderRadius="$full" size="xl">
-            <AvatarFallbackText fontFamily="Inter-Bold">
-              {data?.username || data?.fullname}
+          <Avatar size="xl">
+            <AvatarFallbackText>
+              {data?.username ?? data?.username}
             </AvatarFallbackText>
             <AvatarImage
               source={{
                 uri: data?.profilePicture?.url,
               }}
             />
+            {!isLoading && data && data.isVerified ? (
+              <AvatarBadge
+                bgColor={
+                  colorMode === "dark"
+                    ? "$backgroundDark950"
+                    : "$backgroundLight0"
+                }
+                alignItems="center"
+                justifyContent="center"
+                borderWidth={0}
+              >
+                <Icon
+                  as={Verified}
+                  size="sm"
+                  color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
+                />
+              </AvatarBadge>
+            ) : null}
           </Avatar>
         </Skeleton>
-
-        {isLoading ? (
-          <Skeleton
-            width="100%"
-            height={20}
-            colorMode={colorMode === "dark" ? "dark" : "light"}
-          />
-        ) : (
-          <Text fontFamily="Inter-ExtraBold" fontSize="$3xl" lineHeight="$3xl">
+        <Skeleton
+          show={isLoading}
+          height={41}
+          width={200}
+          colorMode={colorMode === "dark" ? "dark" : "light"}
+        >
+          <Text fontFamily="Inter_800ExtraBold" size="3xl">
             {data?.fullname}
           </Text>
-        )}
+        </Skeleton>
 
         <Biography biography={data?.biography} isLoading={isLoading} />
-      </View>
+      </ScrollView>
     </View>
   );
 };

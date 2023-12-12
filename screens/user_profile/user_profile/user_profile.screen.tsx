@@ -77,7 +77,7 @@ const UserProfileScreen = ({
 
   const tokenApi = useSelector((state: RootState) => state.auth.tokenApi);
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-  const userId = useSelector((state: RootState) => state.auth.userId);
+  // const userId = useSelector((state: RootState) => state.auth.userId);
 
   const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
 
@@ -105,7 +105,7 @@ const UserProfileScreen = ({
     queryKey: UserProfileKeys.userProfile(route.params.id),
     queryFn: () => FetchUserProfileById(route.params.id, tokenApi),
     enabled: isLoggedIn && route.params && route.params.id ? true : false,
-    staleTime: route.params.id === userId ? undefined : 1000 * 60 * 60, // Se è il mio profilo allora ogni volta che vado nella schermata faccio il refetch, altrimenti metto 1 ora
+    staleTime: 1000 * 60 * 60, // 1 ora
     gcTime: Infinity,
   });
 
@@ -118,14 +118,8 @@ const UserProfileScreen = ({
   } = useQuery({
     queryKey: UserProfileKeys.friendshipStatus(route.params.id),
     queryFn: () => ShowFriendship(route.params.id, tokenApi),
-    enabled:
-      isLoggedIn &&
-      route.params &&
-      route.params.id &&
-      route.params.id !== userId
-        ? true
-        : false,
-    staleTime: 1000 * 60 * 60, // 1000 * 60 * 60,
+    enabled: isLoggedIn && route.params && route.params.id ? true : false,
+    // staleTime: 1000 * 60 * 60, // 1 ora
     gcTime: Infinity,
     // refetchOnWindowFocus: true,
     // refetchOnReconnect: true,
@@ -138,12 +132,8 @@ const UserProfileScreen = ({
     useInfiniteMutualFriendsQuery(
       route.params.id,
       tokenApi,
-      isLoggedIn && route.params.id !== userId
+      isLoggedIn && route.params.id ? true : false
     );
-
-  // Nel caso fosse il mio profilo allora carico i miei amici
-  const { data: friendsData, isLoading: isLoadingFriends } =
-    useInfiniteFriendsQuery(tokenApi, isLoggedIn && route.params.id === userId);
 
   const sendFriendshipRequestMutation = useMutation({
     mutationKey: UserProfileKeys.sendFriendhipRequests(route.params?.id),
@@ -244,7 +234,7 @@ const UserProfileScreen = ({
     },
   });
 
-  const [isMyProfile] = React.useState<boolean>(userId === route.params.id);
+  // const [isMyProfile] = React.useState<boolean>(userId === route.params.id);
   const [carouselUsers, setCarouselUsers] = React.useState<IApiUser[]>([]);
 
   React.useEffect(() => {
@@ -284,7 +274,6 @@ const UserProfileScreen = ({
       },
 
       headerRight: () => {
-        if (isMyProfile) return null;
         return (
           <TouchableOpacity
             onPress={handlePresentModalPress}
@@ -321,7 +310,6 @@ const UserProfileScreen = ({
     route.params,
     userProfileData,
     colorMode,
-    isMyProfile,
     friendshipStatusData,
     isErrorUserProfile,
   ]);
@@ -332,22 +320,13 @@ const UserProfileScreen = ({
   }, [friendshipStatusData]);
 
   React.useEffect(() => {
-    if (isMyProfile) {
-      if (friendsData && friendsData.pages && friendsData.pages.length > 0) {
-        // Recupero la prima pagina e la inserisco nel carousel
-        setCarouselUsers(friendsData.pages[0].data);
-      } else {
-        setCarouselUsers([]);
-      }
+    if (mutualFriendsData && mutualFriendsData.pages.length > 0) {
+      // Recupero la prima pagina e la inserisco nel carousel
+      setCarouselUsers(mutualFriendsData.pages[0].data);
     } else {
-      if (mutualFriendsData && mutualFriendsData.pages.length > 0) {
-        // Recupero la prima pagina e la inserisco nel carousel
-        setCarouselUsers(mutualFriendsData.pages[0].data);
-      } else {
-        setCarouselUsers([]);
-      }
+      setCarouselUsers([]);
     }
-  }, [friendsData, mutualFriendsData, isMyProfile]);
+  }, [mutualFriendsData]);
 
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
@@ -356,44 +335,36 @@ const UserProfileScreen = ({
   const goBack = () => navigation.goBack();
 
   const onPressSeeAll = () => {
-    if (isMyProfile) {
-      // Va alla schermata dei miei amici
-    } else {
-      // Controllo se si sono caricati gli amici in comune
-      var total =
-        route.params && route.params.mutualFriends !== undefined
-          ? route.params.mutualFriends
-          : 0;
+    // Controllo se si sono caricati gli amici in comune
+    var total =
+      route.params && route.params.mutualFriends !== undefined
+        ? route.params.mutualFriends
+        : 0;
 
-      if (mutualFriendsData && mutualFriendsData.pages.length > 0) {
-        total = mutualFriendsData.pages[0].total;
-      }
-
-      // Va alla schermata degli amici in comune
-      navigation.push("MutualFriends", {
-        id: route.params.id,
-        total: total,
-      });
+    if (mutualFriendsData && mutualFriendsData.pages.length > 0) {
+      total = mutualFriendsData.pages[0].total;
     }
+
+    // Va alla schermata degli amici in comune
+    navigation.push("MutualFriends", {
+      id: route.params.id,
+      total: total,
+    });
   };
 
   const accept = (userId: number) => {
-    if (isMyProfile) return;
     acceptFriendshipRequestMutation.mutate({ userId });
   };
 
   const reject = (userId: number) => {
-    if (isMyProfile) return;
     rejectFriendshipRequestMutation.mutate({ userId });
   };
 
   const send = (userId: number) => {
-    if (isMyProfile) return;
     sendFriendshipRequestMutation.mutate({ userId });
   };
 
   const cancel = (userId: number) => {
-    if (isMyProfile) return;
     destroyFriendshipRequestMutation.mutate({ userId });
   };
 
@@ -540,26 +511,24 @@ const UserProfileScreen = ({
           gap={16}
           backgroundColor="transparent"
         >
-          {!isMyProfile ? (
-            <FriendshipStatus
-              variant={route.params?.friendshipLoader}
-              isLoading={isLoadingFriendshipStatus}
-              friendshipStatus={friendshipStatusData}
-              username={
-                userProfileData
-                  ? userProfileData.username
-                  : route.params?.username
-              }
-              onPressAdd={() => send(route.params.id)}
-              onPressAccept={() => accept(route.params.id)}
-              onPressCancel={() => cancel(route.params.id)}
-              onPressDeny={() => reject(route.params.id)}
-              isLoadingAdd={sendFriendshipRequestMutation.isPending}
-              isLoadingAccept={acceptFriendshipRequestMutation.isPending}
-              isLoadingCancel={destroyFriendshipRequestMutation.isPending}
-              isLoadingDeny={rejectFriendshipRequestMutation.isPending}
-            />
-          ) : null}
+          <FriendshipStatus
+            variant={route.params?.friendshipLoader}
+            isLoading={isLoadingFriendshipStatus}
+            friendshipStatus={friendshipStatusData}
+            username={
+              userProfileData
+                ? userProfileData.username
+                : route.params?.username
+            }
+            onPressAdd={() => send(route.params.id)}
+            onPressAccept={() => accept(route.params.id)}
+            onPressCancel={() => cancel(route.params.id)}
+            onPressDeny={() => reject(route.params.id)}
+            isLoadingAdd={sendFriendshipRequestMutation.isPending}
+            isLoadingAccept={acceptFriendshipRequestMutation.isPending}
+            isLoadingCancel={destroyFriendshipRequestMutation.isPending}
+            isLoadingDeny={rejectFriendshipRequestMutation.isPending}
+          />
 
           {
             // Se route.params.biography è undefined oppure null, e sto caricando il profile non mostro niente, altrimenti mostro il loader
@@ -592,24 +561,20 @@ const UserProfileScreen = ({
                 backgroundColor="transparent"
               >
                 <Text
-                  fontFamily="Inter-SemiBold"
+                  // fontFamily="Inter-SemiBold"
                   fontSize="$lg"
                   lineHeight="$lg"
                   color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
                 >
-                  {isMyProfile ? i18n.t("friends") : i18n.t("mutualFriends")}
+                  {i18n.t("mutualFriends")}
                 </Text>
                 <Button
                   variant="link"
                   size="sm"
                   onPress={onPressSeeAll}
-                  isDisabled={
-                    isMyProfile ? isLoadingFriends : isLoadingMutualFriends
-                  }
+                  isDisabled={isLoadingMutualFriends}
                 >
-                  <ButtonText fontFamily="Inter-Regular">
-                    {i18n.t("seeAll")}
-                  </ButtonText>
+                  <ButtonText>{i18n.t("seeAll")}</ButtonText>
                   <ButtonIcon as={ArrowRightIcon} size="sm" />
                 </Button>
               </View>
@@ -634,7 +599,7 @@ const UserProfileScreen = ({
                 )}
               />
             </View>
-          ) : (isMyProfile && isLoadingFriends) || isLoadingMutualFriends ? (
+          ) : isLoadingMutualFriends ? (
             <View
               width="100%"
               backgroundColor="transparent"
@@ -644,15 +609,9 @@ const UserProfileScreen = ({
             >
               {Array.from(
                 Array(
-                  isMyProfile
-                    ? route.params &&
-                      route.params.friends &&
-                      route.params.friends > 0
-                      ? route.params.friends
-                      : Math.ceil(SCREEN_WIDTH / FRIEND_CARD_WIDTH)
-                    : route.params &&
-                      route.params.mutualFriends &&
-                      route.params.mutualFriends > 0
+                  route.params &&
+                    route.params.mutualFriends &&
+                    route.params.mutualFriends >= 0
                     ? route.params.mutualFriends
                     : Math.ceil(SCREEN_WIDTH / FRIEND_CARD_WIDTH)
                 ).keys()
@@ -682,7 +641,7 @@ const UserProfileScreen = ({
           paddingLeft={insets.left + Layout.ScreenPaddingHorizontal}
           paddingRight={insets.right + Layout.ScreenPaddingHorizontal}
         >
-          {!isMyProfile && userProfileData && friendshipStatusData ? (
+          {userProfileData ? (
             <>
               <BottomSheetItem
                 iconAs={ShareIcon}
@@ -691,7 +650,7 @@ const UserProfileScreen = ({
                 })}
                 withDivider
               />
-              {!friendshipStatusData.isBlocking && (
+              {friendshipStatusData && !friendshipStatusData.isBlocking && (
                 <BottomSheetItem
                   iconAs={SlashIcon}
                   label={i18n.t("userProfile.bottomSheetModal.block", {
@@ -704,7 +663,7 @@ const UserProfileScreen = ({
                   }
                 />
               )}
-              {friendshipStatusData.isFriend && (
+              {friendshipStatusData && friendshipStatusData.isFriend && (
                 <BottomSheetItem
                   iconAs={UserMinus2Icon}
                   label={i18n.t("userProfile.bottomSheetModal.unfriend")}

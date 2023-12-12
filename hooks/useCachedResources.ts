@@ -4,15 +4,43 @@ import { COLORMODES } from "@gluestack-style/react/lib/typescript/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Font from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import {
   AuthTokenKey,
   DeviceUuidKey,
   UserIdKey,
 } from "@/costants/SecureStoreKeys";
+import {
+  Inter_100Thin,
+  Inter_200ExtraLight,
+  Inter_300Light,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+  Inter_900Black,
+} from "@expo-google-fonts/inter";
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 export default function useCachedResources() {
+  const [appIsReady, setAppIsReady] = useState(false);
+
+  // const [fontsLoaded] = Font.useFonts({
+  //   Inter_100Thin,
+  //   Inter_200ExtraLight,
+  //   Inter_300Light,
+  //   Inter_400Regular,
+  //   Inter_500Medium,
+  //   Inter_600SemiBold,
+  //   Inter_700Bold,
+  //   Inter_800ExtraBold,
+  //   Inter_900Black,
+  // });
+
   const [isLoadingComplete, setLoadingComplete] = useState(false);
   const [colorMode, setColorMode] = useState<COLORMODES>("light");
   const [authToken, setAuthToken] = useState<string | undefined>(undefined);
@@ -21,74 +49,70 @@ export default function useCachedResources() {
 
   // Load any resources or data that we need prior to rendering the app
   useEffect(() => {
-    async function loadResourcesAndDataAsync() {
+    async function prepare() {
       try {
-        SplashScreen.preventAutoHideAsync();
-
-        try {
-          const value = await AsyncStorage.getItem(AppColorModeKey);
-          if (value !== null && (value === "light" || value === "dark"))
-            setColorMode(value);
-        } catch (e) {
-          console.warn(e);
-        }
-
-        // Provo a recuperare l'authToken dallo storage
+        // Load AuthToken
         let authToken = await SecureStore.getItemAsync(AuthTokenKey);
         if (authToken) setAuthToken(authToken);
 
-        // Provo a recuperare il deviceUuid dallo storage
-        let deviceUuid = await SecureStore.getItemAsync(DeviceUuidKey);
-        if (deviceUuid) {
-          setDeviceUuid(deviceUuid);
-        } else {
-          // Se non lo trovo allora lo registro nella schermata successiva
-        }
-
-        // Provo a recuperare l'userId dallo storage
+        // Load UserId
         let userId = await SecureStore.getItemAsync(UserIdKey);
         if (userId) setUserId(parseInt(userId));
 
         // Load fonts
         await Font.loadAsync({
-          ...FontAwesome.font,
+          // ...FontAwesome.font,
 
-          "Inter-Black": require("../assets/Fonts/Inter-Black.ttf"),
-          "Inter-Bold": require("../assets/Fonts/Inter-Bold.ttf"),
-          "Inter-ExtraBold": require("../assets/Fonts/Inter-ExtraBold.ttf"),
-          "Inter-ExtraLight": require("../assets/Fonts/Inter-ExtraLight.ttf"),
-          "Inter-Light": require("../assets/Fonts/Inter-Light.ttf"),
-          "Inter-Medium": require("../assets/Fonts/Inter-Medium.ttf"),
-          "Inter-Regular": require("../assets/Fonts/Inter-Regular.ttf"),
-          "Inter-SemiBold": require("../assets/Fonts/Inter-SemiBold.ttf"),
-          "Inter-Thin": require("../assets/Fonts/Inter-Thin.ttf"),
+          Inter_900Black: require("../assets/Fonts/Inter-Black.ttf"),
+          Inter_700Bold: require("../assets/Fonts/Inter-Bold.ttf"),
+          Inter_800ExtraBold: require("../assets/Fonts/Inter-ExtraBold.ttf"),
+          Inter_200ExtraLight: require("../assets/Fonts/Inter-ExtraLight.ttf"),
+          Inter_300Light: require("../assets/Fonts/Inter-Light.ttf"),
+          Inter_500Medium: require("../assets/Fonts/Inter-Medium.ttf"),
+          Inter_400Regular: require("../assets/Fonts/Inter-Regular.ttf"),
+          Inter_600SemiBold: require("../assets/Fonts/Inter-SemiBold.ttf"),
+          Inter_100Thin: require("../assets/Fonts/Inter-Thin.ttf"),
 
-          "Lora-Bold": require("../assets/Fonts/Lora-Bold.ttf"),
-          "Lora-BoldItalic": require("../assets/Fonts/Lora-BoldItalic.ttf"),
-          "Lora-Italic": require("../assets/Fonts/Lora-Italic.ttf"),
-          "Lora-Medium": require("../assets/Fonts/Lora-Medium.ttf"),
-          "Lora-MediumItalic": require("../assets/Fonts/Lora-MediumItalic.ttf"),
-          "Lora-Regular": require("../assets/Fonts/Lora-Regular.ttf"),
-          "Lora-SemiBold": require("../assets/Fonts/Lora-SemiBold.ttf"),
-          "Lora-SemiBoldItalic": require("../assets/Fonts/Lora-SemiBoldItalic.ttf"),
+          // "Lora-Bold": require("../assets/Fonts/Lora-Bold.ttf"),
+          // "Lora-BoldItalic": require("../assets/Fonts/Lora-BoldItalic.ttf"),
+          // "Lora-Italic": require("../assets/Fonts/Lora-Italic.ttf"),
+          // "Lora-Medium": require("../assets/Fonts/Lora-Medium.ttf"),
+          // "Lora-MediumItalic": require("../assets/Fonts/Lora-MediumItalic.ttf"),
+          // "Lora-Regular": require("../assets/Fonts/Lora-Regular.ttf"),
+          // "Lora-SemiBold": require("../assets/Fonts/Lora-SemiBold.ttf"),
+          // "Lora-SemiBoldItalic": require("../assets/Fonts/Lora-SemiBoldItalic.ttf"),
         });
+
+        // Pre-load fonts, make any API calls you need to do here
+        // await Font.loadAsync(Entypo.font);
+        // Artificially delay for two seconds to simulate a slow loading
+        // experience. Please remove this if you copy and paste the code!
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       } catch (e) {
-        // We might want to provide this error information to an error reporting service
         console.warn(e);
       } finally {
-        setLoadingComplete(true);
-        SplashScreen.hideAsync();
+        // Tell the application to render
+        setAppIsReady(true);
       }
     }
 
-    loadResourcesAndDataAsync();
+    prepare();
   }, []);
 
+  useEffect(() => {
+    if (appIsReady) {
+      // This tells the splash screen to hide immediately! If we call this after
+      // `setAppIsReady`, then we may see a blank screen while the app is
+      // loading its initial state and rendering its first pixels. So instead,
+      // we hide the splash screen once we know the root view has already
+      // performed layout.
+      SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
   return {
-    isLoadingComplete: isLoadingComplete,
-    cachedColorMode: colorMode,
+    appIsReady: appIsReady,
     cachedAuthToken: authToken,
-    cachedDeviceUuid: deviceUuid,
     cachedUserId: userId,
   };
 }

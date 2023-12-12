@@ -9,19 +9,6 @@ type Props = {
 
 const Biography = ({ biography, isLoading = false }: Props) => {
   const colorMode = useColorMode();
-  if (biography) {
-    return (
-      <Text
-        fontFamily="Inter-Regular"
-        fontSize="$md"
-        lineHeight="$md"
-        color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
-      >
-        {biography}
-      </Text>
-    );
-  }
-
   if (isLoading) {
     return (
       <View gap={16} backgroundColor="transparent">
@@ -34,6 +21,18 @@ const Biography = ({ biography, isLoading = false }: Props) => {
           />
         ))}
       </View>
+    );
+  }
+
+  if (biography && biography.length > 0) {
+    return (
+      <Text
+        size="md"
+        fontFamily="Inter_400Regular"
+        // color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
+      >
+        {biography}
+      </Text>
     );
   }
 

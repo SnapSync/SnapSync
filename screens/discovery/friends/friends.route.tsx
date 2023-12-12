@@ -87,7 +87,10 @@ const FriendsRoute = ({ goToProfile }: Props) => {
         }}
         ListHeaderComponent={() => (
           <View marginVertical={20} backgroundColor="transparent">
-            <Text fontFamily="Inter-SemiBold" fontSize="$sm" lineHeight="$sm">
+            <Text
+              /*fontFamily="Inter-SemiBold" */ fontSize="$sm"
+              lineHeight="$sm"
+            >
               {i18n.t("friendsRoute.friends", {
                 count:
                   data &&

@@ -8,6 +8,6 @@ export const useMeQuery = (tokenApi: string, enabled: boolean = true) => {
     queryFn: () => FetchMe(tokenApi),
     enabled,
     gcTime: Infinity,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60 * 24, // 1 day
   });
 };

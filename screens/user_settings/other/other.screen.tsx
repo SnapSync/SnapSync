@@ -50,11 +50,11 @@ const OtherScreen = () => {
                     variant="accent"
                   >
                     <VStack space="xs">
-                      <ToastTitle fontFamily="Inter-SemiBold" fontSize="$sm">
+                      <ToastTitle fontSize="$sm">
                         {i18n.t("clearCacheAlert.successTitle")}
                       </ToastTitle>
                       <ToastDescription
-                        fontFamily="Inter-Regular"
+                        // fontFamily="Inter-Regular"
                         fontSize="$sm"
                         lineHeight="$sm"
                       >
@@ -87,9 +87,8 @@ const OtherScreen = () => {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Pressable
+        {/* <Pressable
           onPress={clearCache}
-          marginBottom="$5"
           gap="$2"
           borderRadius="$xl"
           paddingHorizontal="$3"
@@ -97,26 +96,35 @@ const OtherScreen = () => {
           bgColor={
             colorMode === "dark" ? "$backgroundDark900" : "$backgroundLight50"
           }
+          marginBottom="$10"
+          flexDirection="row"
+          alignItems="center"
           borderColor={
             colorMode === "dark" ? "$borderDark400" : "$borderLight400"
           }
           borderWidth="$1"
-          flexDirection="row"
         >
           <Icon as={TrashIcon} size="sm" />
-          <Text fontFamily="Inter-SemiBold" fontSize="$sm" lineHeight="$sm">
+          <Text fontSize="$sm" lineHeight="$sm">
             {i18n.t("other.clearCache")}
           </Text>
-        </Pressable>
+        </Pressable> */}
+        <Button
+          action="secondary"
+          borderRadius="$xl"
+          size="lg"
+          onPress={clearCache}
+          marginBottom="$10"
+        >
+          <ButtonText>{i18n.t("other.clearCache")}</ButtonText>
+        </Button>
         <Button
           action="negative"
           borderRadius="$xl"
-          size="md"
+          size="lg"
           onPress={deleteAccount}
         >
-          <ButtonText fontFamily="Inter-SemiBold">
-            {i18n.t("other.deleteAccount")}
-          </ButtonText>
+          <ButtonText>{i18n.t("other.deleteAccount")}</ButtonText>
         </Button>
       </ScrollView>
     </View>

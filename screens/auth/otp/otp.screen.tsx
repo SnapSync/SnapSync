@@ -40,8 +40,8 @@ import * as SecureStore from "expo-secure-store";
 import TopSection from "@/components/auth/top_section/top_section.component";
 import BottomSection from "@/components/auth/bottom_section/bottom_section.component";
 import { OPT_LENGTH } from "./otp.costants";
-import authKeys from "../queries";
 import { SnapSyncErrorType } from "@/api/errors_types";
+import authKeys from "../auth.keys";
 
 const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
   const insets = useSafeAreaInsets();
@@ -90,11 +90,7 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
           <Icon
             as={ChevronLeftIcon}
             size="xl"
-            color={
-              colorMode === "dark"
-                ? Layout.IconColorDark
-                : Layout.IconColorLight
-            }
+            color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
           />
         </TouchableOpacity>
       ),
@@ -204,18 +200,11 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
 
   return (
     <KeyboardAvoidingView
+      paddingLeft={insets.left + Layout.DefaultMarginHorizontal}
+      paddingRight={insets.right + Layout.DefaultMarginHorizontal}
+      paddingTop={insets.top}
+      flex={1}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{
-        flex: 1,
-        paddingTop: insets.top,
-        paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
-        paddingRight: insets.right + Layout.DefaultMarginHorizontal,
-        flexDirection: "column",
-      }}
-      onTouchStart={_onTouchStart}
-      bgColor={
-        colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
-      }
     >
       <TopSection title={i18n.t("auth.otp.title")}>
         <FormControl
@@ -237,21 +226,16 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
               keyboardAppearance={colorMode === "dark" ? "dark" : "default"}
               onChangeText={_onChangeText}
               // selectionColor={colorMode === "dark" ? "white" : "black"}
-              fontSize="$3xl"
-              fontFamily="Inter-ExtraBold"
-              lineHeight="$3xl"
+              fontFamily="Inter_900Black"
+              size="3xl"
               textAlign="center"
-              letterSpacing={20}
+              letterSpacing="$2xl"
             />
           </Input>
           {validateOtpMutation.isError && (
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText
-                fontFamily="Inter-Regular"
-                flexShrink={1}
-                flexWrap="wrap"
-              >
+              <FormControlErrorText flexShrink={1}>
                 {validateOtpMutation.error &&
                 instanceOfErrorResponseType(validateOtpMutation.error)
                   ? validateOtpMutation.error.statusCode === 401
@@ -284,7 +268,6 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
           count > 0 ||
           validateOtpMutation.isPending
         }
-        // pb={insets.bottom === 0 ? 20 : insets.bottom}
       />
     </KeyboardAvoidingView>
   );

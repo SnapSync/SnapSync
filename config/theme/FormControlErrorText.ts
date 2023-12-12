@@ -1,8 +1,9 @@
-import { createStyle } from '@gluestack-style/react';
+import { createStyle } from "@gluestack-style/react";
 
 export const FormControlErrorText = createStyle({
-  color: '$error700',
+  fontFamily: "$body",
+  color: "$error700",
   _dark: {
-    color: '$error400',
+    color: "$error400",
   },
 });

@@ -7,14 +7,14 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
-  Avatar,
-  AvatarFallbackText,
-  AvatarImage,
   Icon,
   VStack,
   View,
   useColorMode,
   Text,
+  Avatar,
+  AvatarFallbackText,
+  AvatarImage,
 } from "@gluestack-ui/themed";
 import { TouchableOpacity } from "react-native";
 import { Users2Icon } from "lucide-react-native";
@@ -28,6 +28,7 @@ export const ANIMATED_NAVBAR_HEIGHT = 56;
 type Props = {
   animatedValue: SharedValue<number>;
   avatarUrl?: string;
+  avatarBlurhash?: string | null;
   username?: string;
   fullname?: string;
   isLoadingMe?: boolean;
@@ -42,6 +43,7 @@ const AnimatedNavbar = ({
   animatedValue,
 
   avatarUrl,
+  avatarBlurhash,
   username,
   fullname,
   isLoadingMe = false,
@@ -82,23 +84,19 @@ const AnimatedNavbar = ({
 
   return (
     <AnimatedView
-      style={[
-        headerStyle,
-        {
-          height: ANIMATED_NAVBAR_HEIGHT + insets.top,
-          paddingLeft: insets.left + Layout.DefaultMarginHorizontal,
-          paddingRight: insets.right + Layout.DefaultMarginHorizontal,
-          paddingTop: insets.top,
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 3,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        },
-      ]}
+      height={ANIMATED_NAVBAR_HEIGHT + insets.top}
+      paddingLeft={insets.left + Layout.ScreenPaddingHorizontal}
+      paddingRight={insets.right + Layout.ScreenPaddingHorizontal}
+      paddingTop={insets.top}
+      position="absolute"
+      top={0}
+      left={0}
+      right={0}
+      zIndex={3}
+      flexDirection="row"
+      alignItems="center"
+      justifyContent="space-between"
+      style={[headerStyle]}
       borderBottomWidth={1}
       borderColor={colorMode === "dark" ? "$borderDark800" : "$borderLight100"}
     >
@@ -112,18 +110,14 @@ const AnimatedNavbar = ({
         <TouchableOpacity onPress={onPressLeftIcon}>
           <VStack>
             <AnimatedView
-              style={[
-                {
-                  position: "relative",
-                  width: 6,
-                  height: 6,
-                  top: 6,
-                  right: -18,
-                  zIndex: 1,
-                  elevation: 1,
-                },
-                badgeStyle,
-              ]}
+              position={"absolute"}
+              width={6}
+              height={6}
+              top={6}
+              right={-18}
+              zIndex={1}
+              elevation={1}
+              style={[badgeStyle]}
               bgColor={colorMode === "dark" ? "$red700" : "$red500"}
               rounded="$full"
             />
@@ -142,7 +136,7 @@ const AnimatedNavbar = ({
         justifyContent="center"
         height="100%"
       >
-        <Text fontFamily="Lora-BoldItalic" fontSize="$lg">
+        <Text fontSize="$lg" lineHeight="$lg" fontWeight="$bold">
           SnapSync
         </Text>
       </View>
@@ -161,10 +155,8 @@ const AnimatedNavbar = ({
             radius="round"
             colorMode={colorMode === "dark" ? "dark" : "light"}
           >
-            <Avatar borderRadius="$full" size="sm">
-              <AvatarFallbackText fontFamily="Inter-Bold">
-                {username ? username : fullname}
-              </AvatarFallbackText>
+            <Avatar size="sm">
+              <AvatarFallbackText>{username ?? fullname}</AvatarFallbackText>
               <AvatarImage
                 source={{
                   uri: avatarUrl,

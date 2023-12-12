@@ -147,7 +147,7 @@ const FriendshipStatus = ({
         gap={20}
       >
         <Text
-          fontFamily="Inter-SemiBold"
+          // fontFamily="Inter-SemiBold"
           fontSize="$md"
           lineHeight="$md"
           color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
@@ -173,11 +173,11 @@ const FriendshipStatus = ({
               onPress={onPressAccept}
             >
               {isLoadingAccept || isLoadingDeny ? (
-                <ButtonSpinner size="small" />
+                <ButtonSpinner />
               ) : (
                 <>
-                  <ButtonIcon as={UserCheck2Icon} size="sm" />
-                  <ButtonText fontFamily="Inter-SemiBold">
+                  <ButtonIcon as={UserCheck2Icon} />
+                  <ButtonText>
                     {i18n.t("userProfile.friendship.accept")}
                   </ButtonText>
                 </>
@@ -194,11 +194,11 @@ const FriendshipStatus = ({
               onPress={onPressDeny}
             >
               {isLoadingAccept || isLoadingDeny ? (
-                <ButtonSpinner size="small" />
+                <ButtonSpinner />
               ) : (
                 <>
-                  <ButtonIcon as={UserX2Icon} size="sm" />
-                  <ButtonText fontFamily="Inter-SemiBold">
+                  <ButtonIcon as={UserX2Icon} />
+                  <ButtonText>
                     {i18n.t("userProfile.friendship.deny")}
                   </ButtonText>
                 </>
@@ -223,15 +223,15 @@ const FriendshipStatus = ({
       }}
     >
       {isLoadingAdd || isLoadingCancel ? (
-        <ButtonSpinner size="small" />
+        <ButtonSpinner />
       ) : (
         <>
           {friendshipStatus.outgoingRequest ? (
-            <ButtonIcon as={Clock1Icon} size="sm" />
+            <ButtonIcon as={Clock1Icon} />
           ) : (
-            <ButtonIcon as={UserPlus2Icon} size="sm" />
+            <ButtonIcon as={UserPlus2Icon} />
           )}
-          <ButtonText fontFamily="Inter-SemiBold">
+          <ButtonText>
             {friendshipStatus.outgoingRequest
               ? i18n.t("userProfile.friendship.cancel")
               : i18n.t("userProfile.friendship.add")}

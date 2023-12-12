@@ -154,16 +154,14 @@ const BlockedUsersScreen = ({
                 action="secondary"
                 variant="solid"
                 size="sm"
-                borderRadius="$3xl"
+                borderRadius="$full"
                 onPress={() => unblock(item.id, item.username)}
               >
                 {unblockUserMutation.isPending &&
                 unblockUserMutation.variables?.userId === item.id ? (
-                  <ButtonSpinner size="small" />
+                  <ButtonSpinner />
                 ) : (
-                  <ButtonText fontFamily="Inter-SemiBold" fontSize="$xs">
-                    {i18n.t("unblock")}
-                  </ButtonText>
+                  <ButtonText>{i18n.t("unblock")}</ButtonText>
                 )}
               </Button>
             </View>
@@ -182,20 +180,14 @@ const BlockedUsersScreen = ({
                 <Spinner size="small" />
               ) : isError ? (
                 <Text
-                  fontFamily="Inter-SemiBold"
-                  fontSize="$sm"
-                  lineHeight="$sm"
-                  color={colorMode === "dark" ? "$red400" : "$red700"}
+                  size="sm"
+                  fontFamily="Inter_600SemiBold"
+                  color={colorMode === "dark" ? "$error700" : "$error400"}
                 >
                   {i18n.t("errors.generic")}
                 </Text>
               ) : (
-                <Text
-                  fontFamily="Inter-SemiBold"
-                  fontSize="$sm"
-                  lineHeight="$sm"
-                  // color={colorMode === "dark" ? "$red400" : "$red700"}
-                >
+                <Text size="sm" fontFamily="Inter_600SemiBold">
                   {i18n.t("blockedUsers.noBlockedUsers")}
                 </Text>
               )}

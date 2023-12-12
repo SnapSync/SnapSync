@@ -19,7 +19,7 @@ const UserProfileStack = () => {
         gestureEnabled: false,
         headerTitleAlign: "center",
         headerTitleStyle: {
-          fontFamily: "Inter-SemiBold",
+          // fontFamily: "Inter-SemiBold",
         },
       }}
     >

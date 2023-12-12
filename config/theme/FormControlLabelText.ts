@@ -1,9 +1,10 @@
-import { createStyle } from '@gluestack-style/react';
+import { createStyle } from "@gluestack-style/react";
 
 export const FormControlLabelText = createStyle({
-  fontWeight: '$medium',
-  color: '$textLight900',
+  fontWeight: "$medium",
+  fontFamily: "Inter_500Medium",
+  color: "$textLight900",
   _dark: {
-    color: '$textDark50',
+    color: "$textDark50",
   },
 });

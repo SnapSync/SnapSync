@@ -203,7 +203,7 @@ const DiscoveryScreen = ({
           entering={FadeIn}
           exiting={FadeOut}
         >
-          <TabView<TabViewRoute>
+          {/* <TabView<TabViewRoute>
             lazy
             navigationState={{ index, routes }}
             renderScene={renderScene}
@@ -211,7 +211,7 @@ const DiscoveryScreen = ({
             renderTabBar={(props) => (
               <TabBar {...props} onIndexChange={setIndex} />
             )}
-          />
+          /> */}
         </Animated.View>
       )}
     </View>

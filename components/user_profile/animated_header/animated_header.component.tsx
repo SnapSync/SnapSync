@@ -109,7 +109,7 @@ const AnimatedHeader = ({
           <Text
             numberOfLines={2}
             color={"$textDark0"}
-            fontFamily="Inter-ExtraBold"
+            // fontFamily="Inter-ExtraBold"
             fontSize="$4xl"
             lineHeight="$4xl"
           >
@@ -120,7 +120,7 @@ const AnimatedHeader = ({
             flexShrink={1}
             flexWrap="wrap"
             color={"$textDark0"}
-            fontFamily="Inter-Regular"
+            // fontFamily="Inter-Regular"
             fontSize="$md"
             lineHeight="$md"
           >
@@ -151,7 +151,7 @@ const AnimatedHeader = ({
               <Text
                 color={"$textDark0"}
                 fontSize="$sm"
-                fontFamily="Inter-SemiBold"
+                // fontFamily="Inter-SemiBold"
                 lineHeight="$sm"
               >
                 {streak} 🔥

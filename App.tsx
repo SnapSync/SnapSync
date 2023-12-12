@@ -14,11 +14,19 @@ import "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { StatusBar } from "expo-status-bar";
 import NetInfo from "@react-native-community/netinfo";
-import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister"; // so we can create a React Query persistor using Async Storage.
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"; // set of utilities to queryClient interaction with the persistor
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColorScheme } from "react-native";
-import { ThemeProvider, createTheme } from "@rneui/themed";
+import { ThemeProvider } from "@rneui/themed";
+import { LogLevel, OneSignal } from "react-native-onesignal";
+import Constants from "expo-constants";
+
+OneSignal.Debug.setLogLevel(LogLevel.Verbose);
+OneSignal.initialize(Constants.expoConfig?.extra?.oneSignalAppId);
+
+// Also need enable notifications to complete OneSignal setup
+// OneSignal.Notifications.requestPermission(true);
 
 const queryClient = new QueryClient();
 
@@ -26,9 +34,6 @@ const persister = createAsyncStoragePersister({
   storage: AsyncStorage,
   throttleTime: 3000,
 });
-
-// @tanstack/query-async-storage-persister -> so we can create a React Query persistor using Async Storage.
-// @tanstack/react-query-persist-clien -> set of utilities to queryClient interaction with the persistor
 
 const MyThemeDark = {
   dark: true,
@@ -53,18 +58,12 @@ const MyThemeLight = {
 };
 
 export default function App() {
-  const {
-    isLoadingComplete,
-    cachedColorMode,
-    cachedAuthToken,
-    cachedDeviceUuid,
-    cachedUserId,
-  } = useCachedResources();
+  const { appIsReady, cachedAuthToken, cachedUserId } = useCachedResources();
 
   const colorScheme = useColorScheme();
   // const colorMode = useColorMode();
 
-  const [colorMode, setColorMode] = React.useState<"light" | "dark">("light");
+  const [colorMode, setColorMode] = React.useState<"light" | "dark">("dark");
 
   useEffect(() => {
     return NetInfo.addEventListener((state) => {
@@ -73,29 +72,7 @@ export default function App() {
     });
   }, []);
 
-  // const colorMode = useSelector((state: RootState) => state.app.colorMode);
-  // const dispatch = useDispatch();
-
-  // const [colorMode, setColorMode] = React.useState<COLORMODES>("dark");
-
-  // React.useEffect(() => {
-  //   dispatch(setColorMode(cachedColorMode));
-  // }, [cachedColorMode]);
-
-  if (!isLoadingComplete) return null;
-
-  // const _switchColorMode = async () => {
-  //   let newColorMode: COLORMODES = colorMode === "light" ? "dark" : "light";
-
-  //   // Salvo il nuovo colorMode in AsyncStorage, in modo che al prossimo avvio dell'app il colorMode sia quello salvato
-  //   try {
-  //     await AsyncStorage.setItem(AppColorModeKey, newColorMode);
-  //   } catch (e) {
-  //     console.warn(e);
-  //   }
-
-  //   dispatch(setColorMode(newColorMode));
-  // };
+  if (!appIsReady) return null;
 
   return (
     <Provider store={store}>

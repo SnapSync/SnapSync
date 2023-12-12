@@ -34,7 +34,7 @@ export const TabBarItem = forwardRef<any, Props>((props, ref) => {
             color: colorMode === "dark" ? "#FCFCFC" : "#171717",
             fontSize: 12,
             opacity: props.opacity,
-            fontFamily: "Inter-Bold",
+            // fontFamily: "Inter-Bold",
           }}
         >
           {props.children}

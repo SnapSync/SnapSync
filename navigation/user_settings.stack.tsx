@@ -23,7 +23,7 @@ const UserSettingsStack = () => {
         headerLeft: () => null,
         headerBackVisible: false,
         headerTitleStyle: {
-          fontFamily: "Inter-SemiBold",
+          fontFamily: "Inter_500Medium",
         },
         headerTitleAlign: "center",
       }}

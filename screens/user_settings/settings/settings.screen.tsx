@@ -15,9 +15,11 @@ import {
   Pressable,
   Spinner,
   ScrollView,
+  HelpCircleIcon,
+  StarIcon,
 } from "@gluestack-ui/themed";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CogIcon } from "lucide-react-native";
+import { CogIcon, LogOutIcon } from "lucide-react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
@@ -194,8 +196,8 @@ const SettingsScreen = ({
           paddingRight: insets.right + Layout.ScreenPaddingHorizontal,
           paddingBottom: insets.bottom,
           paddingTop: 20,
-          backgroundColor: "transparent",
         }}
+        backgroundColor="transparent"
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
       >
@@ -217,7 +219,7 @@ const SettingsScreen = ({
           borderWidth="$1"
         >
           <Avatar>
-            <AvatarFallbackText fontFamily="Inter-Bold">
+            <AvatarFallbackText>
               {data
                 ? data.username
                   ? data.username
@@ -242,23 +244,19 @@ const SettingsScreen = ({
             backgroundColor="transparent"
           >
             <Text
-              numberOfLines={1}
-              fontFamily="Inter-Bold"
-              fontSize="$sm"
-              lineHeight="$sm"
-              flexWrap="wrap"
+              isTruncated
               flexShrink={1}
+              fontFamily="Inter_600SemiBold"
+              size="md"
+              color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
             >
               {data ? data.username : route.params?.username}
             </Text>
             <Text
-              numberOfLines={1}
-              color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
-              fontFamily="Inter-Regular"
-              fontSize="$xs"
-              lineHeight="$xs"
-              flexWrap="wrap"
+              isTruncated
               flexShrink={1}
+              size="sm"
+              fontFamily="Inter_400Regular"
             >
               {data ? data.fullname : route.params?.fullname}
             </Text>
@@ -272,6 +270,7 @@ const SettingsScreen = ({
         <DefaultView colorMode={colorMode}>
           <SettingItem
             label={i18n.t("userSettings.settings.items.notificationTitle")}
+            // onPress={() => navigation.navigate("Account")}
           />
           <Divider />
           <SettingItem
@@ -288,9 +287,11 @@ const SettingsScreen = ({
           <SettingItem
             label={i18n.t("userSettings.privacy.items.syncContactsTitle")}
             showSwitch
-            value={webInfo ? webInfo.webInfo.allowSyncContacts : false}
-            isDisabled={isLoading || updateAllowSyncContactsMutation.isPending}
-            onToggle={onToggleAllowSyncContacts}
+            valueSwitch={webInfo?.webInfo.allowSyncContacts ?? false}
+            onToggleSwitch={onToggleAllowSyncContacts}
+            isDisabledSwitch={
+              updateAllowSyncContactsMutation.isPending || isLoading
+            }
           />
           <Divider />
           <SettingItem
@@ -304,15 +305,20 @@ const SettingsScreen = ({
           sectionName={i18n.t("userSettings.more.title")}
         />
         <DefaultView colorMode={colorMode}>
-          <SettingItem label={i18n.t("userSettings.more.items.aboutTitle")} />
+          <SettingItem
+            label={i18n.t("userSettings.more.items.aboutTitle")}
+            iconAs={HelpCircleIcon}
+          />
           <Divider />
           <SettingItem
             label={i18n.t("userSettings.more.items.rateThisAppTitle")}
+            iconAs={StarIcon}
           />
           <Divider />
           <SettingItem
             label={i18n.t("userSettings.more.items.logoutTitle")}
             variant="danger"
+            iconAs={LogOutIcon}
             onPress={() => setIsLoadingLogout(true)}
           />
         </DefaultView>

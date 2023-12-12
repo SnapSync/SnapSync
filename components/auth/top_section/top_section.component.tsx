@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text } from "@gluestack-ui/themed";
+import { View, Heading } from "@gluestack-ui/themed";
 
 type Props = {
   title: string;
@@ -15,9 +15,7 @@ const TopSection = ({ title, children }: Props) => {
       flex={1}
     >
       <View alignItems="center" gap={8} backgroundColor="transparent">
-        <Text fontSize="$lg" fontFamily="Inter-ExtraBold" lineHeight="$md">
-          {title}
-        </Text>
+        <Heading size="lg">{title}</Heading>
       </View>
       {children}
     </View>

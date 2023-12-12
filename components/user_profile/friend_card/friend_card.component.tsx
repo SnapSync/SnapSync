@@ -75,7 +75,7 @@ const FriendCard = ({
             paddingTop={FRIEND_CARD_MARGIN}
           >
             <Avatar size="md">
-              <AvatarFallbackText fontFamily="Inter-SemiBold">
+              <AvatarFallbackText>
                 {username ? username : fullname}
               </AvatarFallbackText>
             </Avatar>
@@ -103,7 +103,7 @@ const FriendCard = ({
               numberOfLines={2}
               flexShrink={1}
               flexWrap="wrap"
-              fontFamily="Inter-SemiBold"
+              // fontFamily="Inter-SemiBold"
               fontSize="$lg"
               lineHeight="$lg"
             >
@@ -114,7 +114,7 @@ const FriendCard = ({
               numberOfLines={1}
               flexShrink={1}
               flexWrap="wrap"
-              fontFamily="Inter-Regular"
+              // fontFamily="Inter-Regular"
               fontSize="$md"
               lineHeight="$md"
             >

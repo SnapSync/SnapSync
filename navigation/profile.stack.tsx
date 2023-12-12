@@ -33,7 +33,7 @@ const ProfileStack = () => {
         headerBackVisible: false,
         headerTitleAlign: "center",
         headerTitleStyle: {
-          fontFamily: "Inter-SemiBold",
+          fontFamily: "Inter_600SemiBold",
         },
       })}
     >

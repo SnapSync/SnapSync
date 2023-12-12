@@ -68,7 +68,7 @@ const BottomSheetItem = ({
           }
         />
         <Text
-          fontFamily="Inter-SemiBold"
+          // fontFamily="Inter-SemiBold"
           fontSize="$md"
           lineHeight="$md"
           color={
