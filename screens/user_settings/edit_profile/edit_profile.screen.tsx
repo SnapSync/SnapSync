@@ -30,6 +30,9 @@ import {
   useColorMode,
   useToast,
   ScrollView,
+  Text,
+  Textarea,
+  TextareaInput,
 } from "@gluestack-ui/themed";
 import { useFormik } from "formik";
 import * as yup from "yup";
@@ -46,7 +49,7 @@ import {
 import { BIOGRAPHY_MAX_LENGTH } from "./edit_profile.constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
-import { Platform, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Platform, TouchableOpacity } from "react-native";
 import i18n from "@/lang";
 import { UserSettingsStackScreenProps } from "@/types";
 import {
@@ -207,7 +210,6 @@ const EditProfileScreen = ({
       // Aggiorno la cache di ProfileKeys.me
       queryClient.setQueryData<IApiUser>(ProfileKeys.me, (old) => {
         if (old) {
-          console.log(JSON.stringify(old));
           return {
             ...old,
             profilePicture: data.profilePicture,
@@ -223,7 +225,6 @@ const EditProfileScreen = ({
     queryKey: EditProfileKeys.editWebFormData,
     queryFn: () => FetchEditWebFormData(tokenApi),
     enabled: isLoggedIn,
-    refetchOnWindowFocus: "always",
   });
 
   const formik = useFormik({
@@ -258,6 +259,16 @@ const EditProfileScreen = ({
   });
 
   React.useEffect(() => {
+    // La invalido per forzare il refetch dei dati, quando l'utente torna di nuovo in questa schermata
+    return () => {
+      queryClient.removeQueries({
+        queryKey: EditProfileKeys.editWebFormData,
+        exact: true,
+      });
+    };
+  }, []);
+
+  React.useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity
@@ -286,6 +297,12 @@ const EditProfileScreen = ({
     if (updateAccountMutation.isSuccess) navigation.goBack();
   }, [updateAccountMutation]);
 
+  const goToTakeProfilePicture = () => {
+    dismissAll();
+
+    navigation.navigate("TakeProfilePicture");
+  };
+
   const removeProfilePicture = () => {
     dismissAll();
     removeProfilePictureMutation.mutate();
@@ -306,6 +323,18 @@ const EditProfileScreen = ({
       const uri = result.assets[0].uri;
       changeProfilePictureMutation.mutate({ uri });
     }
+  };
+
+  const onChangeTextUsername = (text: string) => {
+    formik.setFieldValue("username", text);
+  };
+
+  const onChangeTextFullname = (text: string) => {
+    formik.setFieldValue("fullname", text);
+  };
+
+  const onChangeTextBiography = (text: string) => {
+    formik.setFieldValue("biography", text);
   };
 
   return (
@@ -397,9 +426,7 @@ const EditProfileScreen = ({
               <Input variant="underlined">
                 <InputField
                   value={formik.values.username}
-                  onChangeText={(text) =>
-                    formik.setFieldValue("username", text)
-                  }
+                  onChangeText={onChangeTextUsername}
                   fontFamily="Inter_400Regular"
                   keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                 />
@@ -430,9 +457,7 @@ const EditProfileScreen = ({
               <Input variant="underlined">
                 <InputField
                   value={formik.values.fullname}
-                  onChangeText={(text) =>
-                    formik.setFieldValue("fullname", text)
-                  }
+                  onChangeText={onChangeTextFullname}
                   fontFamily="Inter_400Regular"
                   keyboardAppearance={colorMode === "light" ? "light" : "dark"}
                   autoComplete="name"
@@ -450,30 +475,29 @@ const EditProfileScreen = ({
               <Skeleton
                 colorMode={colorMode === "dark" ? "dark" : "light"}
                 width="100%"
-                height={40}
+                height={100}
               />
             </View>
           ) : (
-            <FormControl>
-              <FormControlLabel>
-                <FormControlLabelText>
-                  {i18n.t("fields.biography")}
-                </FormControlLabelText>
-              </FormControlLabel>
-              <Input variant="underlined">
-                <InputField
-                  value={formik.values.biography}
-                  onChangeText={(text) =>
-                    formik.setFieldValue("biography", text)
-                  }
-                  fontFamily="Inter_400Regular"
-                  keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                  autoComplete="off"
-                  multiline
-                  numberOfLines={4}
-                />
-              </Input>
-            </FormControl>
+            <>
+              <FormControl>
+                <FormControlLabel>
+                  <FormControlLabelText>
+                    {i18n.t("fields.biography")}
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <Textarea>
+                  <TextareaInput
+                    value={formik.values.biography}
+                    onChangeText={onChangeTextBiography}
+                    fontFamily="Inter_400Regular"
+                    keyboardAppearance={
+                      colorMode === "light" ? "light" : "dark"
+                    }
+                  />
+                </Textarea>
+              </FormControl>
+            </>
           )}
         </View>
       </ScrollView>
@@ -500,16 +524,19 @@ const EditProfileScreen = ({
             <>
               <BottomSheetItem
                 iconAs={CameraIcon}
-                label={i18n.t("editProfile.bottomSheetModal.takePhoto")}
+                label={i18n.t("editProfileScreen.bottomSheetModal.takePhoto")}
                 withDivider
                 disabled={
                   changeProfilePictureMutation.isPending ||
                   removeProfilePictureMutation.isPending
                 }
+                onPress={goToTakeProfilePicture}
               />
               <BottomSheetItem
                 iconAs={GalleryHorizontalEndIcon}
-                label={i18n.t("editProfile.bottomSheetModal.chooseFromLibrary")}
+                label={i18n.t(
+                  "editProfileScreen.bottomSheetModal.chooseFromLibrary"
+                )}
                 withDivider={data.profilePicture ? true : false}
                 onPress={pickImage}
                 disabled={
@@ -521,7 +548,7 @@ const EditProfileScreen = ({
                 <BottomSheetItem
                   iconAs={Trash2Icon}
                   label={i18n.t(
-                    "editProfile.bottomSheetModal.removeProfilePicture"
+                    "editProfileScreen.bottomSheetModal.removeProfilePicture"
                   )}
                   variant="danger"
                   onPress={removeProfilePicture}

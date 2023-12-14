@@ -20,6 +20,11 @@ import { useMeQuery } from "@/queries/useMeQuery";
 import Biography from "@/components/user_profile/biography/biography.component";
 import { TouchableOpacity } from "react-native";
 import { UserCog2Icon, Verified } from "lucide-react-native";
+import Infos from "@/components/user_profile/infos/infos.component";
+import { useQuery } from "@tanstack/react-query";
+import ProfileKeys from "./profile.keys";
+import { FetchUserFriendsCount } from "@/api/routes/friendships.route";
+import Counters from "@/components/profile/counters/counters.componenent";
 
 const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
   const insets = useSafeAreaInsets();
@@ -29,6 +34,16 @@ const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
   const tokenApi = useSelector((state: RootState) => state.auth.tokenApi);
 
   const { data, isLoading } = useMeQuery(tokenApi, isLoggedIn);
+
+  const { data: friendsCountData, isLoading: isLoadingFriendsCount } = useQuery(
+    {
+      queryKey: ProfileKeys.friendsCount,
+      queryFn: () => FetchUserFriendsCount(tokenApi),
+      enabled: isLoggedIn,
+      staleTime: 1000 * 60 * 5, // 5 minuti -> dopo il dato viene considerato vecchio, perciò viene rifetchato quando si entra nella schermata
+      gcTime: Infinity,
+    }
+  );
 
   React.useEffect(() => {
     if (data) {
@@ -60,6 +75,12 @@ const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
     });
   }, [data, navigation]);
 
+  const goToFriendsList = () => {
+    navigation.navigate("FriendsList", {
+      total: friendsCountData?.count,
+    });
+  };
+
   return (
     <View flex={1} backgroundColor="transparent">
       <ScrollView
@@ -70,8 +91,8 @@ const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
           paddingRight: insets.right + Layout.ScreenPaddingHorizontal,
           paddingBottom: insets.bottom,
           alignItems: "center",
+          gap: 16,
         }}
-        gap="$4"
         backgroundColor="transparent"
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
@@ -118,12 +139,21 @@ const ProfileScreen = ({ navigation }: ProfileStackScreenProps<"Profile">) => {
           width={200}
           colorMode={colorMode === "dark" ? "dark" : "light"}
         >
-          <Text fontFamily="Inter_800ExtraBold" size="3xl">
+          <Text fontFamily="Inter_800ExtraBold" size="3xl" textAlign="center">
             {data?.fullname}
           </Text>
         </Skeleton>
 
         <Biography biography={data?.biography} isLoading={isLoading} />
+
+        <Infos isLoading={isLoading} zodiacSign={data?.zodiacSign} />
+
+        <Counters
+          friendsCount={friendsCountData?.count}
+          isLoadingFriendsCount={isLoadingFriendsCount}
+          isLoadingSnapsCount={false}
+          onPressFriendsCount={goToFriendsList}
+        />
       </ScrollView>
     </View>
   );

@@ -15,7 +15,7 @@ import {
   AlertCircleIcon,
   FormControlErrorText,
 } from "@gluestack-ui/themed";
-import { Keyboard, Platform, TouchableOpacity } from "react-native";
+import { Platform, TouchableOpacity } from "react-native";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
@@ -110,8 +110,8 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
         _saveAuthToken(accessToken); // Mi salvo il token per attivare il login in automatico al prossimo avvio dell'app
 
         // Mi salvo lo UserId
-        let userId = validateOtpMutation.data.data.userId;
-        _saveUserId(userId.toString());
+        // let userId = validateOtpMutation.data.data.userId;
+        // _saveUserId(userId.toString());
 
         // Resetto il dto in redux
         dispatch(resetAuthDto());
@@ -128,13 +128,7 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
     }
   }, [validateOtpMutation.data, navigation, dispatch]);
 
-  const _onTouchStart = () => {
-    Keyboard.dismiss();
-  };
-
   const _handlePressResend = () => {
-    Keyboard.dismiss();
-
     if (authDto.sessionId) {
       resendOtpMutation.mutate({
         sessionId: authDto.sessionId,
@@ -166,8 +160,6 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
   };
 
   const _onCodeFilled = (code: string) => {
-    Keyboard.dismiss();
-
     if (!authDto.sessionId) {
       toast.show({
         placement: "top",
@@ -194,9 +186,9 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
     await SecureStore.setItemAsync(AuthTokenKey, token);
   };
 
-  const _saveUserId = async (userId: string) => {
-    await SecureStore.setItemAsync(UserIdKey, userId);
-  };
+  // const _saveUserId = async (userId: string) => {
+  //   await SecureStore.setItemAsync(UserIdKey, userId);
+  // };
 
   return (
     <KeyboardAvoidingView
@@ -223,9 +215,8 @@ const OtpScreen = ({ navigation, route }: AuthStackScreenProps<"Otp">) => {
               autoFocus={true}
               autoComplete="sms-otp"
               value={authDto.phoneNumberVerificationCode}
-              keyboardAppearance={colorMode === "dark" ? "dark" : "default"}
+              keyboardAppearance={colorMode === "dark" ? "dark" : "light"}
               onChangeText={_onChangeText}
-              // selectionColor={colorMode === "dark" ? "white" : "black"}
               fontFamily="Inter_900Black"
               size="3xl"
               textAlign="center"

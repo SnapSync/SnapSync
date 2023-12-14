@@ -158,6 +158,25 @@ export const ShowFriendship = async (
   }
 };
 
+export const FetchUserFriendsCount = async (
+  tokenApi: string
+): Promise<{
+  message: string;
+  count: number;
+}> => {
+  try {
+    const { data } = await client.get(`${path}/friends/count`, {
+      headers: {
+        Authorization: `Bearer ${tokenApi}`,
+      },
+    });
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const FetchReceivedFriendRequestsCount = async (
   tokenApi: string
 ): Promise<{

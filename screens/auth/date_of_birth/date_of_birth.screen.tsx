@@ -14,7 +14,7 @@ import {
   AlertCircleIcon,
   FormControlErrorText,
 } from "@gluestack-ui/themed";
-import { Keyboard, Platform } from "react-native";
+import { Platform } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
@@ -77,10 +77,6 @@ const DateOfBirthScreen = ({
       return;
     });
   }, [navigation]);
-
-  const _onTouchStart = () => {
-    Keyboard.dismiss();
-  };
 
   const onChangeTextMonthOfBirth = (value: string) => {
     if (value.length === 0) {
@@ -166,28 +162,6 @@ const DateOfBirthScreen = ({
   };
 
   const _onPress = () => {
-    // Keyboard.dismiss();
-
-    // if (!isConnected) {
-    //   // Mostro il toast, perchè l'utente si è disconnesso
-    //   toast.show({
-    //     placement: "top",
-    //     render: ({ id }) => {
-    //       return (
-    //         <Toast nativeID={"toast-" + id} action="warning" variant="accent">
-    //           <VStack space="xs">
-    //             <ToastDescription>
-    //               {i18n.t("errors.noInternetConnection")}
-    //             </ToastDescription>
-    //           </VStack>
-    //         </Toast>
-    //       );
-    //     },
-    //   });
-
-    //   return;
-    // }
-
     if (
       !authDto.dayOfBirth ||
       !authDto.monthOfBirth ||
@@ -248,7 +222,6 @@ const DateOfBirthScreen = ({
                   authDto.dayOfBirth ? authDto.dayOfBirth.toString() : undefined
                 }
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                // selectionColor={colorMode === "dark" ? "white" : "black"}
                 fontFamily="Inter_900Black"
                 size="3xl"
                 textAlign="center"
@@ -268,7 +241,6 @@ const DateOfBirthScreen = ({
                 ref={inputRefMonthOfBirth}
                 onChangeText={onChangeTextMonthOfBirth}
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                // selectionColor={colorMode === "dark" ? "white" : "black"}
                 fontFamily="Inter_900Black"
                 size="3xl"
                 textAlign="center"
@@ -288,7 +260,6 @@ const DateOfBirthScreen = ({
                     : undefined
                 }
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                // selectionColor={colorMode === "dark" ? "white" : "black"}
                 fontFamily="Inter_900Black"
                 size="3xl"
                 textAlign="center"

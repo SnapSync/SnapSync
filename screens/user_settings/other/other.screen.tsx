@@ -15,8 +15,10 @@ import {
   VStack,
   ToastDescription,
   ToastTitle,
+  ButtonIcon,
 } from "@gluestack-ui/themed";
 import { useQueryClient } from "@tanstack/react-query";
+import { UserCircle2Icon } from "lucide-react-native";
 import React from "react";
 import { Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -87,7 +89,7 @@ const OtherScreen = () => {
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* <Pressable
+        <Pressable
           onPress={clearCache}
           gap="$2"
           borderRadius="$xl"
@@ -106,25 +108,17 @@ const OtherScreen = () => {
         >
           <Icon as={TrashIcon} size="sm" />
           <Text fontSize="$sm" lineHeight="$sm">
-            {i18n.t("other.clearCache")}
+            {i18n.t("otherScreen.clearCache")}
           </Text>
-        </Pressable> */}
-        <Button
-          action="secondary"
-          borderRadius="$xl"
-          size="lg"
-          onPress={clearCache}
-          marginBottom="$10"
-        >
-          <ButtonText>{i18n.t("other.clearCache")}</ButtonText>
-        </Button>
+        </Pressable>
         <Button
           action="negative"
           borderRadius="$xl"
           size="lg"
           onPress={deleteAccount}
         >
-          <ButtonText>{i18n.t("other.deleteAccount")}</ButtonText>
+          <ButtonIcon as={UserCircle2Icon} />
+          <ButtonText>{i18n.t("otherScreen.deleteAccount")}</ButtonText>
         </Button>
       </ScrollView>
     </View>

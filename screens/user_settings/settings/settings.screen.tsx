@@ -36,6 +36,9 @@ import {
   UpdateAllowSyncContacts,
 } from "@/api/routes/settings.route";
 import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
+import * as StoreReview from "expo-store-review";
+import * as Linking from "expo-linking";
+import { Platform } from "react-native";
 
 const DefaultView = ({
   colorMode,
@@ -133,18 +136,18 @@ const SettingsScreen = ({
 
   const { data } = useMeQuery(tokenApi, isLoggedIn);
 
-  const {
-    data: webInfo,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: SettingsKeys.webInfo,
-    queryFn: () => FetchWebInfo(tokenApi),
-    enabled: isLoggedIn,
-    staleTime: 1000 * 60 * 60, // 1 ora, poichè il webInfo non cambia molto spesso, e se cambia, viene aggiornato con il mutation
-    gcTime: Infinity,
-  });
-  useRefreshOnFocus(refetch);
+  // const {
+  //   data: webInfo,
+  //   isLoading,
+  //   refetch,
+  // } = useQuery({
+  //   queryKey: SettingsKeys.webInfo,
+  //   queryFn: () => FetchWebInfo(tokenApi),
+  //   enabled: isLoggedIn,
+  //   staleTime: 1000 * 60 * 60, // 1 ora, poichè il webInfo non cambia molto spesso, e se cambia, viene aggiornato con il mutation
+  //   gcTime: Infinity,
+  // });
+  // useRefreshOnFocus(refetch);
 
   const [isLoadingLogout, setIsLoadingLogout] = React.useState(false);
 
@@ -172,6 +175,20 @@ const SettingsScreen = ({
 
   const onToggleAllowSyncContacts = (value: boolean) => {
     updateAllowSyncContactsMutation.mutate({ allowSyncContacts: value });
+  };
+
+  const rateApp = async () => {
+    // https://docs.expo.dev/versions/latest/sdk/storereview/#storereviewstoreurl
+
+    if (Platform.OS === "android") {
+      // Open the Android Play Store directly
+      //Linking.openURL(`market://details?id=${androidPackageName}&showAllReviews=true`);
+    } else if (Platform.OS === "ios") {
+      // Open the iOS App Store directly
+      // Linking.openURL(
+      //   `itms-apps://itunes.apple.com/app/viewContentsUserReviews/id${itunesItemId}?action=write-review`
+      // );
+    }
   };
 
   if (isLoadingLogout) {
@@ -265,26 +282,28 @@ const SettingsScreen = ({
 
         <SettingSectionHeader
           iconAs={CogIcon}
-          sectionName={i18n.t("userSettings.settings.title")}
+          sectionName={i18n.t("userSettingsScreen.settings.title")}
         />
         <DefaultView colorMode={colorMode}>
           <SettingItem
-            label={i18n.t("userSettings.settings.items.notificationTitle")}
+            label={i18n.t(
+              "userSettingsScreen.settings.items.notificationTitle"
+            )}
             // onPress={() => navigation.navigate("Account")}
           />
           <Divider />
           <SettingItem
-            label={i18n.t("userSettings.settings.items.otherTitle")}
+            label={i18n.t("userSettingsScreen.settings.items.otherTitle")}
             onPress={() => navigation.navigate("Other")}
           />
         </DefaultView>
 
         <SettingSectionHeader
           iconAs={LockIcon}
-          sectionName={i18n.t("userSettings.privacy.title")}
+          sectionName={i18n.t("userSettingsScreen.privacy.title")}
         />
         <DefaultView colorMode={colorMode}>
-          <SettingItem
+          {/* <SettingItem
             label={i18n.t("userSettings.privacy.items.syncContactsTitle")}
             showSwitch
             valueSwitch={webInfo?.webInfo.allowSyncContacts ?? false}
@@ -293,30 +312,31 @@ const SettingsScreen = ({
               updateAllowSyncContactsMutation.isPending || isLoading
             }
           />
-          <Divider />
+          <Divider /> */}
           <SettingItem
-            label={i18n.t("userSettings.privacy.items.blockedUsersTitle")}
+            label={i18n.t("userSettingsScreen.privacy.items.blockedUsersTitle")}
             onPress={() => navigation.navigate("BlockedUsers")}
           />
         </DefaultView>
 
         <SettingSectionHeader
           iconAs={InfoIcon}
-          sectionName={i18n.t("userSettings.more.title")}
+          sectionName={i18n.t("userSettingsScreen.more.title")}
         />
         <DefaultView colorMode={colorMode}>
           <SettingItem
-            label={i18n.t("userSettings.more.items.aboutTitle")}
+            label={i18n.t("userSettingsScreen.more.items.aboutTitle")}
             iconAs={HelpCircleIcon}
           />
           <Divider />
           <SettingItem
-            label={i18n.t("userSettings.more.items.rateThisAppTitle")}
+            label={i18n.t("userSettingsScreen.more.items.rateThisAppTitle")}
             iconAs={StarIcon}
+            onPress={rateApp}
           />
           <Divider />
           <SettingItem
-            label={i18n.t("userSettings.more.items.logoutTitle")}
+            label={i18n.t("userSettingsScreen.more.items.logoutTitle")}
             variant="danger"
             iconAs={LogOutIcon}
             onPress={() => setIsLoadingLogout(true)}

@@ -3,8 +3,8 @@ import { MainStackParamList } from "@/types";
 import React from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import DiscoveryStack from "./discovery.stack";
-import ProfileScreen from "@/screens/profile/profile/profile.screen";
 import ProfileStack from "./profile.stack";
+import * as Contacts from "expo-contacts";
 
 const Tab = createMaterialTopTabNavigator<MainStackParamList>();
 
@@ -14,16 +14,25 @@ const MainStack = () => {
   //     const { status } = await Contacts.requestPermissionsAsync();
   //     if (status === "granted") {
   //       const { data } = await Contacts.getContactsAsync({
-  //         fields: [
-  //           Contacts.Fields.PhoneNumbers,
-  //           Contacts.Fields.Nickname,
-  //           Contacts.Fields.FirstName,
-  //           Contacts.Fields.LastName,
-  //           Contacts.Fields.Name,
-  //         ],
+  //         fields: [Contacts.Fields.ContactType, Contacts.Fields.PhoneNumbers],
   //       });
 
-  //       console.log(data.filter((contact) => contact.nickname !== undefined));
+  //       const digits: Array<string> = [];
+
+  //       for (let i = 0; i < data.length; i++) {
+  //         const contactType = data[i].contactType;
+  //         const phoneNumbers = data[i].phoneNumbers;
+  //         if (
+  //           phoneNumbers &&
+  //           phoneNumbers.length > 0 &&
+  //           contactType === "person"
+  //         ) {
+  //           const d = phoneNumbers[0].digits;
+  //           if (d) digits.push(d);
+  //         }
+  //       }
+
+  //       console.log(digits);
   //     }
   //   })();
   // }, []);

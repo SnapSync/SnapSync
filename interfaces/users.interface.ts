@@ -5,12 +5,18 @@ export interface IUserProfilePicture {
   blurHash: string | null;
 }
 
+export interface IUserProfileZodiacSign {
+  name: string;
+  symbol: string;
+}
+
 export interface IApiUser {
   id: number;
   username: string;
   fullname: string;
   isVerified: boolean;
   profilePicture: IUserProfilePicture | null;
+  zodiacSign: IUserProfileZodiacSign;
 
   biography?: string | null;
 

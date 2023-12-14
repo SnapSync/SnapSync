@@ -7,7 +7,11 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "extra": {
-      "oneSignalAppId": "5802ef55-dbf6-490b-af96-74ae4852882e"
+      "apiUrl": "http://192.168.178.141:8000",
+      "oneSignalAppId": "5802ef55-dbf6-490b-af96-74ae4852882e",
+      "eas": {
+        "projectId": "d2919899-acde-410e-b83f-09d87307a566"
+      }
     },
     "splash": {
       "image": "./assets/splash.png",
@@ -18,7 +22,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.snapsync.app",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSContactsUsageDescription": "Allow $(PRODUCT_NAME) to access your contacts."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +33,12 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.snapsync.app",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.READ_CONTACTS",
+        "android.permission.WRITE_CONTACTS",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -38,6 +50,12 @@
     "plugins": [
       "expo-localization",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+        }
+      ],
+      [
         "expo-contacts",
         {
           "contactsPermission": "Allow $(PRODUCT_NAME) to access your contacts."
@@ -48,13 +66,8 @@
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos."
         }
-      ],
-      [
-        "onesignal-expo-plugin", // @see -> https://documentation.onesignal.com/docs/react-native-expo-sdk-setup
-        {
-          "mode": "development" // development | production
-        }
       ]
-    ]
+    ],
+    "owner": "matteourso2002"
   }
 }

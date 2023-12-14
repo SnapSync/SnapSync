@@ -74,7 +74,10 @@
     "react-native-web": "~0.19.6",
     "react-redux": "^8.1.3",
     "usehooks-ts": "^2.9.1",
-    "yup": "^1.3.2"
+    "yup": "^1.3.2",
+    "expo-camera": "~13.4.4",
+    "expo-store-review": "~6.4.0",
+    "expo-linking": "~5.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -35,6 +35,25 @@ export const FetchUserBlockedUsers = async (
   }
 };
 
+export const FetchUserBlockedUsersCount = async (
+  tokenApi: string
+): Promise<{
+  total: number;
+  message: string;
+}> => {
+  try {
+    const { data } = await client.get(`${path}/blocked_users/count`, {
+      headers: {
+        Authorization: `Bearer ${tokenApi}`,
+      },
+    });
+
+    return data.count;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const FetchWebInfo = async (
   tokenApi: string
 ): Promise<IResponseWebInfo> => {

@@ -31,6 +31,25 @@ export const FetchMe = async (tokenApi: string): Promise<IApiUser> => {
   }
 };
 
+export const FetchMeJoinedAt = async (
+  tokenApi: string
+): Promise<{
+  message: string;
+  joinedAt: number;
+}> => {
+  try {
+    const { data } = await client.get(`${path}/me/joined_at`, {
+      headers: {
+        Authorization: `Bearer ${tokenApi}`,
+      },
+    });
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const FetchUserProfileById = async (
   id: number,
   tokenApi: string

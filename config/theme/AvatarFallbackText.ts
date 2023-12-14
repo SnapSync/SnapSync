@@ -1,14 +1,17 @@
-import { createStyle } from '@gluestack-style/react';
+import { createStyle } from "@gluestack-style/react";
 
 export const AvatarFallbackText = createStyle({
-  color: '$textLight0',
-  fontWeight: '$semibold',
-  props: {
-    size: 'xl',
+  color: "$textLight950",
+  fontWeight: "$semibold",
+  _dark: {
+    color: "$textDark0",
   },
-  overflow: 'hidden',
-  textTransform: 'uppercase',
+  props: {
+    size: "xl",
+  },
+  overflow: "hidden",
+  textTransform: "uppercase",
   _web: {
-    cursor: 'default',
+    cursor: "default",
   },
 });

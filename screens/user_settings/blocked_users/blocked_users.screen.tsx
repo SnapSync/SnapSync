@@ -7,6 +7,8 @@ import {
   useColorMode,
   Text,
   ButtonSpinner,
+  Icon,
+  ChevronLeftIcon,
 } from "@gluestack-ui/themed";
 import { FlashList } from "@shopify/flash-list";
 import {
@@ -25,7 +27,7 @@ import UserItem, {
 } from "@/components/user_item/user_item.component";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
-import { Alert, RefreshControl } from "react-native";
+import { Alert, RefreshControl, TouchableOpacity } from "react-native";
 import i18n from "@/lang";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { SCREEN_HEIGHT } from "@/utils/helper";
@@ -35,7 +37,6 @@ import UserProfileKeys from "@/screens/user_profile/user_profile/user_profile.ke
 
 const BlockedUsersScreen = ({
   navigation,
-  route,
 }: UserSettingsStackScreenProps<"BlockedUsers">) => {
   const insets = useSafeAreaInsets();
   const colorMode = useColorMode();
@@ -92,11 +93,38 @@ const BlockedUsersScreen = ({
     initialPageParam: 1,
     queryFn: ({ pageParam = 1 }) => FetchUserBlockedUsers(pageParam, tokenApi),
     enabled: isLoggedIn,
+    staleTime: 1000 * 60 * 1, // 1 minute
     gcTime: Infinity,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     getPreviousPageParam: (firstPage) => firstPage.prevCursor,
-    refetchOnWindowFocus: "always",
   });
+
+  React.useEffect(() => {
+    return () => {
+      queryClient.removeQueries({
+        queryKey: BlockedUsersKeys.infiniteBlockedUsers,
+        exact: true,
+      });
+    };
+  }, []);
+
+  React.useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity onPress={goBack}>
+          <Icon
+            as={ChevronLeftIcon}
+            size="xl"
+            color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
+          />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
+  const goBack = () => navigation.goBack();
+
+  const _onEndReached = () => hasNextPage && fetchNextPage();
 
   const unblock = (userId: number, username: string) => {
     Alert.alert(
@@ -188,25 +216,21 @@ const BlockedUsersScreen = ({
                 </Text>
               ) : (
                 <Text size="sm" fontFamily="Inter_600SemiBold">
-                  {i18n.t("blockedUsers.noBlockedUsers")}
+                  {i18n.t("blockedUsersScreen.noBlockedUsers")}
                 </Text>
               )}
             </View>
           );
         }}
         onEndReachedThreshold={0.5}
-        onEndReached={() => {
-          if (hasNextPage) {
-            fetchNextPage();
-          }
-        }}
+        onEndReached={_onEndReached}
         ListFooterComponent={() =>
           isFetchingNextPage ? <Spinner size="small" /> : null
         }
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={() => refetch()}
+            onRefresh={refetch}
             tintColor={colorMode === "dark" ? "#FCFCFC" : "#171717"}
           />
         }

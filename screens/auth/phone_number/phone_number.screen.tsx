@@ -16,7 +16,7 @@ import {
   FormControlErrorText,
   Pressable,
 } from "@gluestack-ui/themed";
-import { Keyboard, Platform } from "react-native";
+import { Platform } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
@@ -67,10 +67,6 @@ const PhoneNumberScreen = ({
       return;
     });
   }, [navigation]);
-
-  const _onTouchStart = () => {
-    Keyboard.dismiss();
-  };
 
   const _onChangeText = (text: string) => {
     // Recupero il getNationalNumber
@@ -204,7 +200,6 @@ const PhoneNumberScreen = ({
                 onChangeText={_onChangeText}
                 value={authDto.phoneNumber}
                 keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-                // selectionColor={colorMode === "dark" ? "white" : "black"}
                 fontFamily="Inter_900Black"
                 size="3xl"
               />

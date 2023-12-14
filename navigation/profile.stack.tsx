@@ -6,6 +6,8 @@ import { ChevronLeftIcon, Icon, useColorMode } from "@gluestack-ui/themed";
 import { useNavigation } from "@react-navigation/native";
 import ProfileScreen from "@/screens/profile/profile/profile.screen";
 import { UserCog2Icon } from "lucide-react-native";
+import FriendsListScreen from "@/screens/profile/friends_list/friends_list.screen";
+import i18n from "@/lang";
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
@@ -21,15 +23,7 @@ const ProfileStack = () => {
         gestureEnabled: false,
         headerShown: true,
         headerShadowVisible: false,
-        headerLeft: () => (
-          <TouchableOpacity onPress={goBack}>
-            <Icon
-              as={ChevronLeftIcon}
-              size="xl"
-              color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
-            />
-          </TouchableOpacity>
-        ),
+        headerLeft: () => null,
         headerBackVisible: false,
         headerTitleAlign: "center",
         headerTitleStyle: {
@@ -42,6 +36,25 @@ const ProfileStack = () => {
         component={ProfileScreen}
         options={({ navigation, route }) => ({
           headerTitle: route.params?.username || "",
+        })}
+      />
+      <Stack.Screen
+        name="FriendsList"
+        component={FriendsListScreen}
+        options={({ navigation, route }) => ({
+          headerTitle: i18n.t("friendsListScreen.screenTitle"),
+          headerTitleStyle: {
+            fontFamily: "Inter_500Medium",
+          },
+          // headerLeft: () => (
+          //   <TouchableOpacity onPress={goBack}>
+          //     <Icon
+          //       as={ChevronLeftIcon}
+          //       size="xl"
+          //       color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
+          //     />
+          //   </TouchableOpacity>
+          // ),
         })}
       />
     </Stack.Navigator>

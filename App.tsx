@@ -17,13 +17,12 @@ import NetInfo from "@react-native-community/netinfo";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister"; // so we can create a React Query persistor using Async Storage.
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"; // set of utilities to queryClient interaction with the persistor
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useColorScheme } from "react-native";
 import { ThemeProvider } from "@rneui/themed";
-import { LogLevel, OneSignal } from "react-native-onesignal";
-import Constants from "expo-constants";
+// import { LogLevel, OneSignal } from "react-native-onesignal";
+// import Constants from "expo-constants";
 
-OneSignal.Debug.setLogLevel(LogLevel.Verbose);
-OneSignal.initialize(Constants.expoConfig?.extra?.oneSignalAppId);
+// OneSignal.Debug.setLogLevel(LogLevel.Verbose);
+// OneSignal.initialize(Constants.expoConfig?.extra?.oneSignalAppId);
 
 // Also need enable notifications to complete OneSignal setup
 // OneSignal.Notifications.requestPermission(true);
@@ -58,12 +57,9 @@ const MyThemeLight = {
 };
 
 export default function App() {
-  const { appIsReady, cachedAuthToken, cachedUserId } = useCachedResources();
+  const { appIsReady, cachedAuthToken } = useCachedResources();
 
-  const colorScheme = useColorScheme();
-  // const colorMode = useColorMode();
-
-  const [colorMode, setColorMode] = React.useState<"light" | "dark">("dark");
+  const [colorMode] = React.useState<"light" | "dark">("light");
 
   useEffect(() => {
     return NetInfo.addEventListener((state) => {
@@ -112,10 +108,7 @@ export default function App() {
                   }}
                 >
                   <BottomSheetModalProvider>
-                    <RootNavigation
-                      authToken={cachedAuthToken}
-                      userId={cachedUserId}
-                    />
+                    <RootNavigation authToken={cachedAuthToken} />
                     <StatusBar
                       style={colorMode === "dark" ? "light" : "dark"}
                     />

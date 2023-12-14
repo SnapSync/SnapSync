@@ -1,20 +1,13 @@
 import axios from "axios";
+import Constants from "expo-constants";
 
-const IP = "10.167.12.147";
-export const API_URL = `http://${IP}:8000`;
+export const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
 export interface ErrorResponseType {
   message: string;
   statusCode: number;
   type?: string;
   data?: any;
-}
-
-export interface Pagination {
-  total: number;
-  page: number;
-  size: number;
-  pages: number;
 }
 
 export function instanceOfErrorResponseType(

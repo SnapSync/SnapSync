@@ -15,7 +15,6 @@ import AnimatedNavbar, {
 } from "@/components/home/animated_navbar/animated_navbar.component";
 import { useMeQuery } from "@/queries/useMeQuery";
 import RequestsKeys from "@/screens/discovery/requests/requests.keys";
-import { RefreshControl } from "react-native";
 
 const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
   const insets = useSafeAreaInsets();
@@ -28,22 +27,15 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
   const lastContentOffset = useSharedValue(0);
   const isScrolling = useSharedValue(false);
 
-  const {
-    data: me,
-    isLoading,
-    refetch,
-    isRefetching,
-  } = useMeQuery(tokenApi, isLoggedIn);
+  const { data: me, isLoading } = useMeQuery(tokenApi, isLoggedIn);
 
-  const { data } = useQuery({
-    queryKey: RequestsKeys.countReceivedFriendRequests,
-    queryFn: () => FetchReceivedFriendRequestsCount(tokenApi),
-    enabled: isLoggedIn,
-    // staleTime: Infinity,
-    // gcTime: Infinity,
-  });
-
-  // useRefreshOnFocus(receivedFriendRequestsCountRefetch);
+  // const { data } = useQuery({
+  //   queryKey: RequestsKeys.countReceivedFriendRequests,
+  //   queryFn: () => FetchReceivedFriendRequestsCount(tokenApi),
+  //   enabled: isLoggedIn,
+  //   staleTime: Infinity,
+  //   gcTime: Infinity,
+  // });
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -94,7 +86,7 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
         isLoadingMe={isLoading}
         onPressLeftIcon={_onPressLeftIcon}
         onPressRightIcon={_onPressRightIcon}
-        pendingFriendRequestsCount={data?.count}
+        // pendingFriendRequestsCount={data?.count}
       />
 
       <Animated.FlatList
@@ -114,14 +106,14 @@ const HomeScreen = ({ navigation }: MainStackScreenProps<"Home">) => {
             />
           );
         }}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            progressViewOffset={ANIMATED_NAVBAR_HEIGHT + insets.top}
-            onRefresh={() => refetch()}
-            tintColor={colorMode === "dark" ? "#FCFCFC" : "#171717"}
-          />
-        }
+        // refreshControl={
+        //   <RefreshControl
+        //     refreshing={isRefetching}
+        //     progressViewOffset={ANIMATED_NAVBAR_HEIGHT + insets.top}
+        //     onRefresh={() => refetch()}
+        //     tintColor={colorMode === "dark" ? "#FCFCFC" : "#171717"}
+        //   />
+        // }
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
         onScroll={scrollHandler}

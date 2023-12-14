@@ -14,17 +14,51 @@ const itTranslactions = {
   delete: 'Elimina',
   clear: 'Svuota',
   seeAll: 'Vedi tutti',
+  accept: 'Accetta',
+  add: 'Aggiungi',
+  reject: 'Rifiuta',
+  ok: 'Ok',
 
   friends: 'Amici',
   requests: 'Richieste',
   suggestions: 'Per te',
-  mutualFriends: 'Amici in comune',
+  mutualFriends: {
+    zero: 'Nessun amico in comune',
+    one: '{{count}} amico in comune',
+    other: '{{count}} amici in comune',
+
+  },
+  snaps: 'Snaps',
 
   exit: 'Esci',
 
   lotOfMutualFriends: 'Molti amici in comune',
 
-  userSettings: {
+  // SCREENS
+
+  profileScreen: {
+    friendsCount: {
+      zero: 'Amici',
+      one: 'Amico',
+      other: 'Amici',
+    },
+    snapsCount: {
+      zero: 'Snaps',
+      one: 'Snap',
+      other: 'Snaps',
+    },
+  },
+
+  friendsListScreen: {
+    screenTitle: 'Amici',
+    count: {
+      zero: 'Nessun amico',
+      one: '{{count}} amico',
+      other: '{{count}} amici',
+    }
+  },
+
+  userSettingsScreen: {
     screenTitle: 'Impostazioni',
 
     settings: {
@@ -32,8 +66,7 @@ const itTranslactions = {
 
       items: {
         notificationTitle: 'Notifiche',
-        otherTitle: 'Altro',
-        clearCacheTitle: 'Svuota cache',
+        otherTitle: 'Altro'
       }
     },
 
@@ -58,12 +91,16 @@ const itTranslactions = {
     }
   },
 
-  blockedUsers: {
+  blockedUsersScreen: {
     screenTitle: 'Utenti bloccati',
     noBlockedUsers: 'Non hai bloccato nessun utente.',
   },
 
-  editProfile: {
+  takeProfilePictureScreen: {
+    requestPermission: 'Concedi i permessi per accedere alla fotocamera.',
+  },
+
+  editProfileScreen: {
     screenTitle: 'Modifica profilo',
 
     bottomSheetModal: {
@@ -73,7 +110,7 @@ const itTranslactions = {
     }
   },
 
-  other: {
+  otherScreen: {
     screenTitle: 'Altro',
 
     clearCache: 'Svuota cache',
@@ -140,9 +177,17 @@ const itTranslactions = {
   },
 
   // Discover
-  discovery: {
+  discoveryScreen: {
     screenTitle: "Scopri",
     placeholder: "Cerca nuovi amici...",
+  },
+
+  incomingFriendRequestsScreen: {
+    screenTitle: {
+      zero: 'Nessuna richiesta di amicizia',
+      one: '{{count}} richiesta di amicizia',
+      other: '{{count}} richieste di amicizia',
+    }
   },
 
   friendsRoute: {
@@ -192,6 +237,11 @@ const itTranslactions = {
     successDescription: "La cache è stata svuotata con successo.",
   },
 
+  rejectAlert: {
+    title: "Sei sicuro?",
+    description: "Sei sicuro di voler rifutare la richiesta di amicizia?",
+  },
+
   errors: {
     generic: "Si è verificato un errore, riprova più tardi.",
     noInternetConnection: "Nessuna connessione a Internet.",
@@ -230,7 +280,21 @@ const itTranslactions = {
     biography: "Biografia",
   },
 
-  countries: Countries
+  countries: Countries,
+  zodiacSigns: {
+    aquarius: "Acquario",
+    pisces: "Pesci",
+    aries: "Ariete",
+    taurus: "Toro",
+    gemini: "Gemelli",
+    cancer: "Cancro",
+    leo: "Leone",
+    virgo: "Vergine",
+    libra: "Bilancia",
+    scorpio: "Scorpione",
+    sagittarius: "Sagittario",
+    capricorn: "Capricorno",
+  },
 }
 
 export default itTranslactions;

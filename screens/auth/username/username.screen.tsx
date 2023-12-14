@@ -3,7 +3,6 @@ import {
   KeyboardAvoidingView,
   Input,
   InputField,
-  View,
   useToast,
   Toast,
   VStack,
@@ -14,7 +13,7 @@ import {
   AlertCircleIcon,
   FormControlErrorText,
 } from "@gluestack-ui/themed";
-import { Keyboard, Platform } from "react-native";
+import { Platform } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
@@ -78,8 +77,8 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
       _saveAuthToken(accessToken); // Mi salvo il token per attivare il login in automatico al prossimo avvio dell'app
 
       // Mi salvo lo UserId
-      let userId = signupMutation.data.data.userId;
-      _saveUserId(userId.toString());
+      // let userId = signupMutation.data.data.userId;
+      // _saveUserId(userId.toString());
 
       // Resetto il dto in redux
       dispatch(resetAuthDto());
@@ -95,25 +94,19 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
     }
   }, [signupMutation.data, dispatch]);
 
-  const _dismissKeyboard = () => {
-    Keyboard.dismiss();
-  };
-
   const _saveAuthToken = async (token: string) => {
     await SecureStore.setItemAsync(AuthTokenKey, token);
   };
 
-  const _saveUserId = async (userId: string) => {
-    await SecureStore.setItemAsync(UserIdKey, userId);
-  };
+  // const _saveUserId = async (userId: string) => {
+  //   await SecureStore.setItemAsync(UserIdKey, userId);
+  // };
 
   const _onChangeText = (text: string) => {
     dispatch(updateUsername(text.toLocaleLowerCase()));
   };
 
   const _onPress = () => {
-    // Keyboard.dismiss();
-
     if (!authDto.sessionId || !authDto.username) {
       toast.show({
         placement: "top",
@@ -143,10 +136,6 @@ const UsernameScreen = ({}: AuthStackScreenProps<"Username">) => {
       paddingRight={insets.right + Layout.DefaultMarginHorizontal}
       paddingTop={insets.top}
       flex={1}
-      onTouchStart={_dismissKeyboard}
-      bgColor={
-        colorMode === "light" ? "$backgroundLight0" : "$backgroundDark950"
-      }
     >
       <TopSection title={i18n.t("auth.username.title")}>
         <FormControl

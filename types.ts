@@ -3,7 +3,10 @@ import type {
   CompositeScreenProps,
   NavigatorScreenParams,
 } from "@react-navigation/native";
-import { IUserProfilePicture } from "./interfaces/users.interface";
+import {
+  IUserProfilePicture,
+  IUserProfileZodiacSign,
+} from "./interfaces/users.interface";
 
 declare global {
   namespace ReactNavigation {
@@ -67,6 +70,9 @@ export type ProfileStackParamList = {
     username?: string;
     isVerified?: boolean;
   };
+  FriendsList: {
+    total?: number; // Gli passo total al fine di aver un caricamento più veritiero
+  };
 };
 
 export type ProfileStackScreenProps<
@@ -83,6 +89,7 @@ export type UserProfileStackParamList = {
     id: number;
 
     profilePicture?: IUserProfilePicture | null;
+    zodiacSign?: IUserProfileZodiacSign;
 
     username?: string;
     fullname?: string;
@@ -119,6 +126,9 @@ export type DiscoveryStackParamList = {
   OutgoingFriendRequests: {
     total?: number; // Gli passo total al fine di aver un caricamento più veritiero
   };
+  IncomingFriendRequests: {
+    total?: number; // Gli passo total al fine di aver un caricamento più veritiero
+  };
 };
 
 export type DiscoveryStackScreenProps<
@@ -137,6 +147,7 @@ export type UserSettingsStackParamList = {
   };
 
   EditProfile: undefined;
+  TakeProfilePicture: undefined;
 
   Other: undefined;
 

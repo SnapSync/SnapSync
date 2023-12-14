@@ -124,92 +124,31 @@ const UserItem = ({
             {user?.fullname}
           </Text>
         </Skeleton>
-        {/* TODO: {user &&
-        ((user.mutualFriends && user.mutualFriends >= 20) ||
-          user.contactNickname ||
-          (user.streak && user.streak > 0)) ? (
-          <View
-            flexDirection="row"
-            justifyContent="space-between"
-            alignItems="center"
-            flex={1}
-            backgroundColor="transparent"
-          >
-            {user && user.mutualFriends && user.mutualFriends >= 20 ? (
-              <View
-                flex={2}
-                alignItems="flex-start"
-                justifyContent="center"
-                backgroundColor="transparent"
-              >
-                <Text
-                  numberOfLines={1}
-                  // fontFamily="Inter-Regular"
-                  fontSize="$xs"
-                  lineHeight="$xs"
-                  flexWrap="wrap"
-                  flexShrink={1}
-                  color={
-                    colorMode === "dark" ? "$textDark400" : "$textLight700"
-                  }
-                >
-                  {i18n.t("lotOfMutualFriends")}
-                </Text>
-              </View>
-            ) : user && user.contactNickname ? (
-              <View
-                flexDirection="row"
-                gap={3}
-                alignItems="center"
-                flex={1}
-                backgroundColor="transparent"
-              >
-                <Icon
-                  as={Contact2Icon}
-                  size="2xs"
-                  // color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
-                />
-                <Text
-                  numberOfLines={1}
-                  // fontFamily="Inter-Regular"
-                  fontSize="$xs"
-                  lineHeight="$xs"
-                  flexWrap="wrap"
-                  flexShrink={1}
-                  color={
-                    colorMode === "dark" ? "$textDark400" : "$textLight700"
-                  }
-                >
-                  {user?.contactNickname}
-                </Text>
-              </View>
-            ) : null}
-            {user && user.streak && user.streak > 0 ? (
-              <View
-                flex={1}
-                alignItems={
-                  (user && user.mutualFriends && user.mutualFriends >= 20) ||
-                  (user && user.contactNickname)
-                    ? "flex-end"
-                    : "flex-start"
-                }
-                justifyContent="center"
-                backgroundColor="transparent"
-              >
-                <Text
-                  color={
-                    colorMode === "dark" ? "$textDark400" : "$textLight700"
-                  }
-                  // fontFamily="Inter-SemiBold"
-                  fontSize="$xs"
-                  lineHeight="$xs"
-                >
-                  {user.streak} 🔥
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        ) : null} */}
+        {user ? (
+          user.streak && user.streak > 0 ? (
+            <Text
+              isTruncated
+              flexShrink={1}
+              size="sm"
+              fontFamily="Inter_400Regular"
+            >
+              {user.streak} 🔥
+            </Text>
+          ) : user.mutualFriends ? (
+            <Text
+              isTruncated
+              flexShrink={1}
+              size="sm"
+              fontFamily="Inter_400Regular"
+            >
+              {user.mutualFriends > 20
+                ? `🤝 ${i18n.t("lotOfMutualFriends")}`
+                : `🤝 ${i18n.t("mutualFriends", {
+                    count: user.mutualFriends,
+                  })}`}
+            </Text>
+          ) : null
+        ) : null}
       </View>
     </Pressable>
   );

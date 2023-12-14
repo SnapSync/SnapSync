@@ -43,10 +43,9 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 type Props = {
   authToken?: string;
-  userId?: number;
 };
 
-const RootNavigation = ({ authToken, userId }: Props) => {
+const RootNavigation = ({ authToken }: Props) => {
   const { isConnected } = useConnectivity();
 
   const colorMode = useColorMode();

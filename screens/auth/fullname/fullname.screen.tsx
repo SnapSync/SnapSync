@@ -12,9 +12,8 @@ import {
   FormControlErrorIcon,
   AlertCircleIcon,
   FormControlErrorText,
-  Text,
 } from "@gluestack-ui/themed";
-import { Keyboard, Platform } from "react-native";
+import { Platform } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
@@ -52,10 +51,6 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
       navigation.navigate("DateOfBirth");
     },
   });
-
-  const _onTouchStart = () => {
-    Keyboard.dismiss();
-  };
 
   const _handleChangeText = (text: string) => {
     dispatch(updateFullname(text));
@@ -100,7 +95,7 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
           width="100%"
           isInvalid={validateFullnameMutation.isError}
         >
-          <Input borderWidth={0} height={70}>
+          <Input borderWidth={0} height="$10">
             <InputField
               onChangeText={_handleChangeText}
               value={authDto.fullName}
@@ -108,9 +103,7 @@ const FullNameScreen = ({ navigation }: AuthStackScreenProps<"FullName">) => {
               autoFocus={true}
               autoComplete="name"
               maxLength={FULLNAME_MAX_LENGTH}
-              keyboardAppearance={colorMode === "light" ? "light" : "dark"}
-              // selectionColor={colorMode === "dark" ? "white" : "black"}
-              // style={authStyles.input}
+              keyboardAppearance={colorMode === "dark" ? "dark" : "light"}
               onSubmitEditing={_onPress}
               fontFamily="Inter_900Black"
               size="3xl"
