@@ -9,6 +9,8 @@
     "extra": {
       "apiUrl": "http://192.168.178.141:8000",
       "oneSignalAppId": "5802ef55-dbf6-490b-af96-74ae4852882e",
+      "vexoApiKey": "499dfe56-7f29-400d-8eb2-7102fc25ef7a",
+      "sentryDsn": "https://56a992b8d410580b62383dfb50b2a0e6@o4506427867791360.ingest.sentry.io/4506427907506176",
       "eas": {
         "projectId": "d2919899-acde-410e-b83f-09d87307a566"
       }
@@ -50,12 +52,6 @@
     "plugins": [
       "expo-localization",
       [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
-        }
-      ],
-      [
         "expo-contacts",
         {
           "contactsPermission": "Allow $(PRODUCT_NAME) to access your contacts."
@@ -66,7 +62,16 @@
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos."
         }
-      ]
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "flipper": true
+          }
+        }
+      ],
+      "sentry-expo"
     ],
     "owner": "matteourso2002"
   }

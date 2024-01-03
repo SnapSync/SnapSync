@@ -8,12 +8,7 @@ export interface State {
 }
 
 const initialState: State = {
-  authDto: {
-    username: "",
-    yearOfBirth: null,
-    monthOfBirth: null,
-    dayOfBirth: null,
-  },
+  authDto: {},
 };
 
 export const authenticationSlice = createSlice({
@@ -29,13 +24,25 @@ export const authenticationSlice = createSlice({
     },
 
     updateMonthOfBirth: (state, action: PayloadAction<number | null>) => {
-      state.authDto.monthOfBirth = action.payload;
+      if (action.payload === null) {
+        state.authDto.monthOfBirth = undefined;
+      } else {
+        state.authDto.monthOfBirth = action.payload;
+      }
     },
     updateDayOfBirth: (state, action: PayloadAction<number | null>) => {
-      state.authDto.dayOfBirth = action.payload;
+      if (action.payload === null) {
+        state.authDto.dayOfBirth = undefined;
+      } else {
+        state.authDto.dayOfBirth = action.payload;
+      }
     },
     updateYearOfBirth: (state, action: PayloadAction<number | null>) => {
-      state.authDto.yearOfBirth = action.payload;
+      if (action.payload === null) {
+        state.authDto.yearOfBirth = undefined;
+      } else {
+        state.authDto.yearOfBirth = action.payload;
+      }
     },
 
     updatePhoneNumber: (state, action: PayloadAction<string>) => {
@@ -61,10 +68,13 @@ export const authenticationSlice = createSlice({
 
     resetAuthDto: (state) => {
       state.authDto = {
-        username: "",
-        yearOfBirth: null,
-        monthOfBirth: null,
-        dayOfBirth: null,
+        fullName: undefined,
+        username: undefined,
+        dayOfBirth: undefined,
+        monthOfBirth: undefined,
+        yearOfBirth: undefined,
+        phoneNumber: undefined,
+        phoneNumberVerificationCode: undefined,
       };
     },
   },

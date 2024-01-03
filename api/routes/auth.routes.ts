@@ -159,6 +159,7 @@ export const LoginWithAuthToken = async (
 };
 
 export const SignUp = async (
+  username: string,
   sessionId: string
 ): Promise<{
   data: ILoginResponse;
@@ -166,6 +167,7 @@ export const SignUp = async (
 }> => {
   try {
     const body = {
+      username: username,
       sessionId: sessionId,
     };
 

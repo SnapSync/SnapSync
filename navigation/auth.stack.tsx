@@ -5,31 +5,28 @@ import {
   updatePhoneNumberCountry,
   updateSessionId,
 } from "@/redux/features/authentication/authenticationSlice";
-import CountryListScreen from "@/screens/auth/country_list/country_list.screen";
-import DateOfBirthScreen from "@/screens/auth/date_of_birth/date_of_birth.screen";
-import FullNameScreen from "@/screens/auth/fullname/fullname.screen";
-import OtpScreen from "@/screens/auth/otp/otp.screen";
-import PhoneNumberScreen from "@/screens/auth/phone_number/phone_number.screen";
-import UsernameScreen from "@/screens/auth/username/username.screen";
+import CountryListScreen from "@/screens/auth_stack/country_list/country_list.screen";
+import DateOfBirthScreen from "@/screens/auth_stack/date_of_birth/date_of_birth.screen";
+import FullNameScreen from "@/screens/auth_stack/fullname/fullname.screen";
+import OtpScreen from "@/screens/auth_stack/otp/otp.screen";
+import PhoneNumberScreen from "@/screens/auth_stack/phone_number/phone_number.screen";
+import UsernameScreen from "@/screens/auth_stack/username/username.screen";
 import { AuthStackParamList } from "@/types";
-import { useColorMode } from "@gluestack-style/react";
-import { CloseIcon, Icon } from "@gluestack-ui/themed";
+import { CloseIcon, Icon, useColorMode } from "@gluestack-ui/themed";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
-import { TouchableOpacity } from "react-native";
+import { Platform, TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import * as CountyCodesList from "country-codes-list";
 import * as Localization from "expo-localization";
-import { useNavigation } from "@react-navigation/native";
-import AuthKeys from "@/screens/auth/auth.keys";
+import AuthKeys from "@/screens/auth_stack/auth.keys";
 
 // Utilizzo un NativeStackNavigator per avere la possibilità di utilizzare: https://reactnavigation.org/docs/native-stack-navigator/#headersearchbaroptions
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 const AuthStack = () => {
   const colorMode = useColorMode();
-  const navigation = useNavigation();
 
   const authDto = useSelector(
     (state: RootState) => state.authentication.authDto
@@ -64,18 +61,17 @@ const AuthStack = () => {
     }
   }, [authDto, Localization, dispatch]);
 
-  const goBack = () => navigation.goBack();
-
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
-        headerTransparent: true,
+        headerTransparent: false,
         headerBackVisible: false,
         headerLeft: () => null,
         headerTitleAlign: "center",
         headerTitle: "",
         gestureEnabled: false,
+        headerShadowVisible: false,
       }}
     >
       <Stack.Screen name="FullName" component={FullNameScreen} />
@@ -84,9 +80,9 @@ const AuthStack = () => {
       <Stack.Screen
         name="CountryList"
         component={CountryListScreen}
-        options={{
+        options={({ navigation }) => ({
           headerLeft: () => (
-            <TouchableOpacity onPress={goBack}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
               <Icon
                 as={CloseIcon}
                 size="xl"
@@ -94,17 +90,24 @@ const AuthStack = () => {
               />
             </TouchableOpacity>
           ),
+          headerStyle:
+            Platform.OS !== "ios"
+              ? {
+                  backgroundColor: colorMode === "dark" ? "#171717" : "#FCFCFC",
+                }
+              : undefined,
           animation: "slide_from_bottom",
           headerBlurEffect: colorMode === "dark" ? "dark" : "light",
           headerLargeTitle: true,
-          headerTitle: i18n.t("auth.countryList.title"),
+          headerTitle: i18n.t("countryListScreen.screenTitle"),
+          headerTransparent: true,
           headerLargeTitleStyle: {
             fontFamily: "Inter_500Medium",
           },
           headerTitleStyle: {
             fontFamily: "Inter_500Medium",
           },
-        }}
+        })}
       />
       <Stack.Screen name="Otp" component={OtpScreen} />
       <Stack.Screen name="Username" component={UsernameScreen} />

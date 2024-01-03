@@ -1,10 +1,10 @@
+import { useInfiniteFriends } from "@/api/queries/useInfiniteFriends";
 import UserItem, {
   USER_ITEM_MIN_HEIGHT,
 } from "@/components/user_item/user_item.component";
 import { Layout } from "@/costants/Layout";
 import { IApiUser } from "@/interfaces/users.interface";
 import i18n from "@/lang";
-import { useInfiniteFriendsQuery } from "@/queries/useInfiniteFriendsQuery";
 import { RootState } from "@/redux/app/store";
 import {
   Icon,
@@ -41,7 +41,7 @@ const FriendsRoute = ({ goToProfile }: Props) => {
     isFetchingNextPage,
     refetch,
     isRefetching,
-  } = useInfiniteFriendsQuery(tokenApi, isLoggedIn);
+  } = useInfiniteFriends(isLoggedIn, tokenApi);
 
   const destroy = (userId: number, username: string) => {
     Alert.alert(

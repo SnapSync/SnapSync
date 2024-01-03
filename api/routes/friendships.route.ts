@@ -1,15 +1,12 @@
-import { IFriendshipStatus } from "@/interfaces/friendship_status.interface";
 import client from "..";
 import { IApiUser } from "@/interfaces/users.interface";
+import {
+  CountResponse,
+  FriendshipStatusResponse,
+  InfiniteResponse,
+} from "../types";
 
 const path = "/friendships";
-
-export interface IResponseInfinite {
-  data: IApiUser[];
-  nextCursor: number | undefined;
-  prevCursor: number | undefined;
-  total: number;
-}
 
 export const FetchUserFriends = async (
   page: number,
@@ -17,7 +14,7 @@ export const FetchUserFriends = async (
 
   size: number = 30,
   query: string | null = null
-): Promise<IResponseInfinite> => {
+): Promise<InfiniteResponse<IApiUser>> => {
   try {
     if (page < 1) page = 1;
     if (size < 1) size = 1;
@@ -43,7 +40,7 @@ export const FetchMutualFriends = async (
   userId: number,
   page: number,
   tokenApi: string
-): Promise<IResponseInfinite> => {
+): Promise<InfiniteResponse<IApiUser>> => {
   try {
     if (page < 1) page = 1;
 
@@ -91,7 +88,7 @@ export const FetchUserReceivedFriendRequests = async (
 
   size: number = 30,
   query: string | null = null
-): Promise<IResponseInfinite> => {
+): Promise<InfiniteResponse<IApiUser>> => {
   try {
     if (page < 1) page = 1;
     if (size < 1) size = 1;
@@ -119,7 +116,7 @@ export const FetchUserSentFriendRequests = async (
 
   size: number = 30,
   query: string | null = null
-): Promise<IResponseInfinite> => {
+): Promise<InfiniteResponse<IApiUser>> => {
   try {
     if (page < 1) page = 1;
     if (size < 1) size = 1;
@@ -144,7 +141,7 @@ export const FetchUserSentFriendRequests = async (
 export const ShowFriendship = async (
   userId: number,
   tokenApi: string
-): Promise<IFriendshipStatus> => {
+): Promise<FriendshipStatusResponse> => {
   try {
     const { data } = await client.get(`${path}/show/${userId}`, {
       headers: {
@@ -160,10 +157,7 @@ export const ShowFriendship = async (
 
 export const FetchUserFriendsCount = async (
   tokenApi: string
-): Promise<{
-  message: string;
-  count: number;
-}> => {
+): Promise<CountResponse> => {
   try {
     const { data } = await client.get(`${path}/friends/count`, {
       headers: {
@@ -179,10 +173,7 @@ export const FetchUserFriendsCount = async (
 
 export const FetchReceivedFriendRequestsCount = async (
   tokenApi: string
-): Promise<{
-  message: string;
-  count: number;
-}> => {
+): Promise<CountResponse> => {
   try {
     const { data } = await client.get(
       `${path}/friend-requests/received/count`,
@@ -201,10 +192,7 @@ export const FetchReceivedFriendRequestsCount = async (
 
 export const FetchSentFriendRequestsCount = async (
   tokenApi: string
-): Promise<{
-  message: string;
-  count: number;
-}> => {
+): Promise<CountResponse> => {
   try {
     const { data } = await client.get(`${path}/friend-requests/sent/count`, {
       headers: {
@@ -221,7 +209,7 @@ export const FetchSentFriendRequestsCount = async (
 export const AcceptFriendRequest = async (
   userId: number,
   tokenApi: string
-): Promise<IFriendshipStatus> => {
+): Promise<FriendshipStatusResponse> => {
   try {
     const { data } = await client.post(
       `${path}/accept/${userId}`,
@@ -242,7 +230,7 @@ export const AcceptFriendRequest = async (
 export const DenyFriendRequest = async (
   userId: number,
   tokenApi: string
-): Promise<IFriendshipStatus> => {
+): Promise<FriendshipStatusResponse> => {
   try {
     const { data } = await client.post(
       `${path}/reject/${userId}`,
@@ -263,7 +251,7 @@ export const DenyFriendRequest = async (
 export const SendFriendRequest = async (
   userId: number,
   tokenApi: string
-): Promise<IFriendshipStatus> => {
+): Promise<FriendshipStatusResponse> => {
   try {
     const { data } = await client.post(
       `${path}/create/${userId}`,
@@ -284,7 +272,7 @@ export const SendFriendRequest = async (
 export const DestroyFriendship = async (
   userId: number,
   tokenApi: string
-): Promise<IFriendshipStatus> => {
+): Promise<FriendshipStatusResponse> => {
   try {
     const { data } = await client.post(
       `${path}/destroy/${userId}`,
@@ -305,7 +293,7 @@ export const DestroyFriendship = async (
 export const BlockUser = async (
   userId: number,
   tokenApi: string
-): Promise<IFriendshipStatus> => {
+): Promise<FriendshipStatusResponse> => {
   try {
     const { data } = await client.post(
       `${path}/block/${userId}`,
@@ -326,7 +314,7 @@ export const BlockUser = async (
 export const UnblockUser = async (
   userId: number,
   tokenApi: string
-): Promise<IFriendshipStatus> => {
+): Promise<FriendshipStatusResponse> => {
   try {
     const { data } = await client.post(
       `${path}/unblock/${userId}`,

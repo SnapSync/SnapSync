@@ -7,7 +7,7 @@ type Props = {
   isLoading?: boolean;
 };
 
-const Biography = ({ biography, isLoading = false }: Props) => {
+const Biography = ({ biography, isLoading }: Props) => {
   const colorMode = useColorMode();
   if (isLoading) {
     return (
@@ -31,7 +31,7 @@ const Biography = ({ biography, isLoading = false }: Props) => {
         fontFamily="Inter_400Regular"
         // color={colorMode === "dark" ? "$textDark400" : "$textLight700"}
       >
-        {biography}
+        Lorem ipsum
       </Text>
     );
   }

@@ -7,5 +7,6 @@ export interface TokenData {
 export interface ILoginResponse {
   userId: number;
   tokenData: TokenData;
+  vexoToken: string;
   accessToken: string; // selector:validator
 }

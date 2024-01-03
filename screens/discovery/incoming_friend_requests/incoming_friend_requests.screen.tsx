@@ -1,10 +1,10 @@
+import { useInfiniteIncominFriendshipRequests } from "@/api/queries/useInfiniteIncominRequests";
 import UserItem, {
   USER_ITEM_MIN_HEIGHT,
 } from "@/components/user_item/user_item.component";
 import { Layout } from "@/costants/Layout";
 import { IApiUser } from "@/interfaces/users.interface";
 import i18n from "@/lang";
-import { useInfiniteReceivedFriendRequestsQuery } from "@/queries/useInfiniteReceivedFriendRequestsQuery";
 import { RootState } from "@/redux/app/store";
 import { DiscoveryStackScreenProps } from "@/types";
 import {
@@ -41,7 +41,7 @@ const IncomingFriendRequestsScreen = ({
     isFetchingNextPage,
     isRefetching,
     refetch,
-  } = useInfiniteReceivedFriendRequestsQuery(tokenApi, isLoggedIn);
+  } = useInfiniteIncominFriendshipRequests(isLoggedIn, tokenApi);
 
   React.useEffect(() => {
     if (data) {

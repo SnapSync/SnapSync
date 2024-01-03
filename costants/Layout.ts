@@ -6,4 +6,8 @@ export const Layout = {
 
   IconColorDark: "#FCFCFC",
   IconColorLight: "#171717",
+
+  HeaderTitleStyle: {
+    fontFamily: "Inter_500Medium",
+  },
 };

@@ -73,7 +73,9 @@ const ForYouRoute = ({ goToProfile }: Props) => {
                 size="sm"
                 borderRadius="$3xl"
               >
-                <ButtonText>{i18n.t("userProfile.friendship.add")}</ButtonText>
+                <ButtonText>
+                  {i18n.t("userProfileScreen.friendship.add")}
+                </ButtonText>
               </Button>
             </View>
           </View>

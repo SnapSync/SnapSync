@@ -1,22 +1,15 @@
 import { ProfileStackParamList } from "@/types";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { TouchableOpacity } from "react-native";
-import { ChevronLeftIcon, Icon, useColorMode } from "@gluestack-ui/themed";
-import { useNavigation } from "@react-navigation/native";
-import ProfileScreen from "@/screens/profile/profile/profile.screen";
-import { UserCog2Icon } from "lucide-react-native";
-import FriendsListScreen from "@/screens/profile/friends_list/friends_list.screen";
+import ProfileScreen from "@/screens/profile_stack/profile/profile.screen";
 import i18n from "@/lang";
+import { StyleSheet } from "react-native";
+import FriendsListScreen from "@/screens/profile_stack/friends_list/friends_list.screen";
+import BackBtn from "@/components/back_btn/back_btn.component";
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
 const ProfileStack = () => {
-  const colorMode = useColorMode();
-  const navigation = useNavigation();
-
-  const goBack = () => navigation.goBack();
-
   return (
     <Stack.Navigator
       screenOptions={({ navigation, route }) => ({
@@ -24,10 +17,11 @@ const ProfileStack = () => {
         headerShown: true,
         headerShadowVisible: false,
         headerLeft: () => null,
+        headerRight: () => null,
         headerBackVisible: false,
         headerTitleAlign: "center",
         headerTitleStyle: {
-          fontFamily: "Inter_600SemiBold",
+          fontFamily: "Inter_500Medium",
         },
       })}
     >
@@ -35,7 +29,11 @@ const ProfileStack = () => {
         name="Profile"
         component={ProfileScreen}
         options={({ navigation, route }) => ({
-          headerTitle: route.params?.username || "",
+          headerTitle:
+            route.params?.username || i18n.t("profileScreen.screenTitle"),
+          headerTitleStyle: {
+            fontFamily: "Inter_600SemiBold",
+          },
         })}
       />
       <Stack.Screen
@@ -46,15 +44,7 @@ const ProfileStack = () => {
           headerTitleStyle: {
             fontFamily: "Inter_500Medium",
           },
-          // headerLeft: () => (
-          //   <TouchableOpacity onPress={goBack}>
-          //     <Icon
-          //       as={ChevronLeftIcon}
-          //       size="xl"
-          //       color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
-          //     />
-          //   </TouchableOpacity>
-          // ),
+          headerLeft: () => <BackBtn onPress={() => navigation.goBack()} />,
         })}
       />
     </Stack.Navigator>
@@ -62,3 +52,11 @@ const ProfileStack = () => {
 };
 
 export default ProfileStack;
+
+const styles = StyleSheet.create({
+  profileHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+});

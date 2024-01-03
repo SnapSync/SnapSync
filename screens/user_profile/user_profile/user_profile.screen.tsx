@@ -8,11 +8,6 @@ import {
   ShareIcon,
   Icon,
   ThreeDotsIcon,
-  Divider,
-  Button,
-  ButtonText,
-  ButtonIcon,
-  ArrowRightIcon,
 } from "@gluestack-ui/themed";
 import { Alert, Animated, TouchableOpacity } from "react-native";
 import { SCREEN_WIDTH } from "@/utils/helper";
@@ -30,36 +25,27 @@ import {
   TriangleIcon,
   UserMinus2Icon,
 } from "lucide-react-native";
-import {
-  AcceptFriendRequest,
-  BlockUser,
-  DenyFriendRequest,
-  DestroyFriendship,
-  SendFriendRequest,
-  ShowFriendship,
-} from "@/api/routes/friendships.route";
+import { BlockUser } from "@/api/routes/friendships.route";
 import i18n from "@/lang";
-import { IFriendshipStatus } from "@/interfaces/friendship_status.interface";
 import UserProfileKeys from "./user_profile.keys";
 import BottomSheetItem from "@/components/bottom_sheet_item/bottom_sheet_item.component";
 import Header from "@/components/user_profile/header/header.component";
 import AnimatedHeader from "@/components/user_profile/animated_header/animated_header.component";
-import { instanceOfErrorResponseType } from "@/api";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { LinearGradient } from "expo-linear-gradient";
 import Biography from "@/components/user_profile/biography/biography.component";
 import FriendshipStatus from "@/components/user_profile/friendship_status/friendship_status.component";
-import FriendCard, {
-  FRIEND_CARD_HEIGHT,
-  FRIEND_CARD_MARGIN,
-  FRIEND_CARD_WIDTH,
-} from "@/components/user_profile/friend_card/friend_card.component";
-import Carousel from "react-native-reanimated-carousel";
-import { IApiUser } from "@/interfaces/users.interface";
-import { useInfiniteMutualFriendsQuery } from "@/queries/useInfiniteMutualFriendsQuery";
-import { useInfiniteFriendsQuery } from "@/queries/useInfiniteFriendsQuery";
 import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 import { StatusBar } from "expo-status-bar";
+import SocialContext from "@/components/user_profile/social_context/social_context.component";
+
+import { useFriendshipStatus } from "@/api/queries/useFriendshipStatus";
+import { useInfiniteMutualFriends } from "@/api/queries/useInfiniteMutualFriends";
+import { useDenyFriendship } from "@/api/mutations/useDenyFriendship";
+import { useAcceptFriendship } from "@/api/mutations/useAcceptFriendship";
+import { useCreateFriendship } from "@/api/mutations/useCreateFriendship";
+import { useDestroyFriendship } from "@/api/mutations/useDestroyFriendship";
+import { isErrorResponse } from "@/api/api_responses.types";
 
 const UserProfileScreen = ({
   navigation,
@@ -115,127 +101,44 @@ const UserProfileScreen = ({
     data: friendshipStatusData,
     isLoading: isLoadingFriendshipStatus,
     refetch: refetchFriendshipStatus,
-  } = useQuery({
-    queryKey: UserProfileKeys.friendshipStatus(route.params.id),
-    queryFn: () => ShowFriendship(route.params.id, tokenApi),
-    enabled: isLoggedIn && route.params && route.params.id ? true : false,
-    // staleTime: 1000 * 60 * 60, // 1 ora
-    gcTime: Infinity,
-    // refetchOnWindowFocus: true,
-    // refetchOnReconnect: true,
-  });
+  } = useFriendshipStatus(route.params.id, isLoggedIn, tokenApi);
 
   useRefreshOnFocus(refetchFriendshipStatus);
 
   // Nel caso fosse il profilo di un'altro utente allora carico gli amici in comune con l'utente
   const { data: mutualFriendsData, isLoading: isLoadingMutualFriends } =
-    useInfiniteMutualFriendsQuery(
-      route.params.id,
-      tokenApi,
-      isLoggedIn && route.params.id ? true : false
-    );
+    useInfiniteMutualFriends(route.params.id, isLoggedIn, tokenApi);
 
-  const sendFriendshipRequestMutation = useMutation({
-    mutationKey: UserProfileKeys.sendFriendhipRequests(route.params?.id),
-    mutationFn: (data: { userId: number }) =>
-      SendFriendRequest(data.userId, tokenApi),
-    onMutate: async (data: { userId: number }) => {
-      // queryClient.cancelQueries lo uso per evitare che venga eseguita la query
-      // mentre sto facendo la mutazione, in questo modo evito che venga eseguita
-      // due volte la query
-      // await queryClient.cancelQueries({
-      //   queryKey: userProfileKeys.friendshipStatus(data.userId),
-      // });
-      // queryClient.setQueryData<IFriendshipStatus>(
-      //   userProfileKeys.friendshipStatus(data.userId),
-      //   (old) =>
-      //     ({
-      //       ...old,
-      //       outgoingRequest: true,
-      //       isNotSynced: true,
-      //     } as IFriendshipStatus)
-      // );
-    },
-    onError(error, variables, context) {},
-    onSuccess(data, variables, context) {
-      // TODO: Rifare il refetch della query con sentFriendshipRequest
+  // const blockUserMutation = useMutation({
+  //   mutationFn: (data: { userId: number }) => BlockUser(data.userId, tokenApi),
+  //   onSuccess(data, variables, context) {
+  //     // In case di successo aggiorno isNotSynced
+  //     queryClient.setQueryData<IFriendshipStatus>(
+  //       UserProfileKeys.friendshipStatus(variables.userId),
+  //       {
+  //         ...data,
+  //         isNotSynced: false,
+  //       }
+  //     );
 
-      // In case di successo aggiorno isNotSynced
-      queryClient.setQueryData<IFriendshipStatus>(
-        UserProfileKeys.friendshipStatus(variables.userId),
-        {
-          ...data,
-          isNotSynced: false,
-        }
-      );
-    },
-  });
+  //     // Controllo se erano amici: in case affermativo allora aggiorno anche i friends count
+  //     if (friendshipStatusData && friendshipStatusData.isFriend) {
+  //       // Refetch dei friends count
+  //       queryClient.refetchQueries({
+  //         queryKey: ProfileKeys.friendsCount,
+  //         exact: true,
+  //       });
+  //     }
+  //   },
+  // });
 
-  const destroyFriendshipRequestMutation = useMutation({
-    mutationKey: UserProfileKeys.destroyFriendhipRequests(route.params?.id),
-    mutationFn: (data: { userId: number }) =>
-      DestroyFriendship(data.userId, tokenApi),
-    onSuccess(data, variables, context) {
-      // In case di successo aggiorno isNotSynced
-      queryClient.setQueryData<IFriendshipStatus>(
-        UserProfileKeys.friendshipStatus(variables.userId),
-        {
-          ...data,
-          isNotSynced: false,
-        }
-      );
-    },
-  });
+  const denyFriendshipMutation = useDenyFriendship();
 
-  const acceptFriendshipRequestMutation = useMutation({
-    mutationKey: UserProfileKeys.acceptFriendhipRequests(route.params?.id),
-    mutationFn: (data: { userId: number }) =>
-      AcceptFriendRequest(data.userId, tokenApi),
-    onSuccess(data, variables, context) {
-      // In case di successo aggiorno isNotSynced
-      queryClient.setQueryData<IFriendshipStatus>(
-        UserProfileKeys.friendshipStatus(variables.userId),
-        {
-          ...data,
-          isNotSynced: false,
-        }
-      );
-    },
-  });
+  const acceptFriendshipMutation = useAcceptFriendship();
 
-  const rejectFriendshipRequestMutation = useMutation({
-    mutationKey: UserProfileKeys.rejectFriendhipRequests(route.params?.id),
-    mutationFn: (data: { userId: number }) =>
-      DenyFriendRequest(data.userId, tokenApi),
-    onSuccess(data, variables, context) {
-      // In case di successo aggiorno isNotSynced
-      queryClient.setQueryData<IFriendshipStatus>(
-        UserProfileKeys.friendshipStatus(variables.userId),
-        {
-          ...data,
-          isNotSynced: false,
-        }
-      );
-    },
-  });
+  const createFriendshipMutation = useCreateFriendship();
 
-  const blockUserMutation = useMutation({
-    mutationKey: UserProfileKeys.blockUser(route.params?.id),
-    mutationFn: (data: { userId: number }) => BlockUser(data.userId, tokenApi),
-    onSuccess(data, variables, context) {
-      // In case di successo aggiorno isNotSynced
-      queryClient.setQueryData<IFriendshipStatus>(
-        UserProfileKeys.friendshipStatus(variables.userId),
-        {
-          ...data,
-          isNotSynced: false,
-        }
-      );
-    },
-  });
-
-  // const [isMyProfile] = React.useState<boolean>(userId === route.params.id);
-  const [carouselUsers, setCarouselUsers] = React.useState<IApiUser[]>([]);
+  const destroyFriendshipMutation = useDestroyFriendship();
 
   React.useEffect(() => {
     return () => dismissAll();
@@ -319,22 +222,13 @@ const UserProfileScreen = ({
     if (friendshipStatusData && friendshipStatusData.isBlocking) goBack();
   }, [friendshipStatusData]);
 
-  React.useEffect(() => {
-    if (mutualFriendsData && mutualFriendsData.pages.length > 0) {
-      // Recupero la prima pagina e la inserisco nel carousel
-      setCarouselUsers(mutualFriendsData.pages[0].data);
-    } else {
-      setCarouselUsers([]);
-    }
-  }, [mutualFriendsData]);
-
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
 
   const goBack = () => navigation.goBack();
 
-  const onPressSeeAll = () => {
+  const goToMutualFriends = () => {
     // Controllo se si sono caricati gli amici in comune
     var total =
       route.params && route.params.mutualFriends !== undefined
@@ -353,19 +247,35 @@ const UserProfileScreen = ({
   };
 
   const accept = (userId: number) => {
-    acceptFriendshipRequestMutation.mutate({ userId });
+    acceptFriendshipMutation.mutate({ userId, tokenApi });
   };
 
   const reject = (userId: number) => {
-    rejectFriendshipRequestMutation.mutate({ userId });
+    Alert.alert(
+      i18n.t("rejectAlert.title"),
+      i18n.t("rejectAlert.description"),
+      [
+        {
+          text: i18n.t("cancel"),
+          style: "cancel",
+        },
+        {
+          text: i18n.t("reject"),
+          onPress: () => {
+            denyFriendshipMutation.mutate({ userId, tokenApi });
+          },
+          style: "destructive",
+        },
+      ]
+    );
   };
 
   const send = (userId: number) => {
-    sendFriendshipRequestMutation.mutate({ userId });
+    createFriendshipMutation.mutate({ userId, tokenApi });
   };
 
   const cancel = (userId: number) => {
-    destroyFriendshipRequestMutation.mutate({ userId });
+    destroyFriendshipMutation.mutate({ userId, tokenApi });
   };
 
   const destroy = (userId: number, username: string) => {
@@ -386,7 +296,7 @@ const UserProfileScreen = ({
           style: "destructive",
           onPress: () => {
             dismissAll();
-            destroyFriendshipRequestMutation.mutate({ userId });
+            destroyFriendshipMutation.mutate({ userId, tokenApi });
           },
         },
       ]
@@ -411,7 +321,7 @@ const UserProfileScreen = ({
           style: "destructive",
           onPress: () => {
             dismissAll();
-            blockUserMutation.mutate({ userId });
+            // blockUserMutation.mutate({ userId });
           },
         },
       ]
@@ -429,7 +339,7 @@ const UserProfileScreen = ({
       >
         <Text>
           {errorUserProfile &&
-          instanceOfErrorResponseType(errorUserProfile) &&
+          isErrorResponse(errorUserProfile) &&
           errorUserProfile.statusCode === 404
             ? i18n.t("errors.userNotFound")
             : i18n.t("errors.generic")}
@@ -507,7 +417,7 @@ const UserProfileScreen = ({
         <View
           paddingLeft={insets.left + Layout.ScreenPaddingHorizontal}
           paddingRight={insets.right + Layout.ScreenPaddingHorizontal}
-          paddingTop={24}
+          paddingTop={20}
           gap={16}
           backgroundColor="transparent"
         >
@@ -524,10 +434,31 @@ const UserProfileScreen = ({
             onPressAccept={() => accept(route.params.id)}
             onPressCancel={() => cancel(route.params.id)}
             onPressDeny={() => reject(route.params.id)}
-            isLoadingAdd={sendFriendshipRequestMutation.isPending}
-            isLoadingAccept={acceptFriendshipRequestMutation.isPending}
-            isLoadingCancel={destroyFriendshipRequestMutation.isPending}
-            isLoadingDeny={rejectFriendshipRequestMutation.isPending}
+            // isLoadingAdd={sendFriendshipRequestMutation.isPending}
+            // isLoadingAccept={acceptFriendshipRequestMutation.isPending}
+            // isLoadingCancel={destroyFriendshipRequestMutation.isPending}
+            // isLoadingDeny={rejectFriendshipRequestMutation.isPending}
+          />
+
+          <SocialContext
+            onPress={goToMutualFriends}
+            isLoading={isLoadingMutualFriends}
+            totalMutualFriends={
+              mutualFriendsData
+                ? mutualFriendsData.pages && mutualFriendsData.pages.length > 0
+                  ? mutualFriendsData.pages[0].total
+                  : 0
+                : route.params && route.params.mutualFriends
+                ? route.params.mutualFriends
+                : undefined
+            }
+            mutualFriends={
+              mutualFriendsData &&
+              mutualFriendsData.pages &&
+              mutualFriendsData.pages.length > 0
+                ? mutualFriendsData.pages[0].data
+                : []
+            }
           />
 
           {
@@ -543,9 +474,61 @@ const UserProfileScreen = ({
               />
             )
           }
+
+          <View
+            height={100}
+            width="$full"
+            backgroundColor="transparent"
+            borderRadius="$lg"
+            borderColor={
+              colorMode === "dark" ? "$borderDark400" : "$borderLight700"
+            }
+            borderWidth={0.5}
+            flexDirection="row"
+            alignItems="center"
+            paddingHorizontal="$2"
+            gap="$1"
+          >
+            <View
+              borderRadius="$lg"
+              width={80}
+              height={80}
+              flexDirection="row"
+              justifyContent="center"
+              backgroundColor="transparent"
+              alignContent="center"
+              overflow="hidden"
+            >
+              <View height={80} width={40} backgroundColor="blue" />
+              <View height={80} width={40} backgroundColor="red" />
+            </View>
+            <View
+              backgroundColor="transparent"
+              flex={1}
+              height={80}
+              justifyContent="flex-end"
+            >
+              <Text
+                isTruncated
+                flexShrink={1}
+                fontFamily="Inter_700Bold"
+                size="md"
+              >
+                {userProfileData?.username} & ufo
+              </Text>
+              <Text
+                isTruncated
+                flexShrink={1}
+                fontFamily="Inter_400Regular"
+                size="sm"
+              >
+                2 mn ago
+              </Text>
+            </View>
+          </View>
         </View>
-        <Divider marginVertical={26} />
-        <View
+
+        {/* <View
           paddingLeft={insets.left + Layout.ScreenPaddingHorizontal}
           // paddingRight={insets.right + Layout.DefaultMarginHorizontal} // Non li metto perchè ci saranno due carousel e sta bene se escono fuori dallo schermo
           gap={16}
@@ -620,7 +603,7 @@ const UserProfileScreen = ({
               ))}
             </View>
           ) : null}
-        </View>
+        </View> */}
       </Animated.ScrollView>
 
       <BottomSheetModal
@@ -645,15 +628,18 @@ const UserProfileScreen = ({
             <>
               <BottomSheetItem
                 iconAs={ShareIcon}
-                label={i18n.t("userProfile.bottomSheetModal.share", {
-                  username: userProfileData.username,
-                })}
+                label={i18n.t(
+                  "userProfileScreenScreen.bottomSheetModal.share",
+                  {
+                    username: userProfileData.username,
+                  }
+                )}
                 withDivider
               />
               {friendshipStatusData && !friendshipStatusData.isBlocking && (
                 <BottomSheetItem
                   iconAs={SlashIcon}
-                  label={i18n.t("userProfile.bottomSheetModal.block", {
+                  label={i18n.t("userProfileScreen.bottomSheetModal.block", {
                     username: userProfileData.username,
                   })}
                   withDivider
@@ -666,7 +652,7 @@ const UserProfileScreen = ({
               {friendshipStatusData && friendshipStatusData.isFriend && (
                 <BottomSheetItem
                   iconAs={UserMinus2Icon}
-                  label={i18n.t("userProfile.bottomSheetModal.unfriend")}
+                  label={i18n.t("userProfileScreen.bottomSheetModal.unfriend")}
                   withDivider
                   variant="danger"
                   onPress={() =>
@@ -676,7 +662,7 @@ const UserProfileScreen = ({
               )}
               <BottomSheetItem
                 iconAs={TriangleIcon}
-                label={i18n.t("userProfile.bottomSheetModal.report", {
+                label={i18n.t("userProfileScreen.bottomSheetModal.report", {
                   username: userProfileData.username,
                 })}
                 variant="danger"

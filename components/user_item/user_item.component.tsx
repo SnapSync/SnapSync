@@ -1,157 +1,81 @@
 import { IApiUser } from "@/interfaces/users.interface";
-import {
-  Avatar,
-  AvatarFallbackText,
-  AvatarImage,
-  Divider,
-  View,
-  Text,
-  Icon,
-  useColorMode,
-  AvatarBadge,
-  Pressable,
-} from "@gluestack-ui/themed";
-import React from "react";
-import { TouchableOpacity } from "react-native";
-import { Skeleton } from "moti/skeleton";
-import { Contact2Icon, Verified } from "lucide-react-native";
-import i18n from "@/lang";
+import { Divider, Text } from "@gluestack-ui/themed";
+import React, { memo } from "react";
+import { TouchableOpacity, StyleSheet } from "react-native";
+import UserItemAvatar from "./user_item_avatar/user_item_avatar.component";
+import UserItemInfo from "./user_item_info/user_item_info.component";
+import UserItemUnfriendBtn from "./user_item_unfriend_btn/user_item_unfriend_btn.component";
 
 export const USER_ITEM_MIN_HEIGHT = 50;
 
 type Props = {
-  user?: IApiUser;
   isLoading?: boolean;
   disabled?: boolean;
 
-  onPress?: () => void;
+  user?: IApiUser;
+
+  fsBtn?: "unfried" | "add" | "unblock" | "received" | "send";
+
+  onPress?: (user?: IApiUser) => void;
+  onPressUnfriend?: (user: IApiUser) => void;
 };
 
 const UserItem = ({
   user,
   isLoading = false,
   disabled = false,
+  fsBtn,
   onPress,
+  onPressUnfriend,
 }: Props) => {
-  const colorMode = useColorMode();
+  const _onPress = () => onPress?.(user);
+
+  const _onPressUnfriend = () => {
+    if (!user) return;
+    onPressUnfriend?.(user);
+  };
 
   return (
-    <Pressable
-      onPress={onPress}
+    <TouchableOpacity
+      onPress={_onPress}
       disabled={disabled}
-      gap="$2"
-      marginVertical="$3"
-      flexDirection="row"
-      minHeight={USER_ITEM_MIN_HEIGHT}
-      alignItems="center"
-      flex={1}
-      backgroundColor="transparent"
+      style={styles.container}
     >
-      <Skeleton
-        width={48}
-        height={48}
-        radius="round"
-        show={isLoading}
-        colorMode={colorMode === "dark" ? "dark" : "light"}
-      >
-        <Avatar size="md">
-          <AvatarFallbackText>
-            {user?.username || user?.fullname}
-          </AvatarFallbackText>
-          <AvatarImage
-            source={{
-              uri: user?.profilePicture?.url,
-            }}
-          />
-          {!isLoading && user && user.isVerified ? (
-            <AvatarBadge
-              alignItems="center"
-              justifyContent="center"
-              borderWidth={0}
-              bgColor={
-                colorMode === "dark"
-                  ? "$backgroundDark950"
-                  : "$backgroundLight0"
-              }
-            >
-              <Icon
-                as={Verified}
-                size="xs"
-                color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
-              />
-            </AvatarBadge>
-          ) : null}
-        </Avatar>
-      </Skeleton>
-
+      <UserItemAvatar
+        isLoading={isLoading}
+        profilePicture={user?.profilePicture}
+        username={user?.username}
+        fullname={user?.fullname}
+        isVerified={user?.isVerified}
+      />
       <Divider orientation="vertical" />
 
-      <View
-        flex={1}
-        gap="$2"
-        flexDirection="column"
-        backgroundColor="transparent"
-      >
-        <Skeleton
-          width={"100%"}
-          height={22}
-          colorMode={colorMode === "dark" ? "dark" : "light"}
-          show={isLoading}
-        >
-          <Text
-            isTruncated
-            flexShrink={1}
-            fontFamily="Inter_600SemiBold"
-            size="md"
-            color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
-          >
-            {user?.username}
-          </Text>
-        </Skeleton>
+      <UserItemInfo
+        isLoading={isLoading}
+        username={user?.username}
+        fullname={user?.fullname}
+        mutualFriends={user?.mutualFriends}
+      />
 
-        <Skeleton
-          show={isLoading}
-          width={"100%"}
-          height={20}
-          colorMode={colorMode === "dark" ? "dark" : "light"}
-        >
-          <Text
-            isTruncated
-            flexShrink={1}
-            size="sm"
-            fontFamily="Inter_400Regular"
-          >
-            {user?.fullname}
-          </Text>
-        </Skeleton>
-        {user ? (
-          user.streak && user.streak > 0 ? (
-            <Text
-              isTruncated
-              flexShrink={1}
-              size="sm"
-              fontFamily="Inter_400Regular"
-            >
-              {user.streak} 🔥
-            </Text>
-          ) : user.mutualFriends ? (
-            <Text
-              isTruncated
-              flexShrink={1}
-              size="sm"
-              fontFamily="Inter_400Regular"
-            >
-              {user.mutualFriends > 20
-                ? `🤝 ${i18n.t("lotOfMutualFriends")}`
-                : `🤝 ${i18n.t("mutualFriends", {
-                    count: user.mutualFriends,
-                  })}`}
-            </Text>
-          ) : null
-        ) : null}
-      </View>
-    </Pressable>
+      {fsBtn ? (
+        fsBtn === "unfried" ? (
+          <UserItemUnfriendBtn onPress={_onPressUnfriend} />
+        ) : null
+      ) : null}
+    </TouchableOpacity>
   );
 };
 
-export default UserItem;
+export default memo(UserItem);
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "transparent",
+    minHeight: USER_ITEM_MIN_HEIGHT,
+    flex: 1,
+    gap: 8, // "$2"
+    marginVertical: 10, // "$2.5"
+  },
+});

@@ -18,17 +18,17 @@ import {
 } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
-import { Camera, CameraType, FlashMode } from "expo-camera";
+// import { Camera, CameraType, FlashMode } from "expo-camera";
 import i18n from "@/lang";
 import { TouchableOpacity } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/app/store";
 import { WebChangeProfilePicture } from "@/api/routes/accounts.route";
-import { IEditWebFormData } from "@/interfaces/edit_web_form_data";
 import EditProfileKeys from "../edit_profile/edit_profile.keys";
 import { IApiUser } from "@/interfaces/users.interface";
-import ProfileKeys from "@/screens/profile/profile/profile.keys";
+import { EditWebFormDataResponse } from "@/api/types";
+import ProfileKeys from "@/screens/profile_stack/profile/profile.keys";
 
 const TakeProfilePictureScreen = ({
   navigation,
@@ -39,11 +39,11 @@ const TakeProfilePictureScreen = ({
 
   const tokenApi = useSelector((state: RootState) => state.auth.tokenApi);
 
-  const ref = React.useRef<Camera>(null);
+  // const ref = React.useRef<Camera>(null);
 
-  const [type, setType] = React.useState(CameraType.back);
-  const [permission, requestPermission] = Camera.useCameraPermissions();
-  const [flashMode, setFlashMode] = React.useState(FlashMode.off);
+  // const [type, setType] = React.useState(CameraType.back);
+  // const [permission, requestPermission] = Camera.useCameraPermissions();
+  // const [flashMode, setFlashMode] = React.useState(FlashMode.off);
   const [isCameraReady, setIsCameraReady] = React.useState(false);
 
   const changeProfilePictureMutation = useMutation({
@@ -51,7 +51,7 @@ const TakeProfilePictureScreen = ({
       WebChangeProfilePicture(data.uri, tokenApi),
     onSuccess(data) {
       // ditProfileKeys.editWebFormData
-      queryClient.setQueryData<IEditWebFormData>(
+      queryClient.setQueryData<EditWebFormDataResponse>(
         EditProfileKeys.editWebFormData,
         (old) => {
           if (old) {
@@ -82,29 +82,29 @@ const TakeProfilePictureScreen = ({
   }, [changeProfilePictureMutation]);
 
   const toggleCameraType = () => {
-    setType(type === CameraType.back ? CameraType.front : CameraType.back);
+    // setType(type === CameraType.back ? CameraType.front : CameraType.back);
   };
 
   const toggleFlashMode = () => {
-    setFlashMode(
-      flashMode === FlashMode.off
-        ? FlashMode.on
-        : flashMode === FlashMode.on
-        ? FlashMode.auto
-        : FlashMode.off
-    );
+    // setFlashMode(
+    //   flashMode === FlashMode.off
+    //     ? FlashMode.on
+    //     : flashMode === FlashMode.on
+    //     ? FlashMode.auto
+    //     : FlashMode.off
+    // );
   };
 
   const takePic = async () => {
     if (!isCameraReady) return;
 
-    const photo = await ref.current?.takePictureAsync({
-      quality: 1,
-    });
+    // const photo = await ref.current?.takePictureAsync({
+    //   quality: 1,
+    // });
 
-    if (!photo) return;
+    // if (!photo) return;
 
-    changeProfilePictureMutation.mutate({ uri: photo.uri });
+    // changeProfilePictureMutation.mutate({ uri: photo.uri });
   };
 
   return (
@@ -116,7 +116,7 @@ const TakeProfilePictureScreen = ({
         backgroundColor="transparent"
         overflow="hidden"
       >
-        {!permission ? null : !permission.granted ? (
+        {/* {!permission ? null : !permission.granted ? (
           <View
             flex={1}
             backgroundColor="transparent"
@@ -141,7 +141,7 @@ const TakeProfilePictureScreen = ({
             onCameraReady={() => setIsCameraReady(true)}
             flashMode={flashMode}
           />
-        )}
+        )} */}
       </View>
       <View
         flex={1}
@@ -181,8 +181,8 @@ const TakeProfilePictureScreen = ({
             onPress={() => takePic()}
             disabled={
               !isCameraReady ||
-              !permission ||
-              !permission.granted ||
+              // !permission ||
+              // !permission.granted ||
               changeProfilePictureMutation.isPending
             }
           />
@@ -196,13 +196,13 @@ const TakeProfilePictureScreen = ({
           borderRadius="$full"
           onPress={() => toggleFlashMode()}
         >
-          <Icon
+          {/* <Icon
             as={
               flashMode === FlashMode.off ? FlashlightOffIcon : FlashlightIcon
             }
             size="xl"
             color={colorMode === "dark" ? "$textLight950" : "$textDark0"}
-          />
+          /> */}
         </Pressable>
       </View>
     </View>

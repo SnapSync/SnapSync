@@ -1,10 +1,8 @@
-import { IFriendshipStatus } from "@/interfaces/friendship_status.interface";
 import {
   Button,
   ButtonIcon,
   ButtonSpinner,
   ButtonText,
-  CloseCircleIcon,
   Text,
   View,
   useColorMode,
@@ -18,10 +16,11 @@ import {
   UserPlus2Icon,
   UserX2Icon,
 } from "lucide-react-native";
+import { FriendshipStatusResponse } from "@/api/types";
 
 type Props = {
   username?: string;
-  friendshipStatus?: IFriendshipStatus;
+  friendshipStatus?: FriendshipStatusResponse;
   isLoading?: boolean;
 
   variant?: "add" | "incoming" | "outgoing";
@@ -152,7 +151,7 @@ const FriendshipStatus = ({
           lineHeight="$md"
           color={colorMode === "dark" ? "$textDark0" : "$textLight950"}
         >
-          {i18n.t("userProfile.friendship.received", {
+          {i18n.t("userProfileScreen.friendship.received", {
             username: username,
           })}
         </Text>
@@ -178,7 +177,7 @@ const FriendshipStatus = ({
                 <>
                   <ButtonIcon as={UserCheck2Icon} />
                   <ButtonText>
-                    {i18n.t("userProfile.friendship.accept")}
+                    {i18n.t("userProfileScreen.friendship.accept")}
                   </ButtonText>
                 </>
               )}
@@ -199,7 +198,7 @@ const FriendshipStatus = ({
                 <>
                   <ButtonIcon as={UserX2Icon} />
                   <ButtonText>
-                    {i18n.t("userProfile.friendship.deny")}
+                    {i18n.t("userProfileScreen.friendship.deny")}
                   </ButtonText>
                 </>
               )}
@@ -233,8 +232,8 @@ const FriendshipStatus = ({
           )}
           <ButtonText>
             {friendshipStatus.outgoingRequest
-              ? i18n.t("userProfile.friendship.cancel")
-              : i18n.t("userProfile.friendship.add")}
+              ? i18n.t("userProfileScreen.friendship.cancel")
+              : i18n.t("userProfileScreen.friendship.add")}
           </ButtonText>
         </>
       )}

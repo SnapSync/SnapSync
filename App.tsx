@@ -17,15 +17,25 @@ import NetInfo from "@react-native-community/netinfo";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister"; // so we can create a React Query persistor using Async Storage.
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"; // set of utilities to queryClient interaction with the persistor
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ThemeProvider } from "@rneui/themed";
 // import { LogLevel, OneSignal } from "react-native-onesignal";
-// import Constants from "expo-constants";
+import Constants from "expo-constants";
+// import * as Sentry from "sentry-expo"; // Sentry -> @see -> https://docs.expo.dev/guides/using-sentry/
+// import { vexo } from "vexo-analytics"; // Analytics -> @see -> https://docs.vexo.co/
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig?.extra?.oneSignalAppId);
 
 // Also need enable notifications to complete OneSignal setup
 // OneSignal.Notifications.requestPermission(true);
+
+// You may want to wrap this with `if (!__DEV__) { ... }` to only run Vexo in production.
+// vexo(Constants.expoConfig?.extra?.vexoApiKey);
+
+// Sentry.init({
+//   dsn: Constants.expoConfig?.extra?.sentryDsn,
+//   enableInExpoDevelopment: true,
+//   debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
+// });
 
 const queryClient = new QueryClient();
 
@@ -59,7 +69,7 @@ const MyThemeLight = {
 export default function App() {
   const { appIsReady, cachedAuthToken } = useCachedResources();
 
-  const [colorMode] = React.useState<"light" | "dark">("light");
+  const [colorMode] = React.useState<"light" | "dark">("dark");
 
   useEffect(() => {
     return NetInfo.addEventListener((state) => {
@@ -94,26 +104,10 @@ export default function App() {
               theme={colorMode === "dark" ? MyThemeDark : MyThemeLight}
             >
               <GluestackUIProvider config={config} colorMode={colorMode}>
-                <ThemeProvider
-                  theme={{
-                    mode: colorMode,
-                    lightColors: {
-                      primary: "#0077E6",
-                      background: "#FCFCFC",
-                    },
-                    darkColors: {
-                      primary: "#1A91FF",
-                      background: "#171717",
-                    },
-                  }}
-                >
-                  <BottomSheetModalProvider>
-                    <RootNavigation authToken={cachedAuthToken} />
-                    <StatusBar
-                      style={colorMode === "dark" ? "light" : "dark"}
-                    />
-                  </BottomSheetModalProvider>
-                </ThemeProvider>
+                <BottomSheetModalProvider>
+                  <RootNavigation authToken={cachedAuthToken} />
+                  <StatusBar style={colorMode === "dark" ? "light" : "dark"} />
+                </BottomSheetModalProvider>
               </GluestackUIProvider>
             </NavigationContainer>
           </SafeAreaProvider>

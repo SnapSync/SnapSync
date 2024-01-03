@@ -155,7 +155,7 @@ const RequestsRoute = ({ goToProfile, onPressSentRequests }: Props) => {
                 borderRadius="$3xl"
               >
                 <ButtonText>
-                  {i18n.t("userProfile.friendship.accept")}
+                  {i18n.t("userProfileScreen.friendship.accept")}
                 </ButtonText>
               </Button>
               <Pressable onPress={() => reject(item.id)}>

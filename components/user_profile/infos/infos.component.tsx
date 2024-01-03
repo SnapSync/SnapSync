@@ -7,16 +7,10 @@ import i18n from "@/lang";
 type Props = {
   isLoading?: boolean;
   zodiacSign?: IUserProfileZodiacSign;
-  snapSyncScore?: number;
   streak?: number;
 };
 
-const Infos = ({
-  isLoading = false,
-  zodiacSign,
-  snapSyncScore,
-  streak,
-}: Props) => {
+const Infos = ({ isLoading = false, zodiacSign, streak }: Props) => {
   const colorMode = useColorMode();
 
   return (
@@ -43,26 +37,6 @@ const Infos = ({
           ))
       ) : (
         <>
-          {snapSyncScore && snapSyncScore > 0 ? (
-            <View
-              backgroundColor="transparent"
-              alignItems="center"
-              justifyContent="center"
-              gap="$1"
-              borderRadius="$xl"
-              borderColor={
-                colorMode === "dark" ? "$borderDark400" : "$borderLight700"
-              }
-              borderWidth={1}
-              paddingHorizontal="$2.5"
-              paddingVertical="$1.5"
-              minWidth={80}
-            >
-              <Text fontFamily="Inter_600SemiBold" fontSize="$sm">
-                {snapSyncScore}
-              </Text>
-            </View>
-          ) : null}
           {zodiacSign ? (
             <View
               backgroundColor="transparent"

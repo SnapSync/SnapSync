@@ -1,9 +1,5 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import {
-  TransitionPresets,
-  createStackNavigator,
-} from "@react-navigation/stack";
 import { RootStackParamList } from "@/types";
 import AuthStack from "./auth.stack";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,8 +12,6 @@ import { LoginWithAuthToken } from "@/api/routes/auth.routes";
 import * as SecureStore from "expo-secure-store";
 import { AuthTokenKey, UserIdKey } from "@/costants/SecureStoreKeys";
 import i18n from "@/lang";
-import { instanceOfErrorResponseType } from "@/api";
-import { SnapSyncErrorType } from "@/api/errors_types";
 import {
   Text,
   Button,
@@ -34,6 +28,9 @@ import {
 } from "@gluestack-ui/themed";
 import UserProfileStack from "./user_profile.stack";
 import UserSettingsStack from "./user_settings.stack";
+// import { identifyDevice } from "vexo-analytics";
+import { isErrorResponse } from "@/api/api_responses.types";
+import SnapSyncErrors from "@/api/api_errors";
 
 /**
  * A root stack navigator is often used for displaying modals on top of all other content.
@@ -46,7 +43,7 @@ type Props = {
 };
 
 const RootNavigation = ({ authToken }: Props) => {
-  const { isConnected } = useConnectivity();
+  // const { isConnected } = useConnectivity();
 
   const colorMode = useColorMode();
 
@@ -76,7 +73,10 @@ const RootNavigation = ({ authToken }: Props) => {
 
       // Salvo lo UserId nello storage
       let userId = data.data.userId;
-      await SecureStore.setItemAsync(UserIdKey, userId.toString());
+      // await SecureStore.setItemAsync(UserIdKey, userId.toString());
+
+      // Identificatore del dispositivo
+      // await identifyDevice(data.data.vexoToken);
 
       dispatch(login(data.data));
 
@@ -85,14 +85,14 @@ const RootNavigation = ({ authToken }: Props) => {
     },
     onError: async (error) => {
       setIsLoading(false);
-      if (error && instanceOfErrorResponseType(error)) {
+      if (error && isErrorResponse(error)) {
         await SecureStore.deleteItemAsync(AuthTokenKey);
         await SecureStore.deleteItemAsync(UserIdKey);
 
         if (
           error.statusCode === 403 &&
           error.type &&
-          error.type === SnapSyncErrorType.SnapSyncUserBannedError
+          error.type === SnapSyncErrors.SnapSyncUserBannedError
         ) {
           setModalBody(
             i18n.t("errors.authTokenModal.userBanned", {
@@ -109,12 +109,12 @@ const RootNavigation = ({ authToken }: Props) => {
   });
 
   React.useEffect(() => {
-    if (!isLoggedIn && authTokenState && isConnected) {
+    if (!isLoggedIn && authTokenState /*&& isConnected*/) {
       loginWithAuthTokenMutation.mutate({ authToken: authTokenState });
     } else {
       setIsLoading(false);
     }
-  }, [isConnected, authTokenState, isLoggedIn]);
+  }, [/*isConnected,*/ authTokenState, isLoggedIn]);
 
   // React.useEffect(() => {
   //   if (userId && !userIdRedux) {

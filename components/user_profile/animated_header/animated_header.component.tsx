@@ -34,8 +34,6 @@ const AnimatedHeader = ({
 }: Props) => {
   const insets = useSafeAreaInsets();
 
-  console.log("AnimatedHeader");
-
   return (
     <View
       style={[

@@ -12,6 +12,7 @@ const itTranslactions = {
   block: 'Blocca',
   unblock: 'Sblocca',
   delete: 'Elimina',
+  remove: 'Rimuovi',
   clear: 'Svuota',
   seeAll: 'Vedi tutti',
   accept: 'Accetta',
@@ -19,7 +20,18 @@ const itTranslactions = {
   reject: 'Rifiuta',
   ok: 'Ok',
 
+  streak: 'Streak',
+
   friends: 'Amici',
+  friendsCount: {
+    zero: 'Amici',
+    one: '{{count}} amico',
+    other: '{{count}} amici',
+  },
+  incomingFriendRequests: 'Chi mi ha aggiunto',
+  outgoingFriendRequests: 'Richieste inviate',
+  suggestionsForYou: 'Suggerimenti per te',
+  othersResults: 'Altri risultati',
   requests: 'Richieste',
   suggestions: 'Per te',
   mutualFriends: {
@@ -34,9 +46,56 @@ const itTranslactions = {
 
   lotOfMutualFriends: 'Molti amici in comune',
 
-  // SCREENS
+  /* ---------------------------------------------- SCREENS ---------------------------------------------- */
+  // AUTH STACK
+  fullnameScreen: {
+    topSectionTitle: `Iniziamo, qual'è il tuo nome?`,
+    inputPlaceholder: 'Il tuo nome',
+  },
 
+  dateOfBirthScreen: {
+    topSectionTitle: `Ciao {{fullname}}, quando è il tuo compleanno?`,
+
+    dayPlaceholder: 'DD',
+    monthPlaceholder: 'MM',
+    yearPlaceholder: 'YYYY',
+  },
+
+  phoneNumberScreen: {
+    topSectionTitle: `Crea il tuo account utilizzando il tuo numero di telefono`,
+    hint: "Toccando \"Continua\", accetti le nostre Privacy Policy e Termini di Servizio.",
+
+    inputPlaceholder: 'Il tuo numero',
+  },
+
+  countryListScreen: {
+    screenTitle: 'Seleziona paese',
+  },
+
+  otpScreen: {
+    topSectionTitle: `Verifica il tuo numero`,
+    topSectionSubtitle: `Codice di verifica inviato a {{phoneNumber}}`,
+
+    resend: 'Reinvia',
+    resendIn: 'Reinvia in {{seconds}}s',
+  },
+
+  usernameScreen: {
+    topSectionTitle: `Bene, crea il tuo username`,
+    hint: "Il tuo username è unico. Puoi sempre cambiarlo in seguito.",
+    inputPlaceholder: 'Il tuo username',
+
+  },
+
+  // MAIN STACK
+  homeScreen: {
+    searchPlaceholder: 'Cerca nuovi amici...',
+    showAllResults: 'Mostra tutti i risultati',
+  },
+
+  // PROFILE STACK
   profileScreen: {
+    screenTitle: 'Profilo',
     friendsCount: {
       zero: 'Amici',
       one: 'Amico',
@@ -51,6 +110,7 @@ const itTranslactions = {
 
   friendsListScreen: {
     screenTitle: 'Amici',
+    emptyList: 'Sembra che tu non abbia ancora amici.',
     count: {
       zero: 'Nessun amico',
       one: '{{count}} amico',
@@ -58,6 +118,7 @@ const itTranslactions = {
     }
   },
 
+  // USER SETTINGS STACK
   userSettingsScreen: {
     screenTitle: 'Impostazioni',
 
@@ -118,7 +179,14 @@ const itTranslactions = {
   },
 
   // Profile
-  userProfile: {
+  userProfileScreen: {
+    socialContext: {
+      mutualFriends: {
+        zero: 'Nessun amico in comune',
+        one: '{{count}} amico in comune',
+        other: '{{count}} amici in comune',
+      },
+    },
     friendship: {
       accept: 'Accetta',
       deny: 'Rifiuta',
@@ -127,12 +195,6 @@ const itTranslactions = {
       received: '{{username}} vuole essere tuo amico',
     },
     bottomSheetModal: {
-      // Per il mio profilo
-      editProfile: 'Modifica profilo',
-      settings: 'Impostazioni',
-      logout: 'Esci',
-
-      // Per il profilo di un altro utente
       share: 'Condividi',
       block: 'Blocca {{username}}',
       unfriend: 'Rimuovi dagli amici',
@@ -148,38 +210,10 @@ const itTranslactions = {
     }
   },
 
-  // Auth
-  auth: {
-    privacyPolicyHint: "Toccando \"Continua\", accetti le nostre Privacy Policy e Termini di Servizio.",
-    usernameHint: "Il tuo username è unico. Puoi sempre cambiarlo in seguito.",
-    fullname: {
-      title: "Iniziamo, qual'è il tuo nome?",
-      placeholder: "Il tuo nome",
-    },
-    dateOfBirth: {
-      title: "Ciao {{fullname}}, quando è il tuo compleanno?"
-    },
-    phoneNumber: {
-      title: "Crea il tuo account utilizzando il tuo numero di telefono",
-      placeholder: 'Il tuo numero',
-    },
-    countryList: {
-      title: "Seleziona paese",
-    },
-    otp: {
-      title: "Verifica il tuo numero",
-      subtitle: "Codice di verifica inviato a {{phoneNumber}}"
-    },
-    username: {
-      title: "Bene, crea il tuo username",
-      placeholder: "Il tuo username",
-    }
-  },
-
-  // Discover
+  // DISCOVERY STACK
   discoveryScreen: {
     screenTitle: "Scopri",
-    placeholder: "Cerca nuovi amici...",
+    searchPlaceholder: "Cerca nuovi amici...",
   },
 
   incomingFriendRequestsScreen: {
@@ -190,30 +224,48 @@ const itTranslactions = {
     }
   },
 
-  friendsRoute: {
-    friends: {
-      zero: 'Nessun amico',
-      one: '{{count}} amico',
-      other: '{{count}} amici',
-    }
-  },
+  // Auth
+  // auth: {
+  //   privacyPolicyHint: "Toccando \"Continua\", accetti le nostre Privacy Policy e Termini di Servizio.",
+  //   usernameHint: "Il tuo username è unico. Puoi sempre cambiarlo in seguito.",
+  //   fullname: {
+  //     title: "Iniziamo, qual'è il tuo nome?",
+  //     placeholder: "Il tuo nome",
+  //   },
+  //   dateOfBirth: {
+  //     title: "Ciao {{fullname}}, quando è il tuo compleanno?"
+  //   },
+  //   phoneNumber: {
+  //     title: "Crea il tuo account utilizzando il tuo numero di telefono",
+  //     placeholder: 'Il tuo numero',
+  //   },
+  //   countryList: {
+  //     title: "Seleziona paese",
+  //   },
+  //   otp: {
+  //     title: "Verifica il tuo numero",
+  //     subtitle: "Codice di verifica inviato a {{phoneNumber}}"
+  //   },
+  //   username: {
+  //     title: "Bene, crea il tuo username",
+  //     placeholder: "Il tuo username",
+  //   }
+  // },
 
-  requestsRoute: {
-    requestSentTitle: "Richieste inviate",
-    requestSentDescription: "Controlla le richieste di amicizia che hai inviato.",
-  },
+  // friendsRoute: {
+  //   friends: {
+  //     zero: 'Nessun amico',
+  //     one: '{{count}} amico',
+  //     other: '{{count}} amici',
+  //   }
+  // },
 
-  // outgoingFriendRequests
-  outgoingFriendRequests: {
-    screenTitle: "Richieste inviate",
-  },
+  // requestsRoute: {
+  //   requestSentTitle: "Richieste inviate",
+  //   requestSentDescription: "Controlla le richieste di amicizia che hai inviato.",
+  // },
 
-  // incomingFriendRequests
-  incomingFriendRequests: {
-    listHeaderTitle: "Richieste inviate",
-    listHeaderBody: "Controlla le richieste di amicizia che hai inviato.",
-  },
-
+  /* ---------------------------------------------- ALERT ---------------------------------------------- */
   blockUserAlert: {
     title: "Sei sicuro?",
     description: "Se blocchi {{username}}, non potrai più vedere i suoi post e lui non potrà più vedere i tuoi. Vuoi continuare?",
@@ -242,6 +294,7 @@ const itTranslactions = {
     description: "Sei sicuro di voler rifutare la richiesta di amicizia?",
   },
 
+  /* ---------------------------------------------- OTHERS ---------------------------------------------- */
   errors: {
     generic: "Si è verificato un errore, riprova più tardi.",
     noInternetConnection: "Nessuna connessione a Internet.",
@@ -249,9 +302,48 @@ const itTranslactions = {
     otpInvalid: "Il codice di verifica non è valido.",
     userBanned: "Ops! Sembra che il tuo account sia stato bannato.",
     usernameAlreadyExists: "Ops! Questo username è già stato preso.",
+    phoneNumberAlreadyExists: "Ops! Questo numero di telefono è associato ad un altro account.",
     userNotFound: "Ops! Questo utente non esiste.",
     fieldNotValid: "Ops! Inserisci un valore valido.",
     invalidData: "Ops! I dati inseriti non sono validi.",
+    auth: {
+      sessionIdNotFound: "Ops! Qualcosa è andato storto. Riprova più tardi.",
+    },
+
+    fullname: {
+      required: "Il nome è richiesto.",
+      minLength: "Il nome deve essere di almeno {{minLength}} caratteri.",
+      maxLength: "Il nome deve essere di massimo {{maxLength}} caratteri.",
+      regex: "Il nome non è valido.",
+
+      invalid: "Il nome non è valido.",
+    },
+
+    dateOfBirth: {
+      monthRequired: "Il mese è richiesto.",
+      dayRequired: "Il giorno è richiesto.",
+      yearRequired: "L'anno è richiesto.",
+
+      monthInvalid: "Il mese non è valido.",
+      dayInvalid: "Il giorno non è valido.",
+      yearInvalid: "L'anno non è valido.",
+
+
+      invalid: "La data di nascita non è valida.",
+      ageNotValid: "Devi avere almeno {{minAge}} anni per usare questa app.",
+    },
+
+    otp: {
+      invalid: "Il codice di verifica non è valido.",
+    },
+
+    username: {
+      required: "Lo username è richiesto.",
+      minLength: "Lo username deve essere di almeno {{minLength}} caratteri.",
+      maxLength: "Lo username deve essere di massimo {{maxLength}} caratteri.",
+      regex: "Lo username non è valido.",
+      invalid: "Lo username non è valido.",
+    },
 
     authTokenModal: {
       title: "Ops! Qualcosa è andato storto.",
@@ -262,8 +354,8 @@ const itTranslactions = {
     // Validation
     invalid: "{{field}} non è valido.",
     required: "{{field}} è richiesto.",
-    minLenght: "{{field}} deve essere di almeno {{minLenght}} caratteri.",
-    maxLenght: "{{field}} deve essere di massimo {{maxLenght}} caratteri.",
+    // minLenght: "{{field}} deve essere di almeno {{minLenght}} caratteri.",
+    // maxLenght: "{{field}} deve essere di massimo {{maxLenght}} caratteri.",
     regex: "{{field}} non è valido.",
     min: "{{field}} deve essere maggiore o uguale a {{min}}.",
     max: "{{field}} deve essere minore o uguale a {{max}}.",

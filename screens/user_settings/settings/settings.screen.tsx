@@ -27,7 +27,6 @@ import * as SecureStore from "expo-secure-store";
 import { logout } from "@/redux/features/auth/authSlice";
 import { AuthTokenKey, UserIdKey } from "@/costants/SecureStoreKeys";
 import { UserSettingsStackScreenProps } from "@/types";
-import { useMeQuery } from "@/queries/useMeQuery";
 import { RootState } from "@/redux/app/store";
 import SettingsKeys from "./settings.keys";
 import {
@@ -39,6 +38,7 @@ import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 import * as StoreReview from "expo-store-review";
 import * as Linking from "expo-linking";
 import { Platform } from "react-native";
+import { useMe } from "@/api/queries/useMe";
 
 const DefaultView = ({
   colorMode,
@@ -134,7 +134,7 @@ const SettingsScreen = ({
     },
   });
 
-  const { data } = useMeQuery(tokenApi, isLoggedIn);
+  const { data } = useMe(isLoggedIn, tokenApi);
 
   // const {
   //   data: webInfo,

@@ -31,9 +31,8 @@ import { Alert, RefreshControl, TouchableOpacity } from "react-native";
 import i18n from "@/lang";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { SCREEN_HEIGHT } from "@/utils/helper";
-import { IResponseInfinite, UnblockUser } from "@/api/routes/friendships.route";
-import { IFriendshipStatus } from "@/interfaces/friendship_status.interface";
 import UserProfileKeys from "@/screens/user_profile/user_profile/user_profile.keys";
+import { useUnblockUser } from "@/api/mutations/useUnblockUser";
 
 const BlockedUsersScreen = ({
   navigation,
@@ -46,38 +45,7 @@ const BlockedUsersScreen = ({
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
   const tokenApi = useSelector((state: RootState) => state.auth.tokenApi);
 
-  const unblockUserMutation = useMutation({
-    mutationFn: (data: { userId: number }) =>
-      UnblockUser(data.userId, tokenApi),
-    onSuccess: (data, { userId }) => {
-      // Rimuovo l'utente dalla lista senza dover fare il refetch
-      queryClient.setQueryData<InfiniteData<IResponseInfinite>>(
-        BlockedUsersKeys.infiniteBlockedUsers,
-        (oldData) => {
-          if (oldData) {
-            return {
-              ...oldData,
-              pages: oldData.pages.map((page) => {
-                return {
-                  ...page,
-                  data: page.data.filter((user) => user.id !== userId),
-                };
-              }),
-            };
-          }
-        }
-      );
-
-      // Aggiorno il friendship status con il nuovo valore
-      queryClient.setQueryData<IFriendshipStatus>(
-        UserProfileKeys.friendshipStatus(userId),
-        {
-          ...data,
-          isNotSynced: false,
-        }
-      );
-    },
-  });
+  const unblockUserMutation = useUnblockUser();
 
   const {
     data,
@@ -142,7 +110,7 @@ const BlockedUsersScreen = ({
         {
           text: i18n.t("unblock"),
           onPress: () => {
-            unblockUserMutation.mutate({ userId });
+            unblockUserMutation.mutate({ userId, tokenApi });
           },
         },
       ]

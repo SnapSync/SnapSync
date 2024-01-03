@@ -1,10 +1,10 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import NetInfo from "@react-native-community/netinfo";
 import React from "react";
 
 /**
  * Returns information about internet connectivity.
- * @example const [isConnected, checkConnection, isLoading] = useConnectivity();
+ * @example const {isConnected} = useConnectivity();
  */
 export const useConnectivity = () => {
   // const [isLoading, setLoading] = useState<boolean>(true);
@@ -22,6 +22,5 @@ export const useConnectivity = () => {
 
   return {
     isConnected: isConnected,
-    // isLoading: ref.current[2],
   };
 };

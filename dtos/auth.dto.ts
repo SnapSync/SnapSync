@@ -4,7 +4,7 @@ export interface AuthDto {
   sessionId?: string;
 
   fullName?: string; // Nome e cognome
-  username: string; // Sarà sempre presente
+  username?: string; // Sarà sempre presente
 
   phoneNumberVerificationCode?: string; // Codice di verifica del numero di telefono
   phoneNumber?: string;
@@ -12,7 +12,7 @@ export interface AuthDto {
 
   phoneNumberCountry?: CountyCodesList.CountryData;
 
-  yearOfBirth: number | null;
-  monthOfBirth: number | null;
-  dayOfBirth: number | null;
+  yearOfBirth?: number;
+  monthOfBirth?: number;
+  dayOfBirth?: number;
 }

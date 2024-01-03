@@ -40,12 +40,10 @@ import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
   USERNAME_REGEX,
-} from "@/screens/auth/username/username.costants";
-import {
   FULLNAME_MAX_LENGTH,
   FULLNAME_MIN_LENGTH,
   FULLNAME_REGEX,
-} from "@/screens/auth/fullname/fullname.costants";
+} from "@/costants/Validation";
 import { BIOGRAPHY_MAX_LENGTH } from "./edit_profile.constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Layout } from "@/costants/Layout";
@@ -59,12 +57,9 @@ import {
   Trash2Icon,
 } from "lucide-react-native";
 import { Skeleton } from "moti/skeleton";
-import ProfileKeys from "@/screens/profile/profile/profile.keys";
-import { instanceOfErrorResponseType } from "@/api";
 import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
 import CustomBackdrop from "@/components/custom_backdrop/custom_backdrop.component";
 import BottomSheetItem from "@/components/bottom_sheet_item/bottom_sheet_item.component";
-import { IEditWebFormData } from "@/interfaces/edit_web_form_data";
 import { IApiUser } from "@/interfaces/users.interface";
 import * as ImagePicker from "expo-image-picker";
 

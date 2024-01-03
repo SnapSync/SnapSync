@@ -1,17 +1,17 @@
 import { IUserProfilePicture } from "@/interfaces/users.interface";
 import client, { API_URL } from "..";
-import { IEditWebFormData } from "@/interfaces/edit_web_form_data";
 import * as FileSystem from "expo-file-system";
+import { EditWebFormDataResponse } from "../types";
 
 const path = "/accounts";
 
 // export const GetFullnameRules = async (): Promise<{
+//   isNullable: boolean;
 //   maxLength: number;
 //   minLength: number;
-//   regex: RegExp;
 // }> => {
 //   try {
-//     const { data } = await client.get(`${path}/full_name/rules`);
+//     const { data } = await client.get(`${path}/fullname/rules`);
 
 //     return data;
 //   } catch (error) {
@@ -35,7 +35,7 @@ const path = "/accounts";
 
 export const FetchEditWebFormData = async (
   tokenApi: string
-): Promise<IEditWebFormData> => {
+): Promise<EditWebFormDataResponse> => {
   try {
     const { data } = await client.get(`${path}/edit/web_form_data`, {
       headers: {
@@ -54,7 +54,7 @@ export const UpdateAccount = async (
   username: string,
   fullname: string,
   biography: string | null
-): Promise<IEditWebFormData> => {
+): Promise<EditWebFormDataResponse> => {
   try {
     const { data } = await client.post(
       `${path}/edit`,

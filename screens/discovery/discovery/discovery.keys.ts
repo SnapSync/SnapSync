@@ -1,6 +1,5 @@
 const DiscoveryKeys = {
-  search: (query: string) => ["search", query],
-  infiniteIncomingFriendRequests: ["infiniteIncomingFriendRequests"] as const,
+  search: (query: string) => ["search", { query }] as const,
   infinitePeopleYouMayKnow: ["infinitePeopleYouMayKnow"] as const,
 };
 

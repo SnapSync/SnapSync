@@ -70,9 +70,7 @@ export type ProfileStackParamList = {
     username?: string;
     isVerified?: boolean;
   };
-  FriendsList: {
-    total?: number; // Gli passo total al fine di aver un caricamento più veritiero
-  };
+  FriendsList: undefined;
 };
 
 export type ProfileStackScreenProps<
@@ -123,6 +121,7 @@ export type UserProfileStackScreenProps<
 export type DiscoveryStackParamList = {
   Discovery: undefined;
   Search: undefined;
+  ForYou: undefined;
   OutgoingFriendRequests: {
     total?: number; // Gli passo total al fine di aver un caricamento più veritiero
   };

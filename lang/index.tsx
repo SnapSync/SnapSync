@@ -10,7 +10,7 @@ const translations = {
 const i18n = new I18n(translations);
 
 // Set the locale once at the beginning of your app.
-i18n.locale = Localization.getLocales()[0].languageCode;
+i18n.locale = __DEV__ ? "it" : Localization.getLocales()[0].languageCode;
 
 i18n.enableFallback = process.env.NODE_ENV === "production" ? true : false; // In sviluppo la metto a false per vedere se le traduzioni sono corrette
 

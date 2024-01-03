@@ -35,10 +35,11 @@ const BottomSection = ({
     <View
       backgroundColor="transparent"
       maxWidth={500}
-      paddingBottom={insets.bottom === 0 ? "$16" : insets.bottom}
+      paddingBottom={insets.bottom === 0 ? "$4" : insets.bottom}
       justifyContent="flex-end"
       alignItems="center"
-      gap={16}
+      gap="$4"
+      width="100%"
       flex={1}
     >
       {hint && (
@@ -49,16 +50,16 @@ const BottomSection = ({
       <Button
         action={"primary"}
         variant={"solid"}
-        size={"lg"}
+        size={"xl"}
         isDisabled={isDisabled}
         width={"100%"}
         onPress={onPress}
-        rounded="$lg"
+        rounded="$full"
       >
         {isLoading ? (
-          <ButtonSpinner />
+          <ButtonSpinner size="small" />
         ) : (
-          <ButtonText>
+          <ButtonText fontFamily="Inter_600SemiBold" letterSpacing="$lg">
             {buttonLabel ? buttonLabel : i18n.t("continue")}
           </ButtonText>
         )}

@@ -11,8 +11,8 @@ import UserItem, {
 } from "@/components/user_item/user_item.component";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
-import { useInfiniteMutualFriendsQuery } from "@/queries/useInfiniteMutualFriendsQuery";
 import { IApiUser } from "@/interfaces/users.interface";
+import { useInfiniteMutualFriends } from "@/api/queries/useInfiniteMutualFriends";
 
 const MutualFriendsScreen = ({
   navigation,
@@ -24,7 +24,7 @@ const MutualFriendsScreen = ({
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
 
   const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useInfiniteMutualFriendsQuery(route.params.id, tokenApi, isLoggedIn);
+    useInfiniteMutualFriends(route.params.id, isLoggedIn, tokenApi);
 
   React.useEffect(() => {
     if (data && data.pages && data.pages.length > 0) {
@@ -36,6 +36,8 @@ const MutualFriendsScreen = ({
 
   const pushToUserProfile = (item: IApiUser) =>
     navigation.push("UserProfile", { ...item });
+
+  const _onEndReached = () => hasNextPage && fetchNextPage();
 
   return (
     <View flex={1} backgroundColor="transparent">
@@ -77,11 +79,7 @@ const MutualFriendsScreen = ({
           }
         }}
         onEndReachedThreshold={0.5}
-        onEndReached={() => {
-          if (hasNextPage) {
-            fetchNextPage();
-          }
-        }}
+        onEndReached={_onEndReached}
         ListFooterComponent={() =>
           isFetchingNextPage ? <Spinner size="small" /> : null
         }
