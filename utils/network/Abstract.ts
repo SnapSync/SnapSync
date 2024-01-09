@@ -59,3 +59,7 @@ export interface IApiParams {
 export interface INetworkParams extends IApiParams {
   method?: Method;
 }
+
+export function isIError(error: unknown): error is IError {
+  return (error as IError).status !== undefined;
+}

@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { DefaultTheme } from "@react-navigation/native";
 import { Provider } from "react-redux";
 import { onlineManager, QueryClient } from "@tanstack/react-query";
 import "react-native-reanimated";
@@ -41,28 +40,6 @@ const persister = createAsyncStoragePersister({
   throttleTime: 3000,
 });
 
-const MyThemeDark = {
-  dark: true,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: "#1A91FF", // The primary color of the app used to tint various elements. Usually you'll want to use your brand color for this.
-    background: "#171717", // The color of various backgrounds, such as background color for the screens.
-    text: "#FCFCFC", // The text color of various elements.
-    card: "#171717", // The background color of card-like elements, such as headers, tab bars etc.
-  },
-};
-
-const MyThemeLight = {
-  dark: false,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: "#0077E6",
-    background: "#FCFCFC",
-    text: "#171717",
-    card: "#FCFCFC",
-  },
-};
-
 export default function App() {
   useEffect(() => {
     return NetInfo.addEventListener((state) => {
@@ -98,40 +75,4 @@ export default function App() {
       </Provider>
     </GestureHandlerRootView>
   );
-
-  // return (
-  //   <Provider store={store}>
-  //     <PersistQueryClientProvider
-  //       persistOptions={{ persister }}
-  //       onSuccess={() => {
-  //         queryClient
-  //           .resumePausedMutations()
-  //           .then(() => queryClient.invalidateQueries());
-  //       }}
-  //       client={queryClient}
-  //     >
-  //       <GestureHandlerRootView style={{ flex: 1 }}>
-  //         <SafeAreaProvider
-  //           style={{
-  //             flex: 1,
-  //             // paddingHorizontal: Layout.DefaultMarginHorizontal,
-  //             // backgroundColor: colorMode === "dark" ? Layout.DarkBgc : Layout.LightBgc,
-  //           }}
-  //         >
-  //           <NavigationContainer
-  //             // @see -> https://reactnavigation.org/docs/themes/
-  //             theme={colorMode === "dark" ? MyThemeDark : MyThemeLight}
-  //           >
-  //             <GluestackUIProvider config={config} colorMode={colorMode}>
-  //               <BottomSheetModalProvider>
-  //                 <RootNavigation authToken={cachedAuthToken} />
-  //                 <StatusBar style={colorMode === "dark" ? "light" : "dark"} />
-  //               </BottomSheetModalProvider>
-  //             </GluestackUIProvider>
-  //           </NavigationContainer>
-  //         </SafeAreaProvider>
-  //       </GestureHandlerRootView>
-  //     </PersistQueryClientProvider>
-  //   </Provider>
-  // );
 }

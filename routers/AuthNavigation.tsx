@@ -12,6 +12,7 @@ import {
   InputField,
 } from "@gluestack-ui/themed";
 import { IError } from "@/utils/network/Abstract";
+import { signIn } from "@/modules/app/services/appService";
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -34,11 +35,11 @@ const LogInScreen = () => {
 
   const LogInMutation = useMutation({
     mutationFn: (data: { userId: number }) => login(data),
-    onSuccess: (data) => {
-      console.log(data);
+    onSuccess: async (data) => {
+      await signIn(data.result);
     },
     onError: (error: IError) => {
-      console.log(JSON.stringify(error.message));
+      console.log(JSON.stringify(error));
     },
   });
 

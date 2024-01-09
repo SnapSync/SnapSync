@@ -63,3 +63,27 @@ export const addSecureStoreDataAsync = async (
     // saving error
   }
 };
+
+export const getSecureStoreDataAsync = async (
+  key: storeEnum
+): Promise<string> => {
+  try {
+    const value = await SecureStore.getItemAsync(key.toString());
+    if (value !== null) {
+      return value;
+    }
+    return "";
+  } catch (e) {
+    return "";
+  }
+};
+
+export const removeSecureStoreDataAsync = async (
+  key: storeEnum
+): Promise<void> => {
+  try {
+    await SecureStore.deleteItemAsync(key.toString());
+  } catch (exception) {
+    console.error("error");
+  }
+};

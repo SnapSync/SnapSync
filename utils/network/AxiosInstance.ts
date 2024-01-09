@@ -9,9 +9,8 @@ const options = {
 const axiosInstance = axios.create(options);
 
 axiosInstance.interceptors.request.use((config) => {
-  const token = getReduxStore().AppReducer?.token || "";
+  const token = getReduxStore().AppReducer?.tokenData?.token || "";
 
-  // @ts-ignore
   config?.headers?.set("Authorization", `Bearer ${token}`);
 
   return config;

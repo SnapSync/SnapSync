@@ -88,16 +88,15 @@ export default class Network {
     });
   }
 
-  // static get<_Result = any, Response = ApiResult<_Result>>({
-  //   version = "v1.0",
-  //   ...requestParams
-  // }: IApiParams) {
-  //   return this.newRequest<_Result, Response>({
-  //     ...requestParams,
-  //     url: `${version}${requestParams.url}`,
-  //     method: MethodEnum.GET,
-  //   });
-  // }
+  static get<_Result = any, Response = ApiResult<_Result>>({
+    ...requestParams
+  }: IApiParams) {
+    return this.newRequest<_Result, Response>({
+      ...requestParams,
+      url: `${requestParams.url}${requestParams.queryString || ""}`,
+      method: MethodEnum.GET,
+    });
+  }
 
   // static delete<_Result = any, Response = ApiResult<_Result>>({
   //   version = "v1.0",

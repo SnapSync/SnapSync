@@ -1,69 +1,99 @@
-import React from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@/hooks";
-import { Text, View, Appearance, Button } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { storeEnum } from "@/helpers/storage/Abstract";
-import { removeStoreDataAsync } from "@/helpers/storage";
-import { MainStackParamList } from "@/utils/Routes";
+import React from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { HomeIcon } from 'lucide-react-native';
+import { useTheme } from '@/hooks';
+import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { storeEnum } from '@/helpers/storage/Abstract';
+import { removeStoreDataAsync } from '@/helpers/storage';
+import { MainStackParamList } from '@/utils/Routes';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { myFriendsCount } from '@/modules/app/api';
+import {
+  Avatar,
+  AvatarFallbackText,
+  AvatarImage,
+  Button,
+  ButtonSpinner,
+  ButtonText,
+  Icon,
+  Text,
+} from '@gluestack-ui/themed';
+import { signOut } from '@/modules/app/services/appService';
+import HomeScreen from '@/screens/MainStack/HomeScreen';
+import { useMe } from '@/modules/app/api/queries/useMe';
+import ProfileNavigation from './ProfileNavigation';
 
 const Tab = createBottomTabNavigator<MainStackParamList>();
 
 export default function TabNavigator() {
-  const theme = useTheme();
+  const { data } = useMe();
+
+  const me = data?.result;
 
   return (
     <Tab.Navigator
       screenOptions={{
-        // tabBarActiveTintColor: theme.primary,
-        // tabBarStyle: { backgroundColor: "#FFF" },
         headerShown: false,
+        tabBarLabelStyle: {
+          display: 'none',
+        },
       }}
-      initialRouteName={"Home"}
-    >
+      initialRouteName={'Home'}>
       <Tab.Screen
-        name={"Home"}
-        component={Home}
+        name={'Home'}
+        component={HomeScreen}
         options={{
-          tabBarIcon: ({ color }) => (
-            <AntDesign name="home" size={24} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <Icon as={HomeIcon} size="md" color={color} />,
         }}
       />
 
       <Tab.Screen
-        name={"Profile"}
-        component={Profile}
+        name={'ProfileStack'}
+        component={ProfileNavigation}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person-outline" color={color} size={24} />
-          ),
+          tabBarIcon: ({ focused, color }) => {
+            return (
+              <View
+                style={{
+                  backgroundColor: focused ? color : 'transparent',
+                  borderRadius: 9999,
+                  padding: 2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Avatar size="xs">
+                  <AvatarFallbackText>{me?.username || me?.fullname}</AvatarFallbackText>
+                  {me?.profilePicture ? (
+                    <AvatarImage
+                      source={{
+                        uri: me.profilePicture.url,
+                      }}
+                    />
+                  ) : null}
+                </Avatar>
+              </View>
+            );
+          },
         }}
       />
     </Tab.Navigator>
   );
 }
 
-const Home = () => {
-  const insets = useSafeAreaInsets();
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "red",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Text>{JSON.stringify(insets, null, 2)}</Text>
-    </View>
-  );
-};
-
 const Profile = () => {
   const theme = useTheme();
+  const queryClient = useQueryClient();
+
+  const { data, refetch, isRefetching } = useQuery({
+    queryKey: ['friends_count'],
+    queryFn: myFriendsCount,
+    enabled: false,
+  });
+
+  const logOut = async () => {
+    await signOut(queryClient);
+  };
 
   const deleteP = async () => {
     await removeStoreDataAsync(storeEnum.ColorMode);
@@ -73,16 +103,19 @@ const Profile = () => {
     <View
       style={{
         flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Text>{Appearance.getColorScheme()}</Text>
-      <Text>{JSON.stringify(theme, null, 2)}</Text>
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+      <Button onPress={() => refetch()}>
+        {isRefetching ? <ButtonSpinner /> : <ButtonText>refetch</ButtonText>}
+      </Button>
+      <Button onPress={logOut}>
+        {isRefetching ? <ButtonSpinner /> : <ButtonText>Log Out</ButtonText>}
+      </Button>
 
-      <View style={{ height: 20, backgroundColor: "#E2E2E2" }} />
+      <Text>{JSON.stringify(data, null, 2)}</Text>
 
-      <Button title="Cancella" onPress={deleteP} />
+      {/* <Button title="Cancella" onPress={deleteP} /> */}
     </View>
   );
 };

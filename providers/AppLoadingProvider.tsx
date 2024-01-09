@@ -5,8 +5,17 @@ import * as Font from "expo-font";
 import InterFont from "@/assets/Fonts";
 import { useAppDispatch } from "@/utils/redux/store";
 import { SetColorShceme } from "@/modules/app/redux/appSlice";
-import { addStoreDataAsync, getStoreDataAsync } from "@/helpers/storage";
+import {
+  addStoreDataAsync,
+  getSecureStoreDataAsync,
+  getStoreDataAsync,
+  removeSecureStoreDataAsync,
+} from "@/helpers/storage";
 import { storeEnum } from "@/helpers/storage/Abstract";
+import NetInfo from "@react-native-community/netinfo";
+import { loginAuthToken } from "@/modules/app/api";
+import { isIError } from "@/utils/network/Abstract";
+import { signIn } from "@/modules/app/services/appService";
 // import * as SystemUI from "expo-system-ui";
 
 SplashScreen.preventAutoHideAsync();
@@ -44,6 +53,27 @@ function AppLoadingProvider({ children }: Props) {
           // Otherwise, use the stored preference
           dispatch(SetColorShceme(userColorScheme));
         }
+
+        // Try to SignIn with AuthToken
+        // let authToken = await getSecureStoreDataAsync(storeEnum.AuthToken);
+        // if (authToken.length > 0) {
+        //   // Check if the user is connected to the internet
+        //   let netInfo = await NetInfo.fetch();
+        //   if (netInfo.isConnected) {
+        //     try {
+        //       const data = await loginAuthToken({ authToken: authToken });
+        //       signIn(data.result);
+        //     } catch (e) {
+        //       console.log(JSON.stringify(e));
+        //       // If there is an error, remove the AuthToken
+        //       if (
+        //         isIError(e) &&
+        //         (e.status === 404 || e.status === 401 || e.status === 403)
+        //       )
+        //         await removeSecureStoreDataAsync(storeEnum.AuthToken);
+        //     }
+        //   }
+        // }
 
         // Artificially delay for two seconds to simulate a slow loading
         // experience. Please remove this if you copy and paste the code!

@@ -1,31 +1,38 @@
-import * as React from "react";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import * as React from 'react';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import {
   CardStyleInterpolators,
   createStackNavigator,
   StackNavigationOptions,
-} from "@react-navigation/stack";
-import { useAppSelector } from "@/utils/redux/store";
-import { Dimensions, View } from "react-native";
-import translate from "@/helpers/localization";
-import { enableScreens } from "react-native-screens";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useTheme } from "@/hooks";
-import { navigationRef } from "./Router";
-import BottomNavigation from "./BottomNavigation";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { GluestackUIProvider } from "@gluestack-ui/themed";
-import OnboardingNavigation from "./OnboardingNavigation";
-import { config } from "@/config/gluestack-ui.config";
-import { RootStackParamList } from "@/utils/Routes";
-import AuthNavigation from "./AuthNavigation";
-import { useIsFirstRender } from "usehooks-ts";
+} from '@react-navigation/stack';
+import { useAppSelector } from '@/utils/redux/store';
+import { Dimensions, Text, View } from 'react-native';
+import translate from '@/helpers/localization';
+import { enableScreens } from 'react-native-screens';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useConnectivity, useTheme } from '@/hooks';
+import BottomNavigation from './BottomNavigation';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { GluestackUIProvider } from '@gluestack-ui/themed';
+import OnboardingNavigation from './OnboardingNavigation';
+import { config } from '@/config/gluestack-ui.config';
+import { RootStackParamList } from '@/utils/Routes';
+import AuthNavigation from './AuthNavigation';
+import UserProfileNavigation from './UserProfileNavigation';
+import { useIsFirstRender } from 'usehooks-ts';
 import {
   addStoreDataAsync,
+  getSecureStoreDataAsync,
   getStoreDataAsync,
   getStoreStringAsync,
-} from "@/helpers/storage";
-import { storeEnum } from "@/helpers/storage/Abstract";
+  removeSecureStoreDataAsync,
+} from '@/helpers/storage';
+import { storeEnum } from '@/helpers/storage/Abstract';
+import { useMutation } from '@tanstack/react-query';
+import { loginAuthToken } from '@/modules/app/api';
+import { signIn } from '@/modules/app/services/appService';
+import { isIError } from '@/utils/network/Abstract';
+import ProfileSettingsNavigation from './ProfileSettingsNavigation';
 
 enableScreens();
 
@@ -33,60 +40,104 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 const screenOptions: StackNavigationOptions = {
   gestureEnabled: true,
-  gestureResponseDistance: Dimensions.get("screen").width,
-  headerShown: true,
-  cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+  gestureResponseDistance: Dimensions.get('screen').width,
+  headerShown: false,
+  // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
   // headerStyle: { backgroundColor: "#FFF" },
   // headerTitleStyle: { fontFamily: "Bold" },
-  headerTitleAlign: "center",
+  headerTitleAlign: 'center',
 };
 
 function RootNavigation() {
   const isFirst = useIsFirstRender();
+  const [isConnected, checkConnection] = useConnectivity();
   const hasLaunched = React.useRef<boolean>(false);
+  const authToken = React.useRef<string>('');
 
   const isSignedIn = useAppSelector((s) => s.AppReducer?.isSignedIn);
   const ucm = useAppSelector((s) => s.AppReducer.userColorScheme);
   const theme = useTheme();
 
   const [isLoadingHasLaunched, setIsLoadingHasLaunched] = React.useState(true);
+  const [isLoadingAuthToken, setIsLoadingAuthToken] = React.useState(true);
+
+  const LogInAuthTokenMutation = useMutation({
+    mutationFn: (data: { authToken: string }) => loginAuthToken(data),
+    // onSuccess: async (data) => {
+    //   await signIn(data.result);
+    // },
+    // onError: (error: IError) => {
+    //   console.log(JSON.stringify(error));
+    // },
+  });
+
+  // React.useEffect(() => {
+  //   const loadAsyncStorage = async () => {
+  //     const hasLaunchedAS = await getStoreStringAsync(storeEnum.HasLaunched);
+  //     if (hasLaunchedAS === "true") {
+  //       hasLaunched.current = true;
+  //     } else {
+  //       // user has not launched the app yet
+  //       await addStoreDataAsync(storeEnum.HasLaunched, "true");
+  //     }
+
+  //     setIsLoadingHasLaunched(false);
+  //   };
+
+  //   if (isFirst) {
+  //     // Check if user has launched the app before
+  //     loadAsyncStorage();
+  //   } else {
+  //     setIsLoadingHasLaunched(false);
+  //   }
+  // }, []);
 
   React.useEffect(() => {
-    const loadAsyncStorage = async () => {
-      const hasLaunchedAS = await getStoreStringAsync(storeEnum.HasLaunched);
-      if (hasLaunchedAS === "true") {
-        hasLaunched.current = true;
-      } else {
-        // user has not launched the app yet
-        await addStoreDataAsync(storeEnum.HasLaunched, "true");
-      }
+    const loadSecureStore = async () => {
+      const authTokenSS = await getSecureStoreDataAsync(storeEnum.AuthToken);
+      if (authTokenSS.length > 0) {
+        authToken.current = authTokenSS;
 
-      setIsLoadingHasLaunched(false);
+        try {
+          const data = await LogInAuthTokenMutation.mutateAsync({
+            authToken: authTokenSS,
+          });
+
+          await signIn(data.result);
+
+          // Reset AuthToken
+          authToken.current = '';
+        } catch (e) {
+          console.log('AuthToken Error: ', JSON.stringify(e));
+          // If there is an error, remove the AuthToken
+          if (isIError(e) && (e.status === 404 || e.status === 401 || e.status === 403))
+            await removeSecureStoreDataAsync(storeEnum.AuthToken);
+        }
+      } else {
+        // If it is an empty string, then the user has not signed in yet
+        await removeSecureStoreDataAsync(storeEnum.AuthToken);
+        setIsLoadingAuthToken(false);
+      }
     };
 
-    if (isFirst) {
-      // Check if user has launched the app before
-      loadAsyncStorage();
+    if (!isSignedIn && isFirst) {
+      loadSecureStore();
     } else {
-      setIsLoadingHasLaunched(false);
+      setIsLoadingAuthToken(false);
     }
-  }, []);
+  }, [isSignedIn]);
 
-  if (isLoadingHasLaunched) {
-    return <View style={{ flex: 1 }} />;
-  }
+  // console.log("isConnected", isConnected);
+
+  if (isLoadingAuthToken) return <View style={{ flex: 1 }} />;
 
   return (
     <SafeAreaProvider style={{ flex: 1 }}>
-      <GluestackUIProvider
-        config={config}
-        colorMode={ucm === "dark" ? "dark" : "light"}
-      >
+      <GluestackUIProvider config={config} colorMode={ucm === 'dark' ? 'dark' : 'light'}>
         <BottomSheetModalProvider>
           <NavigationContainer
-            ref={navigationRef}
             theme={{
-              dark: ucm === "dark",
+              dark: ucm === 'dark',
               colors: {
                 ...DefaultTheme.colors,
                 primary: theme.primary,
@@ -94,42 +145,46 @@ function RootNavigation() {
                 text: theme.text,
                 card: theme.card,
               },
-            }}
-          >
+            }}>
             <Stack.Navigator
               initialRouteName={
-                isSignedIn
-                  ? "Main"
+                isSignedIn || authToken.current.length > 0
+                  ? 'Main'
                   : hasLaunched.current
-                    ? "Auth"
-                    : "Onboarding"
+                    ? 'Auth'
+                    : 'Onboarding'
               }
-              screenOptions={{ ...screenOptions }}
-            >
-              {isSignedIn ? (
+              screenOptions={{ ...screenOptions }}>
+              {isSignedIn || authToken.current.length > 0 ? (
                 <>
                   <Stack.Screen
-                    name={"Main"}
+                    name={'Main'}
                     component={BottomNavigation}
                     options={{
                       gestureEnabled: false,
+                    }}
+                  />
+
+                  <Stack.Screen
+                    name="UserProfileStack"
+                    component={UserProfileNavigation}
+                    options={{
                       headerShown: false,
-                      headerTitle: translate("navigation.home"),
+                    }}
+                  />
+
+                  <Stack.Screen
+                    name="ProfileSettingsStack"
+                    component={ProfileSettingsNavigation}
+                    options={{
+                      headerShown: false,
                     }}
                   />
                 </>
               ) : (
                 <>
-                  <Stack.Screen
-                    name={"Onboarding"}
-                    component={OnboardingNavigation}
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name={"Auth"}
-                    component={AuthNavigation}
-                    options={{ headerShown: false }}
-                  />
+                  <Stack.Screen name={'Onboarding'} component={OnboardingNavigation} />
+                  <Stack.Screen name={'Auth'} component={AuthNavigation} />
                 </>
               )}
             </Stack.Navigator>
@@ -203,3 +258,17 @@ export default React.memo(RootNavigation);
 
 //   },
 // };
+
+const Test = () => {
+  return (
+    <View
+      style={{
+        flex: 0.5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'red',
+      }}>
+      <Text>Test</Text>
+    </View>
+  );
+};

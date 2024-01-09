@@ -1,109 +1,109 @@
-import { createStyle } from "@gluestack-style/react";
+import { createStyle } from '@gluestack-style/react';
 
 export const Avatar = createStyle({
-  borderRadius: "$full",
-  justifyContent: "center",
-  alignItems: "center",
-  position: "relative",
-  bg: "$primary600",
+  borderRadius: '$full',
+  justifyContent: 'center',
+  alignItems: 'center',
+  position: 'relative',
+  bg: '$primary600',
   _dark: {
-    bg: "$backgroundDark900",
-    borderWidth: "1",
-    borderColor: "$borderDark800",
+    bg: '$backgroundDark900',
+    // borderWidth: "1",
+    // borderColor: "$borderDark800",
   },
   _light: {
-    bg: "$backgroundLight50",
-    borderWidth: "1",
-    borderColor: "$borderLight200",
+    bg: '$backgroundLight50',
+    // borderWidth: "1",
+    // borderColor: "$borderLight200",
   },
   variants: {
     size: {
       xs: {
-        w: "$6",
-        h: "$6",
+        w: '$6',
+        h: '$6',
 
         _badge: {
-          w: "$2",
-          h: "$2",
+          w: '$2',
+          h: '$2',
         },
 
         _text: {
-          props: { size: "2xs" },
+          props: { size: '2xs' },
         },
       },
 
       sm: {
-        w: "$8",
-        h: "$8",
+        w: '$8',
+        h: '$8',
 
         _badge: {
-          w: "$2",
-          h: "$2",
+          w: '$2',
+          h: '$2',
         },
 
         _text: {
-          props: { size: "xs" },
+          props: { size: 'xs' },
         },
       },
 
       md: {
-        w: "$12",
-        h: "$12",
+        w: '$12',
+        h: '$12',
 
         _badge: {
-          w: "$3",
-          h: "$3",
+          w: '$3',
+          h: '$3',
         },
 
         _text: {
-          props: { size: "md" },
+          props: { size: 'md' },
         },
       },
 
       lg: {
-        w: "$16",
-        h: "$16",
+        w: '$16',
+        h: '$16',
 
         _badge: {
-          w: "$4",
-          h: "$4",
+          w: '$4',
+          h: '$4',
         },
 
         _text: {
-          props: { size: "xl" },
+          props: { size: 'xl' },
         },
       },
 
       xl: {
-        w: "$24",
-        h: "$24",
+        w: '$24',
+        h: '$24',
 
         _badge: {
-          w: "$6",
-          h: "$6",
+          w: '$6',
+          h: '$6',
         },
 
         _text: {
-          props: { size: "3xl" },
+          props: { size: '3xl' },
         },
       },
 
-      "2xl": {
-        w: "$32",
-        h: "$32",
+      '2xl': {
+        w: '$32',
+        h: '$32',
 
         _badge: {
-          w: "$8",
-          h: "$8",
+          w: '$8',
+          h: '$8',
         },
 
         _text: {
-          props: { size: "5xl" },
+          props: { size: '5xl' },
         },
       },
     },
   },
   defaultProps: {
-    size: "md",
+    size: 'md',
   },
 });
